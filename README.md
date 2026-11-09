@@ -23,6 +23,6 @@ A NeoForge 1.21.1 crop-genetics and breeding mod for steampunk/dieselpunk worlds
 
 ## Licence
 
-Code: MIT. Art derived from **Excalibur by Maffhew** is used with the author's permission and is not covered by the MIT licence (see `LICENSE`).
+Code: MIT. Art derived from **Excalibur by Maffhew** is not covered by the MIT licence (see `LICENSE`).
 
 **Author:** Kragnoth
