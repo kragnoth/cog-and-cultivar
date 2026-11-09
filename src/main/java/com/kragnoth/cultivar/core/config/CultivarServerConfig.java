@@ -1,5 +1,6 @@
 package com.kragnoth.cultivar.core.config;
 
+import com.kragnoth.cultivar.content.core.genetics.Genetics;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
@@ -13,6 +14,8 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.DoubleValue GROWTH_MULTIPLIER;
     public static final ModConfigSpec.BooleanValue WEEDS_ENABLED;
     public static final ModConfigSpec.IntValue WORK_BUDGET_PER_TICK;
+    public static final ModConfigSpec.EnumValue<Genetics.Expression> STAT_EXPRESSION;
+    public static final ModConfigSpec.BooleanValue CLONE_MUTATIONS;
     public static final ModConfigSpec.BooleanValue INFLUENCE_ENABLED;
     public static final ModConfigSpec.DoubleValue MAX_MUTATION_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue MIN_WEED_MULTIPLIER;
@@ -25,6 +28,13 @@ public final class CultivarServerConfig {
                 .defineInRange("growthMultiplier", 1.0, 0.0, 10.0);
         WEEDS_ENABLED = b.comment("Whether blight/weeds can spawn on crops.")
                 .define("weedsEnabled", true);
+        b.pop();
+
+        b.push("genetics");
+        STAT_EXPRESSION = b.comment("How an allele pair is expressed as one stat value: MAX (dominant), MIN, or MEAN.")
+                .defineEnum("statExpression", Genetics.Expression.MAX);
+        CLONE_MUTATIONS = b.comment("Whether a single-parent clone can still drift stats.")
+                .define("cloneMutations", false);
         b.pop();
 
         b.push("influence");
