@@ -650,6 +650,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **4 — Water** | Cistern, Rotary Sprinkler, Drip Line, troughs + gates (graph), fertigation fluids | Sprinkler field fed by Create pipes |
 | **5 — Climate** | Soil conditioning attachment, Mist Nozzle, Conservatory + Climate Gauge, temperature requirement | Grow a HOT-requirement strain in a snow biome |
 | **6 — Content** | Ore-blooms → crushed ore, Brassleaf gating, Seed Vault, Livestock Trough, **Brass Apiary**, blight variants, Derelict Conservatories | Pack-ready |
+| **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
 | **7 — Polish** | Excalibur-based asset pass, sounds, Ponder scenes, JEI/EMI categories, Jade | Release |
 
 ---
