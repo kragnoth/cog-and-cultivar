@@ -5,7 +5,13 @@ import com.kragnoth.cultivar.api.modifier.PlantModifier;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.Item;
+
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Datapack entry describing a species. JSON path: {@code data/<namespace>/cultivar/plant/<id>.json}.
@@ -17,6 +23,7 @@ import java.util.List;
  * @param growthBonus       added to growthChance per point of the growth stat
  * @param cloneable         whether a single mature neighbour can spread a copy onto a grafting frame
  * @param spreadChance      chance per eligible tick for that clone to happen
+ * @param seeds             vanilla/modded items that plant this species on a trellis (converted to a base genome)
  */
 public record Plant(int stages,
                     int afterHarvestStage,
@@ -27,7 +34,8 @@ public record Plant(int stages,
                     List<Product> products,
                     List<Product> clipProducts,
                     List<GrowthCondition> requirements,
-                    List<PlantModifier> modifiers) {
+                    List<PlantModifier> modifiers,
+                    Optional<HolderSet<Item>> seeds) {
     public static final Codec<Plant> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.intRange(1, 16).fieldOf("stages").forGetter(Plant::stages),
             Codec.intRange(0, 15).optionalFieldOf("after_harvest_stage", 0).forGetter(Plant::afterHarvestStage),
@@ -38,7 +46,8 @@ public record Plant(int stages,
             Product.CODEC.listOf().optionalFieldOf("products", List.of()).forGetter(Plant::products),
             Product.CODEC.listOf().optionalFieldOf("clip_products", List.of()).forGetter(Plant::clipProducts),
             GrowthCondition.CODEC.listOf().optionalFieldOf("requirements", List.of()).forGetter(Plant::requirements),
-            PlantModifier.CODEC.listOf().optionalFieldOf("modifiers", List.of()).forGetter(Plant::modifiers)
+            PlantModifier.CODEC.listOf().optionalFieldOf("modifiers", List.of()).forGetter(Plant::modifiers),
+            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("seeds").forGetter(Plant::seeds)
     ).apply(i, Plant::new));
 
     public Plant {

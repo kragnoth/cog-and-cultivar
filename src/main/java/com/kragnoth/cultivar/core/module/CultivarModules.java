@@ -2,6 +2,7 @@ package com.kragnoth.cultivar.core.module;
 
 import com.kragnoth.cultivar.compat.create.CreateModule;
 import com.kragnoth.cultivar.content.core.CoreModule;
+import com.kragnoth.cultivar.content.crop.CropModule;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -13,6 +14,7 @@ import java.util.function.Supplier;
 public final class CultivarModules {
     public static final List<Supplier<CultivarModule>> ALL = List.of(
             CoreModule::new,
+            CropModule::new,
             CreateModule::new
     );
 

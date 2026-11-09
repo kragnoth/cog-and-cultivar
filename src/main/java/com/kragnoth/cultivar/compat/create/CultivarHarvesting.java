@@ -1,7 +1,11 @@
 package com.kragnoth.cultivar.compat.create;
 
+import com.kragnoth.cultivar.content.crop.CropBlockEntity;
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.function.BiConsumer;
 
 /**
  * Bridge between Create's Mechanical Harvester and Cultivar crops.
@@ -11,13 +15,14 @@ public final class CultivarHarvesting {
     private CultivarHarvesting() {}
 
     /**
-     * @return true if the position held a Cultivar crop and was handled here
-     *         (Create's default harvesting must then be skipped).
+     * @return true if the position is a Cultivar crop (handled here, so Create must not break it);
+     *         mature crops are harvested in place and keep their genome.
      */
-    public static boolean tryHarvest(MovementContext context, BlockPos pos) {
-        // Phase 3: if the block is a Cultivar crop and mature, harvest through the crop API,
-        // route drops via the behaviour's dropItem(context, stack), keep the genome,
-        // and reset to the plant's after-harvest stage.
-        return false;
+    public static boolean tryHarvest(MovementContext context, BlockPos pos, BiConsumer<MovementContext, ItemStack> drop) {
+        if (!(context.world.getBlockEntity(pos) instanceof CropBlockEntity crop)) {
+            return false;
+        }
+        crop.harvest(stack -> drop.accept(context, stack));
+        return true;
     }
 }

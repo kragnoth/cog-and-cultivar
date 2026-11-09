@@ -1,0 +1,2 @@
+{ "stages": 4, "growth_chance": 0.5, "spawn_chance": 0.1, "lethal": true, "aggressive": false,
+  "rake_products": [ { "item": "minecraft:stick", "chance": 0.5 } ] }

@@ -368,6 +368,8 @@ Working names (placeholders; pick one):
   - **Brass:** iron plus a +1 strength-equivalent tolerance buffer. Crafted with Create brass sheets.
   - **Blackened Steel:** brass plus immunity to blight spread *into* the crop. Late game.
   - Datapack-driven materials let pack makers add more.
+- **Art direction from Joe's references:** the iron, brass and steel tiers follow **wrought-iron garden trellises**: a slim arched top, vertical bars with collar rings, and C/S-scroll flourishes at the crown and base. At 16 px that means a two-pixel arch, two side rails and one scroll motif per face. Timber stays a simple lashed lattice. Planted crops grow *through* the bars, so the plant model renders inside the frame, not on top of it.
+- **Bell Cloche (new, early game):** a glass bell jar placed over a single planted trellis. Kitbash it from Excalibur `glass` with a brass knob. It acts as a one-crop greenhouse: season immunity, ×1.1 growth, +1 humidity step, and it blocks weed *spawning* (existing weeds still grow). It doesn't stack with a Conservatory. It is a crop-influence source with radius 0, so no new systems are needed. A cloche can be lifted off with an empty hand to harvest, or harvested in place by a Deployer.
 - **Grafting Frame** replaces the cross crop. Visual: two trellises clamped with a brass bracket; a small pressure dial shows "graft progress". Deployers holding a trellis can create one, which allows automated breeding grids.
 - **Regression stays** for hostile conditions. Add a **wilt visual** (desaturated overlay tint) so players can see why growth stopped.
 - **Improvement:** expose the growth response to a **comparator** (0 = infertile, 1–14 = growth %, 15 = mature) for redstone-driven automation.
@@ -642,7 +644,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | Phase | Scope | Exit test |
 |---|---|---|
 | **0 — Foundation** ✅ | Module system, registries (static + datapack), genome component, crop-influence API, server config, versioned network, ServerWorkQueue, datagen, sidedness guard, dedicated-server CI tests | CI green on a dedicated server |
-| **1 — Core** | Trellis, crop BE, datapack plant/soil/mutation content, growth tick, breeding, weeds/blight, harvest, **influence lookup + beehive pollination (§3.15)** | Breed a vanilla mutation chain; stats inherit as specified; a full hive measurably raises mutation rate |
+| **1 — Core** | Trellis, crop BE, Bell Cloche, datapack plant/soil/mutation content, growth tick, breeding, weeds/blight, harvest, **influence lookup + beehive pollination (§3.15)** | Breed a vanilla mutation chain; stats inherit as specified; a full hive measurably raises mutation rate |
 | **2 — Tools & info** | Spade, Shears, Tiller, Satchel, Loupe (+ goggle merge), Ledger, Assaying Engine (kinetic), Assay Card | Full manual breeding loop with diegetic info |
 | **3 — Create farming** | Harvester override, deployer actions, item attributes, comparator/Display Link | Fully automated plant–harvest–sort loop |
 | **4 — Water** | Cistern, Rotary Sprinkler, Drip Line, troughs + gates (graph), fertigation fluids | Sprinkler field fed by Create pipes |

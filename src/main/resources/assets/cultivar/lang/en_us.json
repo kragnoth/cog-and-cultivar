@@ -1,3 +1,17 @@
 {
-  "itemGroup.cultivar": "Cog & Cultivar"
+  "itemGroup.cultivar": "Cog & Cultivar",
+  "block.cultivar.timber_trellis": "Timber Trellis",
+  "block.cultivar.iron_trellis": "Iron Trellis",
+  "item.cultivar.seed": "Cultivar Seed",
+  "item.cultivar.seed.named": "%s Seed",
+  "stat.cultivar.gain": "Gain",
+  "stat.cultivar.growth": "Growth",
+  "stat.cultivar.strength": "Strength",
+  "stat.cultivar.resistance": "Resistance",
+  "stat.cultivar.fertility": "Fertility",
+  "stat.cultivar.mutativity": "Mutativity",
+  "plant.minecraft.wheat": "Wheat",
+  "plant.minecraft.carrot": "Carrot",
+  "plant.minecraft.potato": "Potato",
+  "plant.minecraft.beetroot": "Beetroot"
 }
