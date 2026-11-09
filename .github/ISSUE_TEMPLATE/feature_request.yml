@@ -1,0 +1,14 @@
+name: Feature request
+description: Suggest a feature or content
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+    validations:
+      required: true
+  - type: textarea
+    id: fit
+    attributes:
+      label: How does it fit the steampunk/Create theme and the design spec?

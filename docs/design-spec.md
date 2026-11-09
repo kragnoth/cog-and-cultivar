@@ -485,6 +485,40 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 - A **Livestock Trough** accepts harvested fodder and, if the crop's genome carries that animal's gene, breeds nearby animals on a cooldown. This is more controllable than mobs wandering into fields, and it is Create-feedable.
 - The mobs-eat-fields AI from 1.18 stays as an optional config.
 
+### 3.15 Apiculture — Bees as Pollinators
+
+**Goal:** a beehive near a breeding field should be *worth placing* (a clear early-game boost) without becoming mandatory or making high-tier breeding trivial.
+
+**Mechanism:** bees are the first user of the generic **crop influence** system (`api/influence`). A `cultivar:crop_influence` datapack entry targets `minecraft:beehive` and `minecraft:bee_nest`. Crops find hives through the vanilla **POI index** (no block scanning), cache the result, and refresh it slowly (on the order of once per minute per crop, spread across random ticks).
+
+**Range:** radius 5, height ±2, so an 11×11 field around the hive. That covers a typical breeding grid without blanketing a whole farm.
+
+**Strength scales with the colony, read from the hive's honey level** (a blockstate, so it's free to read):
+`scale = (1 + honey_level) / 6`, giving 0.17 for an empty hive and 1.0 for a full one.
+- Bees only raise honey by foraging flowers, so a working colony is required for the full effect. Plants tagged `cultivar:bee_forage` (flowering cultivars) count as forage.
+- **Trade-off:** harvesting honey or combs resets the honey level and temporarily weakens pollination. Players choose between honey and breeding pressure.
+
+**Effects at full strength (scale 1.0):**
+
+| Effect | Value | What it means in practice |
+|---|---|---|
+| `fertility_bonus` | **+1** | Pollination. Parent-selection chance per parent goes from fertility/10 to (fertility+1)/10 |
+| `mutation_multiplier` | **×1.25** | A 25 % mutation becomes 31.25 %; a 50 % one becomes 62.5 % |
+| `mutativity_bonus` | **+1** | Offspring stat drift: at mutativity 1, drift chance goes 10 % → 20 %, and the drift bias tilts upward. Stats still have to be *bred* up; bees never add stat points directly |
+| `weed_multiplier` | **×0.75** | At resistance 1, the weed share of ticks drops from 50 % to 37.5 % |
+| `growth_multiplier` | ×1.0 | No growth speed-up, to avoid overlapping with sprinklers |
+
+**Why these numbers are noticeable but not overpowered:**
+- **Early game (fertility 3):** a two-parent cross needs both parents to pass their fertility roll: 0.3 × 0.3 = 9 % per tick without bees, 0.4 × 0.4 = 16 % with them (×1.8). Add the ×1.25 mutation multiplier and mutation events come about **2.2× as often**. That is very visible in the first hour of breeding.
+- **Late game (fertility 10):** the fertility bonus is capped out and only ×1.25 mutation remains, a **1.25×** edge. Useful, not mandatory.
+- **Stacking is bounded:** several hives don't stack (the strongest hive in range applies). Combining with other influence sources is capped by server config: mutation ×1.5 maximum, weed multiplier 0.5 minimum. Pack makers can tune all of it in the datapack entry.
+
+**Feedback:** a pollen particle drifts over influenced crops (client-config toggleable); the Botanist's Loupe and goggles list active influences ("Pollinated: Beehive 83 %").
+
+**Steampunk upgrade (Phase 6): Brass Apiary.** A Create-powered hive. Its strength scales with RPM instead of honey (`cultivar:kinetic_speed` scaling type), it has radius 7, and it outputs honey as a fluid through pipes, so automated farms don't have to trade honey against pollination. Its effects are the same as a full beehive's: the upgrade buys reliability and reach, not more power.
+
+**Vanilla note:** vanilla bees' crop-growing behaviour only targets vanilla crop blocks, so it won't touch Cultivar crops. The influence system replaces it on purpose.
+
 ---
 
 ## 4. Graphics & Audio Direction — Excalibur base
@@ -607,12 +641,13 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 
 | Phase | Scope | Exit test |
 |---|---|---|
-| **1 — Core** | Trellis, crop BE, genome component, datapack plant/soil/mutation, growth tick, breeding, weeds/blight, harvest | Breed a vanilla mutation chain; stats inherit as specified |
+| **0 — Foundation** ✅ | Module system, registries (static + datapack), genome component, crop-influence API, server config, versioned network, ServerWorkQueue, datagen, sidedness guard, dedicated-server CI tests | CI green on a dedicated server |
+| **1 — Core** | Trellis, crop BE, datapack plant/soil/mutation content, growth tick, breeding, weeds/blight, harvest, **influence lookup + beehive pollination (§3.15)** | Breed a vanilla mutation chain; stats inherit as specified; a full hive measurably raises mutation rate |
 | **2 — Tools & info** | Spade, Shears, Tiller, Satchel, Loupe (+ goggle merge), Ledger, Assaying Engine (kinetic), Assay Card | Full manual breeding loop with diegetic info |
 | **3 — Create farming** | Harvester override, deployer actions, item attributes, comparator/Display Link | Fully automated plant–harvest–sort loop |
 | **4 — Water** | Cistern, Rotary Sprinkler, Drip Line, troughs + gates (graph), fertigation fluids | Sprinkler field fed by Create pipes |
 | **5 — Climate** | Soil conditioning attachment, Mist Nozzle, Conservatory + Climate Gauge, temperature requirement | Grow a HOT-requirement strain in a snow biome |
-| **6 — Content** | Ore-blooms → crushed ore, Brassleaf gating, Seed Vault, Livestock Trough, blight variants, Derelict Conservatories | Pack-ready |
+| **6 — Content** | Ore-blooms → crushed ore, Brassleaf gating, Seed Vault, Livestock Trough, **Brass Apiary**, blight variants, Derelict Conservatories | Pack-ready |
 | **7 — Polish** | Excalibur-based asset pass, sounds, Ponder scenes, JEI/EMI categories, Jade | Release |
 
 ---
