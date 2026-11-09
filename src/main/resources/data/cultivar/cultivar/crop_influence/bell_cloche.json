@@ -1,0 +1,6 @@
+{
+  "blocks": "cultivar:bell_cloche",
+  "radius": 0,
+  "height": 1,
+  "effects": { "growth_multiplier": 1.1, "weed_multiplier": 0.5 }
+}

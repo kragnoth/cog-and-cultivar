@@ -5,6 +5,7 @@ import com.kragnoth.cultivar.api.CultivarRegistries;
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.genetics.Stat;
 import com.kragnoth.cultivar.content.core.condition.CoreConditions;
+import com.kragnoth.cultivar.content.core.influence.CoreInfluence;
 import com.kragnoth.cultivar.core.module.CultivarModule;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -49,6 +50,7 @@ public final class CoreModule implements CultivarModule {
     public void onConstruct(IEventBus modBus, ModContainer container) {
         STATS.register(modBus);
         CoreConditions.TYPES.register(modBus);
+        CoreInfluence.SCALING_TYPES.register(modBus);
         COMPONENTS.register(modBus);
         TABS.register(modBus);
     }
