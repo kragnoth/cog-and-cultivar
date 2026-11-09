@@ -1,0 +1,13 @@
+{
+  "stages": 8,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:wheat_seeds",
+  "products": [ { "item": "minecraft:wheat", "min": 1, "max": 2 } ],
+  "requirements": [
+    { "type": "cultivar:light", "min": 10, "max": 15, "tolerance": 0.5 },
+    { "type": "cultivar:humidity", "value": "wet", "tolerance": 0.15 },
+    { "type": "cultivar:nutrients", "value": "high", "comparison": "at_least", "tolerance": 0.1 }
+  ]
+}

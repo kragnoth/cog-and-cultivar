@@ -18,7 +18,8 @@ public abstract class HarvesterMovementBehaviourMixin {
 
     @Inject(method = "visitNewPosition", at = @At("HEAD"), cancellable = true)
     private void cultivar$harvestCultivarCrops(MovementContext context, BlockPos pos, CallbackInfo ci) {
-        if (!context.world.isClientSide() && CultivarHarvesting.tryHarvest(context, pos)) {
+        HarvesterMovementBehaviour self = (HarvesterMovementBehaviour) (Object) this;
+        if (!context.world.isClientSide() && CultivarHarvesting.tryHarvest(context, pos, self::collectOrDropItem)) {
             ci.cancel();
         }
     }
