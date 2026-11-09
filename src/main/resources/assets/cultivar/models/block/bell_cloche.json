@@ -1,0 +1,19 @@
+{
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "textures": { "glass": "cultivar:block/bell_cloche", "knob": "cultivar:block/brass_knob", "particle": "cultivar:block/bell_cloche" },
+  "elements": [
+    { "from": [3, 0, 3], "to": [13, 10, 13], "faces": {
+      "north": { "uv": [3, 6, 13, 16], "texture": "#glass" }, "south": { "uv": [3, 6, 13, 16], "texture": "#glass" },
+      "east": { "uv": [3, 6, 13, 16], "texture": "#glass" }, "west": { "uv": [3, 6, 13, 16], "texture": "#glass" },
+      "up": { "uv": [3, 3, 13, 13], "texture": "#glass" } } },
+    { "from": [4, 10, 4], "to": [12, 12, 12], "faces": {
+      "north": { "uv": [4, 4, 12, 6], "texture": "#glass" }, "south": { "uv": [4, 4, 12, 6], "texture": "#glass" },
+      "east": { "uv": [4, 4, 12, 6], "texture": "#glass" }, "west": { "uv": [4, 4, 12, 6], "texture": "#glass" },
+      "up": { "uv": [4, 4, 12, 12], "texture": "#glass" } } },
+    { "from": [7, 12, 7], "to": [9, 14, 9], "faces": {
+      "north": { "uv": [0, 0, 2, 2], "texture": "#knob" }, "south": { "uv": [0, 0, 2, 2], "texture": "#knob" },
+      "east": { "uv": [0, 0, 2, 2], "texture": "#knob" }, "west": { "uv": [0, 0, 2, 2], "texture": "#knob" },
+      "up": { "uv": [0, 0, 2, 2], "texture": "#knob" } } }
+  ]
+}

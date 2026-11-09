@@ -17,6 +17,7 @@ import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.content.core.genetics.BreedingEngine;
 import com.kragnoth.cultivar.content.core.genetics.Genetics;
 import com.kragnoth.cultivar.content.core.growth.GrowthMath;
+import com.kragnoth.cultivar.content.core.influence.InfluenceLookup;
 import com.kragnoth.cultivar.core.config.CultivarServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -101,9 +102,29 @@ public class CropBlockEntity extends BlockEntity {
                 : Genetics.expressed(genome, stat, CultivarServerConfig.STAT_EXPRESSION.get());
     }
 
-    /** Crop influence at this position. Phase 1d replaces this with the POI-backed lookup (beehives etc.). */
-    protected InfluenceEffects influence() {
-        return InfluenceEffects.NONE;
+    @Nullable
+    private InfluenceEffects cachedInfluence;
+    private long influenceExpiry;
+
+    /**
+     * Combined crop influence here (beehives, cloches...). Recomputed at most about once a minute per crop,
+     * with jitter so neighbouring crops don't refresh on the same tick. Server-side only.
+     */
+    public InfluenceEffects influence() {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return InfluenceEffects.NONE;
+        }
+        long now = serverLevel.getGameTime();
+        if (cachedInfluence == null || now >= influenceExpiry) {
+            cachedInfluence = InfluenceLookup.compute(serverLevel, worldPosition);
+            influenceExpiry = now + 1200 + serverLevel.random.nextInt(200);
+        }
+        return cachedInfluence;
+    }
+
+    /** Forces the next {@link #influence()} call to recompute (e.g. a cloche was placed or removed). */
+    public void invalidateInfluence() {
+        cachedInfluence = null;
     }
 
     private Optional<Soil> soil() {

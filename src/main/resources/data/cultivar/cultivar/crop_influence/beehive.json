@@ -1,0 +1,7 @@
+{
+  "blocks": ["minecraft:beehive", "minecraft:bee_nest"],
+  "radius": 5,
+  "height": 2,
+  "effects": { "mutation_multiplier": 1.25, "fertility_bonus": 1, "mutativity_bonus": 1, "weed_multiplier": 0.75 },
+  "scaling": { "type": "cultivar:honey_level" }
+}

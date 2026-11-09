@@ -95,3 +95,17 @@ for stage, rows in enumerate((5, 8, 12, 16)):
     recolour(f'{EXC}/block/dead_bush.png', RUST, rows).save(f'{OUT}/block/rust_rot_stage{stage}.png')
 Image.open(f'{EXC}/item/wheat_seeds.png').convert('RGBA').save(f'{OUT}/item/seed.png')
 print('ok')
+
+# ---- Bell Cloche (1d): Excalibur glass frame with brass rim, plus a brass knob
+BRASS = [(0x84, 0x51, 0x25, 255), (0xab, 0x75, 0x31, 255), (0xc4, 0x94, 0x3d, 255), (0xd6, 0xb0, 0x55, 255), (0xdf, 0xbe, 0x5e, 255), (0xf4, 0xdf, 0x8d, 255)]
+glass = Image.open(f'{EXC}/block/glass.png').convert('RGBA')
+cloche = glass.copy()
+for x in range(16):
+    cloche.putpixel((x, 15), BRASS[1]); cloche.putpixel((x, 14), BRASS[3])   # brass rim at the base
+cloche.save(f'{OUT}/block/bell_cloche.png')
+knob = canvas()
+for x in range(16):
+    for y in range(16):
+        knob.putpixel((x, y), BRASS[5] if (x + y) % 3 == 0 else BRASS[3])
+knob.save(f'{OUT}/block/brass_knob.png')
+print('cloche ok')
