@@ -1,7 +1,7 @@
 # Cog & Cultivar — working notes for Claude
 
 - Mod id `cultivar`, package `com.kragnoth.cultivar`, MIT (code only; Excalibur-derived art is excluded, see LICENSE).
-- Targets: MC 1.21.1, NeoForge 21.1.219 (ModDevGradle 2.0.141), Create 6.0.11-320, Ponder 1.0.85, Flywheel 1.0.6, Java 21.
+- Targets: MC 1.21.1, NeoForge 21.1.219 (ModDevGradle 2.0.141), Create 6.0.10-281 baseline (CI also tests 6.0.11), Ponder 1.0.82, Flywheel 1.0.6, Java 21.
 - Design source of truth: `docs/design-spec.md`. Follow its roadmap phases (§6) and Create API table (§5.7).
 - Clean-room rule: implement from the spec, never copy AgriCraft code.
 - Art: 16x16, kitbashed from Excalibur; use the brass/blackened-steel ramps in spec §4.

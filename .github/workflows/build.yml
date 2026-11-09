@@ -11,8 +11,15 @@ concurrency:
 
 jobs:
   build:
-    name: Compile, checks, datagen, dedicated-server tests
+    name: Create ${{ matrix.create }}
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # First entry is the compile baseline (oldest supported). Others must also build and pass tests.
+        create: ['6.0.10-281', '6.0.11-320']
+    env:
+      CREATE: -Pcreate_version=${{ matrix.create }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-java@v5
@@ -22,9 +29,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
 
       - name: Build and checks (includes client/server sidedness guard)
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon $CREATE
 
       - name: Datagen is up to date
+        if: matrix.create == '6.0.10-281'
         run: |
           ./gradlew runData --no-daemon
           git add -N src/generated
@@ -34,9 +42,10 @@ jobs:
           fi
 
       - name: Dedicated server game tests
-        run: ./gradlew runGameTestServer --no-daemon
+        run: ./gradlew runGameTestServer --no-daemon $CREATE
 
       - uses: actions/upload-artifact@v5
+        if: matrix.create == '6.0.10-281'
         with:
           name: cultivar-jar
           path: build/libs/*.jar
