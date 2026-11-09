@@ -40,6 +40,10 @@ neoForge {
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
         data {
             data()
             programArguments.addAll '--mod', project.mod_id, '--all',
@@ -94,6 +98,31 @@ neoForge.ideSyncTask generateModMetadata
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+// Guard: common code must never import client-only classes, or dedicated servers crash on load.
+// Anything under a `client` package (or `mixin/client`) is exempt.
+tasks.register('checkSidedness') {
+    group = 'verification'
+    description = 'Fails if code outside a client package imports client-only classes.'
+    def srcDir = file('src/main/java')
+    inputs.dir(srcDir)
+    doLast {
+        def pattern = ~/^\s*import\s+(static\s+)?(net\.minecraft\.client|com\.mojang\.blaze3d|net\.neoforged\.neoforge\.client)\..*/
+        def offenders = []
+        srcDir.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+            if (!f.name.endsWith('.java')) return
+            def rel = srcDir.toPath().relativize(f.toPath()).toString().replace('\\', '/')
+            if (rel.contains('/client/')) return
+            f.eachLine { line, n ->
+                if (line ==~ pattern) offenders << "${rel}:${n}: ${line.trim()}"
+            }
+        }
+        if (!offenders.isEmpty()) {
+            throw new GradleException("Client-only imports outside a client package:\n  " + offenders.join('\n  '))
+        }
+    }
+}
+tasks.named('check') { dependsOn 'checkSidedness' }
 
 idea {
     module {
