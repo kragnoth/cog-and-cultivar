@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.kragnoth.cultivar.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "HarvesterMovementBehaviourMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
