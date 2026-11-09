@@ -1,0 +1,11 @@
+{
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "textures": { "frame": "cultivar:block/timber_trellis", "particle": "cultivar:block/timber_trellis" },
+  "elements": [
+    { "from": [2, 0, 0], "to": [2, 16, 16], "shade": false, "faces": { "east": { "uv": [0, 0, 16, 16], "texture": "#frame" }, "west": { "uv": [0, 0, 16, 16], "texture": "#frame" } } },
+    { "from": [14, 0, 0], "to": [14, 16, 16], "shade": false, "faces": { "east": { "uv": [0, 0, 16, 16], "texture": "#frame" }, "west": { "uv": [0, 0, 16, 16], "texture": "#frame" } } },
+    { "from": [0, 0, 2], "to": [16, 16, 2], "shade": false, "faces": { "north": { "uv": [0, 0, 16, 16], "texture": "#frame" }, "south": { "uv": [0, 0, 16, 16], "texture": "#frame" } } },
+    { "from": [0, 0, 14], "to": [16, 16, 14], "shade": false, "faces": { "north": { "uv": [0, 0, 16, 16], "texture": "#frame" }, "south": { "uv": [0, 0, 16, 16], "texture": "#frame" } } }
+  ]
+}

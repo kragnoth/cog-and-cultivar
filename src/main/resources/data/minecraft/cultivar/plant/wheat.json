@@ -4,10 +4,43 @@
   "growth_bonus": 0.025,
   "spread_chance": 0.1,
   "seeds": "minecraft:wheat_seeds",
-  "products": [ { "item": "minecraft:wheat", "min": 1, "max": 2 } ],
+  "products": [
+    {
+      "item": "minecraft:wheat",
+      "min": 1,
+      "max": 2
+    }
+  ],
   "requirements": [
-    { "type": "cultivar:light", "min": 10, "max": 15, "tolerance": 0.5 },
-    { "type": "cultivar:humidity", "value": "wet", "tolerance": 0.15 },
-    { "type": "cultivar:nutrients", "value": "high", "comparison": "at_least", "tolerance": 0.1 }
-  ]
+    {
+      "type": "cultivar:light",
+      "min": 10,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "high",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "textures": [
+      "minecraft:block/wheat_stage0",
+      "minecraft:block/wheat_stage1",
+      "minecraft:block/wheat_stage2",
+      "minecraft:block/wheat_stage3",
+      "minecraft:block/wheat_stage4",
+      "minecraft:block/wheat_stage5",
+      "minecraft:block/wheat_stage6",
+      "minecraft:block/wheat_stage7"
+    ],
+    "shape": "hash"
+  }
 }

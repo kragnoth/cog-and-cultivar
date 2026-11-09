@@ -1,2 +1,19 @@
-{ "stages": 4, "growth_chance": 0.5, "spawn_chance": 0.1, "lethal": true, "aggressive": false,
-  "rake_products": [ { "item": "minecraft:stick", "chance": 0.5 } ] }
+{
+  "stages": 4,
+  "growth_chance": 0.5,
+  "spawn_chance": 0.1,
+  "lethal": true,
+  "aggressive": false,
+  "rake_products": [
+    {
+      "item": "minecraft:stick",
+      "chance": 0.5
+    }
+  ],
+  "textures": [
+    "cultivar:block/rust_rot_stage0",
+    "cultivar:block/rust_rot_stage1",
+    "cultivar:block/rust_rot_stage2",
+    "cultivar:block/rust_rot_stage3"
+  ]
+}
