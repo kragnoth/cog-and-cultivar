@@ -24,6 +24,7 @@ import java.util.Optional;
  * @param cloneable         whether a single mature neighbour can spread a copy onto a grafting frame
  * @param spreadChance      chance per eligible tick for that clone to happen
  * @param seeds             vanilla/modded items that plant this species on a trellis (converted to a base genome)
+ * @param render            client display: block-atlas textures spread across the stages, and the plant shape
  */
 public record Plant(int stages,
                     int afterHarvestStage,
@@ -35,7 +36,8 @@ public record Plant(int stages,
                     List<Product> clipProducts,
                     List<GrowthCondition> requirements,
                     List<PlantModifier> modifiers,
-                    Optional<HolderSet<Item>> seeds) {
+                    Optional<HolderSet<Item>> seeds,
+                    Optional<PlantRender> render) {
     public static final Codec<Plant> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.intRange(1, 16).fieldOf("stages").forGetter(Plant::stages),
             Codec.intRange(0, 15).optionalFieldOf("after_harvest_stage", 0).forGetter(Plant::afterHarvestStage),
@@ -47,7 +49,8 @@ public record Plant(int stages,
             Product.CODEC.listOf().optionalFieldOf("clip_products", List.of()).forGetter(Plant::clipProducts),
             GrowthCondition.CODEC.listOf().optionalFieldOf("requirements", List.of()).forGetter(Plant::requirements),
             PlantModifier.CODEC.listOf().optionalFieldOf("modifiers", List.of()).forGetter(Plant::modifiers),
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("seeds").forGetter(Plant::seeds)
+            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("seeds").forGetter(Plant::seeds),
+            PlantRender.CODEC.optionalFieldOf("render").forGetter(Plant::render)
     ).apply(i, Plant::new));
 
     public Plant {

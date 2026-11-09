@@ -4,10 +4,39 @@
   "growth_bonus": 0.025,
   "spread_chance": 0.1,
   "seeds": "minecraft:beetroot_seeds",
-  "products": [ { "item": "minecraft:beetroot", "min": 1, "max": 2 } ],
+  "products": [
+    {
+      "item": "minecraft:beetroot",
+      "min": 1,
+      "max": 2
+    }
+  ],
   "requirements": [
-    { "type": "cultivar:light", "min": 10, "max": 15, "tolerance": 0.5 },
-    { "type": "cultivar:humidity", "value": "wet", "tolerance": 0.15 },
-    { "type": "cultivar:nutrients", "value": "high", "comparison": "at_least", "tolerance": 0.1 }
-  ]
+    {
+      "type": "cultivar:light",
+      "min": 10,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "high",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "textures": [
+      "minecraft:block/beetroots_stage0",
+      "minecraft:block/beetroots_stage1",
+      "minecraft:block/beetroots_stage2",
+      "minecraft:block/beetroots_stage3"
+    ],
+    "shape": "hash"
+  }
 }

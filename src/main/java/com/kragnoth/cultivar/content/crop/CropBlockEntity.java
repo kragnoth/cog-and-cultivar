@@ -348,6 +348,26 @@ public class CropBlockEntity extends BlockEntity {
     }
 
     @Override
+    public void onDataPacket(net.minecraft.network.Connection net, ClientboundBlockEntityDataPacket packet,
+                             HolderLookup.Provider registries) {
+        super.onDataPacket(net, packet, registries);
+        rerenderOnClient();
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        super.handleUpdateTag(tag, registries);
+        rerenderOnClient();
+    }
+
+    /** Rebuilds the chunk section so the crop model picks up the new plant/stage. No-op on the server. */
+    private void rerenderOnClient() {
+        if (level != null && level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
+        }
+    }
+
+    @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }

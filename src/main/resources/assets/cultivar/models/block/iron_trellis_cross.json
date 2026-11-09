@@ -1,0 +1,12 @@
+{
+  "parent": "cultivar:block/iron_trellis",
+  "textures": { "rod": "cultivar:block/iron_rod" },
+  "elements": [
+    { "from": [2, 0, 0], "to": [2, 16, 16], "shade": false, "faces": { "east": { "uv": [0, 0, 16, 16], "texture": "#frame" }, "west": { "uv": [0, 0, 16, 16], "texture": "#frame" } } },
+    { "from": [14, 0, 0], "to": [14, 16, 16], "shade": false, "faces": { "east": { "uv": [0, 0, 16, 16], "texture": "#frame" }, "west": { "uv": [0, 0, 16, 16], "texture": "#frame" } } },
+    { "from": [0, 0, 2], "to": [16, 16, 2], "shade": false, "faces": { "north": { "uv": [0, 0, 16, 16], "texture": "#frame" }, "south": { "uv": [0, 0, 16, 16], "texture": "#frame" } } },
+    { "from": [0, 0, 14], "to": [16, 16, 14], "shade": false, "faces": { "north": { "uv": [0, 0, 16, 16], "texture": "#frame" }, "south": { "uv": [0, 0, 16, 16], "texture": "#frame" } } },
+    { "from": [0, 10, 7.5], "to": [16, 11, 8.5], "faces": { "north": { "uv": [0, 0, 16, 1], "texture": "#rod" }, "south": { "uv": [0, 0, 16, 1], "texture": "#rod" }, "up": { "uv": [0, 0, 16, 1], "texture": "#rod" }, "down": { "uv": [0, 0, 16, 1], "texture": "#rod" }, "east": { "uv": [0, 0, 1, 1], "texture": "#rod" }, "west": { "uv": [0, 0, 1, 1], "texture": "#rod" } } },
+    { "from": [7.5, 10, 0], "to": [8.5, 11, 16], "faces": { "east": { "uv": [0, 0, 16, 1], "texture": "#rod" }, "west": { "uv": [0, 0, 16, 1], "texture": "#rod" }, "up": { "uv": [0, 0, 1, 16], "texture": "#rod" }, "down": { "uv": [0, 0, 1, 16], "texture": "#rod" }, "north": { "uv": [0, 0, 1, 1], "texture": "#rod" }, "south": { "uv": [0, 0, 1, 1], "texture": "#rod" } } }
+  ]
+}
