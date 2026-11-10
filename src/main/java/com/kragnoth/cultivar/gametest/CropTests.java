@@ -88,6 +88,37 @@ public final class CropTests {
     }
 
     @GameTest(template = "empty")
+    public static void blightFollowsHabitat(GameTestHelper h) {
+        BlockPos mud = new BlockPos(1, 2, 1), sand = new BlockPos(4, 2, 1), podzol = new BlockPos(7, 2, 1);
+        h.setBlock(mud, Blocks.MUD);
+        h.setBlock(sand, Blocks.SAND);
+        h.setBlock(podzol, Blocks.PODZOL);
+        var trellis = com.kragnoth.cultivar.content.crop.CropModule.TIMBER_TRELLIS.get().defaultBlockState();
+        for (BlockPos soil : new BlockPos[]{mud, sand, podzol}) {
+            h.setBlock(soil.above(), trellis);
+        }
+        java.util.function.Function<BlockPos, java.util.Set<String>> eligible = soil ->
+                ((com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(soil.above())).eligibleWeeds().stream()
+                        .map(w -> w.unwrapKey().orElseThrow().location().getPath()).collect(java.util.stream.Collectors.toSet());
+        var onMud = eligible.apply(mud);
+        var onSand = eligible.apply(sand);
+        var onPodzol = eligible.apply(podzol);
+        h.assertTrue(onMud.contains("bog_rot") && onMud.contains("rust_rot") && !onMud.contains("dry_rot"), "mud: " + onMud);
+        h.assertTrue(onSand.contains("dry_rot") && onSand.contains("ash_blight") && onSand.contains("leach_creep")
+                && !onSand.contains("bog_rot"), "sand: " + onSand);
+        h.assertTrue(onPodzol.contains("sour_moss") && onPodzol.contains("glut_canker") && !onPodzol.contains("ash_blight"),
+                "podzol: " + onPodzol);
+
+        var crop = (com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(mud.above());
+        var bog = crop.eligibleWeeds().stream().filter(w -> w.is(com.kragnoth.cultivar.Cultivar.id("bog_rot"))).findFirst().orElseThrow();
+        crop.setWeed(bog, 0);
+        java.util.List<net.minecraft.world.item.ItemStack> drops = new java.util.ArrayList<>();
+        crop.clearWeeds(drops::add);
+        h.assertTrue(drops.isEmpty() && !crop.hasWeed(), "an immature blight clears with no drops");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void heatAndClocheShiftHumidity(GameTestHelper h) {
         BlockPos fire = new BlockPos(1, 2, 1), cold = new BlockPos(4, 2, 1), both = new BlockPos(7, 2, 1);
         h.setBlock(fire, Blocks.COARSE_DIRT);

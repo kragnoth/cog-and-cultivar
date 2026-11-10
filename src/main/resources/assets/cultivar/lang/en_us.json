@@ -12,6 +12,14 @@
   "plant.minecraft.potato": "Potato",
   "plant.minecraft.beetroot": "Beetroot",
   "weed.cultivar.rust_rot": "Rust-rot",
+  "weed.cultivar.bog_rot": "Bog-rot",
+  "weed.cultivar.dry_rot": "Dry-rot",
+  "weed.cultivar.ash_blight": "Ash Blight",
+  "weed.cultivar.sour_moss": "Sour Moss",
+  "weed.cultivar.mildew": "Mildew",
+  "weed.cultivar.sun_scald": "Sun-scald",
+  "weed.cultivar.leach_creep": "Leach-creep",
+  "weed.cultivar.glut_canker": "Glut Canker",
   "item.cultivar.transplanting_spade": "Transplanting Spade",
   "item.cultivar.transplanting_spade.holding": "Holding: %s",
   "item.cultivar.pruning_shears": "Pruning Shears",
@@ -259,5 +267,12 @@
   "jei.cultivar.info.botanical_ledger": "Your botanical knowledge belongs to you; the Ledger is how it moves. Record a planted crop with it, or let an Assaying Engine or Trial Bed fill it. Carrying or reading a Ledger teaches you what it holds and copies what you know into it. Crosses appear in JEI once you know both parents and the child.",
   "jei.cultivar.info.planter_bed": "A self-contained growing station. Touching beds form one plot that shares water, seeds and output. Feed seeds, fertilizer, trellises and Bell Cloches by pipe or hopper; it plants, grows and keeps its best seeds, and offers crops for extraction. A redstone signal strips the plot and dumps everything for collection.",
   "jei.cultivar.info.trial_bed": "A research plot. Touching trial beds grow the seeds they are fed on a checkerboard of trellises with every habitat limit removed, and record each real cross into the Ledger in their slot. Now and then they also discover an untested cross outright. A redstone signal pauses the plot and returns its seeds.",
-  "jei.cultivar.info.sprinkler": "Mount it on any fluid pipe and feed it water. While it has water it gives nearby crops extra growth, sometimes a bone-meal pulse, and keeps farmland moist. A redstone signal stops it."
+  "jei.cultivar.info.sprinkler": "Mount it on any fluid pipe and feed it water. While it has water it gives nearby crops extra growth, sometimes a bone-meal pulse, and keeps farmland moist. A redstone signal stops it.",
+  "jei.cultivar.blight": "Blight",
+  "jei.cultivar.blight.anywhere": "Any soil, any light",
+  "jei.cultivar.blight.lethal": "Lethal: sets the crop back",
+  "jei.cultivar.blight.spreads": "Spreads to neighbours",
+  "jei.cultivar.blight.lethalspreads": "Lethal and spreads",
+  "jei.cultivar.blight.harmless": "Slows growth only",
+  "jei.cultivar.blight.drops": "Clear it mature with a hoe for drops"
 }

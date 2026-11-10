@@ -1,0 +1,35 @@
+{
+  "stages": 4,
+  "growth_chance": 0.55,
+  "spawn_chance": 0.1,
+  "lethal": true,
+  "aggressive": false,
+  "rake_products": [
+    {
+      "item": "minecraft:sugar",
+      "min": 1,
+      "max": 2,
+      "chance": 0.3
+    },
+    {
+      "item": "minecraft:honeycomb",
+      "min": 1,
+      "max": 1,
+      "chance": 0.04
+    }
+  ],
+  "textures": [
+    "cultivar:block/glut_canker_stage0",
+    "cultivar:block/glut_canker_stage1",
+    "cultivar:block/glut_canker_stage2",
+    "cultivar:block/glut_canker_stage3"
+  ],
+  "habitat": [
+    {
+      "type": "cultivar:nutrients",
+      "value": "very_high",
+      "comparison": "at_least",
+      "tolerance": 0
+    }
+  ]
+}

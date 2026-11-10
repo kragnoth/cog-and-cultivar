@@ -14,6 +14,7 @@ import com.kragnoth.cultivar.content.tools.ToolsModule;
 import com.kragnoth.cultivar.content.trial.TrialModule;
 import com.kragnoth.cultivar.core.config.CultivarServerConfig;
 import com.kragnoth.cultivar.api.plant.Fertilizer;
+import com.kragnoth.cultivar.api.plant.Weed;
 import com.kragnoth.cultivar.api.soil.Soil;
 import com.kragnoth.cultivar.content.assay.AssayModule;
 import com.kragnoth.cultivar.content.bed.PlanterBedModule;
@@ -90,7 +91,10 @@ public final class CultivarJeiPlugin implements IModPlugin {
 
     record FertilizerPage(Fertilizer fertilizer) {}
 
+    record BlightPage(ResourceLocation id, Weed weed) {}
+
     static final RecipeType<SoilPage> SOILS = RecipeType.create(Cultivar.MOD_ID, "soil", SoilPage.class);
+    static final RecipeType<BlightPage> BLIGHTS = RecipeType.create(Cultivar.MOD_ID, "blight", BlightPage.class);
     static final RecipeType<FertilizerPage> FERTILIZERS = RecipeType.create(Cultivar.MOD_ID, "fertilizer", FertilizerPage.class);
 
     @Override
@@ -102,7 +106,10 @@ public final class CultivarJeiPlugin implements IModPlugin {
                 new LinesCategory<>(gui, SOILS, "jei.cultivar.soil", new ItemStack(Items.FARMLAND), 6, CultivarJeiPlugin::soilItems, CultivarJeiPlugin::soilLines),
                 new LinesCategory<>(gui, FERTILIZERS, "jei.cultivar.fertilizer", new ItemStack(Items.BONE_MEAL), 3,
                         p -> p.fertilizer().items().stream().map(h -> new ItemStack(h.value())).toList(),
-                        CultivarJeiPlugin::fertilizerLines));
+                        CultivarJeiPlugin::fertilizerLines),
+                new LinesCategory<>(gui, BLIGHTS, "jei.cultivar.blight", new ItemStack(Items.IRON_HOE), 5,
+                        p -> p.weed().rakeProducts().stream().map(pr -> new ItemStack(pr.item(), pr.max())).toList(),
+                        CultivarJeiPlugin::blightLines));
     }
 
     private static List<ItemStack> soilItems(SoilPage page) {
@@ -119,6 +126,21 @@ public final class CultivarJeiPlugin implements IModPlugin {
         lines.add(Component.translatable("ledger.cultivar.cond.nutrients", level(soil.nutrients().getSerializedName())));
         lines.add(Component.translatable("jei.cultivar.soil.growth", String.format(Locale.ROOT, "%.2f", soil.growthModifier())));
         lines.add(Component.translatable("jei.cultivar.soil.shifts").withStyle(ChatFormatting.DARK_GRAY));
+        return lines;
+    }
+
+    private static List<Component> blightLines(BlightPage page) {
+        Weed weed = page.weed();
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.translatableWithFallback("weed." + page.id().getNamespace() + "." + page.id().getPath(),
+                page.id().getPath()).withStyle(ChatFormatting.BOLD));
+        if (weed.habitat().isEmpty()) {
+            lines.add(Component.translatable("jei.cultivar.blight.anywhere"));
+        }
+        weed.habitat().forEach(c -> lines.add(com.kragnoth.cultivar.client.ledger.LedgerScreen.describe(c)));
+        String traits = (weed.lethal() ? "lethal" : "") + (weed.aggressive() ? "spreads" : "");
+        lines.add(Component.translatable("jei.cultivar.blight." + (traits.isEmpty() ? "harmless" : traits)));
+        lines.add(Component.translatable("jei.cultivar.blight.drops").withStyle(ChatFormatting.DARK_GRAY));
         return lines;
     }
 
@@ -157,6 +179,8 @@ public final class CultivarJeiPlugin implements IModPlugin {
 
         var access = level.registryAccess();
         registration.addRecipes(SOILS, access.registryOrThrow(CultivarRegistries.SOIL).stream().map(SoilPage::new).toList());
+        registration.addRecipes(BLIGHTS, access.registryOrThrow(CultivarRegistries.WEED).entrySet().stream()
+                .map(e -> new BlightPage(e.getKey().location(), e.getValue())).toList());
         registration.addRecipes(FERTILIZERS,
                 access.registryOrThrow(CultivarRegistries.FERTILIZER).stream().map(FertilizerPage::new).toList());
         List<ItemStack> seeds = access.registryOrThrow(CultivarRegistries.PLANT).holders()
@@ -184,7 +208,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(TrialModule.TRIAL_BED.get(), MutationCategory.TYPE);
         registration.addRecipeCatalyst(AssayModule.ENGINE_ITEM.get(), AssayCategory.TYPE);
         for (var trellis : List.of(CropModule.TIMBER_TRELLIS.get(), CropModule.IRON_TRELLIS.get())) {
-            registration.addRecipeCatalyst(trellis, SOILS, FERTILIZERS);
+            registration.addRecipeCatalyst(trellis, SOILS, FERTILIZERS, BLIGHTS);
         }
         registration.addRecipeCatalyst(PlanterBedModule.BED_ITEM.get(), FERTILIZERS);
     }

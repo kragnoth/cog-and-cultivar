@@ -212,7 +212,21 @@ Parents that can't grow in the child's habitat (e.g. potatoes in the dark) are b
 ---
 
 
-> **Phase 6 blight variants (data-only):** weeds follow habitats like mutations do: e.g. Bog Rot on flooded soil, Ash Blight on soul sand, Dry Rot on arid soil, alongside Rust Rot. Each is a `weed` JSON with pack-driven art.
+> **Blight variants ✅:** a weed JSON may carry a `habitat` (growth conditions, tested on the trellis like plant requirements, so water/cloche/heat shifts count); a new blight is picked from those whose habitat fits. Spreading ignores habitat. A mature blight cleared with a hoe rolls its `rake_products` (cleanup material, sometimes useful); an immature one drops nothing.
+>
+> | Blight | Habitat | Behaviour | Drops (mature) |
+> |---|---|---|---|
+> | Rust-rot | anywhere | lethal | sticks, rare iron nugget |
+> | Bog-rot | watery or flooded | spreads | clay, slime ball |
+> | Dry-rot | dry or arid | lethal | dead bush, bone meal |
+> | Ash Blight | slightly alkaline or more | slows | charcoal, rare gunpowder |
+> | Sour Moss | acidic or more | spreads | moss carpet, rare glow berries |
+> | Mildew | light ≤ 7, damp or wetter | spreads | string, brown mushroom |
+> | Sun-scald | light ≥ 14, damp or drier | lethal | dead bush, rare glowstone dust |
+> | Leach-creep | low nutrients or less | slow, slows | bone meal, flint |
+> | Glut Canker | very high nutrients | lethal | sugar, rare honeycomb |
+>
+> Art: `tools/art/gen_blight_textures.py` recolours the Rust-rot sprites per blight.
 
 ### 2.7 Harvest & Drops
 
@@ -724,7 +738,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **5 — Climate** ❌ dropped | Temperature added no gameplay; soils, the Sprinkler and the Bell Cloche already cover climate control. Left to addons via the API (see ARCHITECTURE.md "Extending from an addon") | — |
 | **Planter Bed** ✅ | End-stage breeding machine. Self-contained, pipe-fed (soil, ranked seed stock, fertilizer, trellis + cloche supply, 4000 mB water, 9 outputs); touching beds form one plot (shared capabilities, balanced water, plot-wide goggles + comparator). Places fed trellises/cloches itself; redstone strips them back. Breeder beds (grafting frame above) bank newborn children as seeds and re-arm; producer beds plant the best seed, hold mature crops for neighbouring breeders, harvest, and upgrade to better seeds of the same species. Ranking = weighted stats (config) | A self-improving plot fed only by pipes |
 | **Trial Bed** ✅ | Research plot (brass casing): touching Trial Beds grow and cross their stocked seeds for real with every limiter removed (ideal soil host: no requirements, weeds or mutation habitats). Free trellises in a checkerboard: producers plant random stocked species (spending a seed), hold mature to parent, then rotate; frames breed, and a child of a new species records that mutation in the Ledger. Bonus: every N minutes (config, default 5) a roll at a configurable chance (default 5% for a full 9×9, scaled by plot size) discovers a random untested mutation whose parents are both stocked, records parents + child in the plot's Ledger (recipe appears), and spends one seed of each parent. Inputs: seeds + Ledger; output: the Ledger | A 9×9 fills a Ledger over time |
-| **6 — Content** (slimmed) | **Ore-blooms** ✅ (22 blooms incl. 12 low-value stepping stones, data-only, drop `create:crushed_raw_*` and gems), **habitat blight variants** (data-only), **Brass Apiary** (one block). Derelict Conservatories ✅ (greenhouse + lean-to ruins, decay processor, loot). Optional: Wall Trellis. Dropped: Seed Vault, Livestock Trough/fodder genes, Ore Petals, Brassleaf gating | Pack-ready |
+| **6 — Content** (slimmed) | **Ore-blooms** ✅ (22 blooms incl. 12 low-value stepping stones, data-only, drop `create:crushed_raw_*` and gems), **habitat blight variants** ✅ (9, data-driven `habitat`), **Brass Apiary** (one block). Derelict Conservatories ✅ (greenhouse + lean-to ruins, decay processor, loot). Optional: Wall Trellis. Dropped: Seed Vault, Livestock Trough/fodder genes, Ore Petals, Brassleaf gating | Pack-ready |
 | **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
 | **7 — Polish** | Excalibur-based asset pass, sounds, Ponder scenes, JEI/EMI categories, Jade | Release |
 

@@ -106,5 +106,7 @@ shipped files under `data/minecraft/cultivar/` in the mod jar.
   `/cultivar knowledge grant <players> all|<plant>`, `/cultivar knowledge revoke <players> all|<plant>`,
   `/cultivar knowledge list <player>`. Set `genetics.revealAllMutations = true` in `cultivar-server.toml` to show
   every cross in JEI and the Ledger.
+- **Blights** (`data/<ns>/cultivar/weed/*.json`) take an optional `habitat` list of growth conditions; a blight only
+  takes root where it fits. `rake_products` drop when a mature blight is cleared with a hoe.
 - **Overriding art:** a resource pack can re-skin any crop by overriding the textures it names, or the
   `cultivar:crop/...` model.
