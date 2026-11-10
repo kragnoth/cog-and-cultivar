@@ -32,7 +32,8 @@ import java.util.Map;
 /**
  * Sprinkler (Phase 4): one block, fed water by anything that speaks NeoForge's fluid capability (Create pipes and
  * pumps, Pipez, Modern Dynamics, tanks). {@code FACING} is the nozzle direction: it sits on top of, beside or under
- * whatever it's attached to. While it has water it adds random ticks and occasional bone-meal pulses to growables
+ * whatever it's attached to. Modelled on Create's Spout (copper casing body, inverted nozzle stack) with Create's
+ * own textures, so it matches the pack and any Create resource pack. While it has water it adds random ticks and occasional bone-meal pulses to growables
  * around it and keeps farmland moist. See {@link SprinklerBlockEntity}.
  */
 public class SprinklerBlock extends BaseEntityBlock {
@@ -44,7 +45,7 @@ public class SprinklerBlock extends BaseEntityBlock {
 
     static {
         for (Direction d : Direction.values()) {
-            SHAPES.put(d, Shapes.or(box(d, 4, 0, 4, 12, 2, 12), box(d, 6, 2, 6, 10, 6, 10), box(d, 5, 6, 5, 11, 9, 11)));
+            SHAPES.put(d, Shapes.or(box(d, 3, 0, 3, 13, 2, 13), box(d, 4, 2, 4, 12, 12, 12), box(d, 6, 12, 6, 10, 15, 10)));
         }
     }
 
@@ -118,9 +119,10 @@ public class SprinklerBlock extends BaseEntityBlock {
             return;
         }
         Direction facing = state.getValue(FACING);
-        double cx = pos.getX() + 0.5 + facing.getStepX() * 0.45;
-        double cy = pos.getY() + 0.5 + facing.getStepY() * 0.45;
-        double cz = pos.getZ() + 0.5 + facing.getStepZ() * 0.45;
+        // Spray from the nozzle tip (15/16 out from the attached face).
+        double cx = pos.getX() + 0.5 + facing.getStepX() * 0.44;
+        double cy = pos.getY() + 0.5 + facing.getStepY() * 0.44;
+        double cz = pos.getZ() + 0.5 + facing.getStepZ() * 0.44;
         for (int i = 0; i < 4; i++) {
             double angle = random.nextDouble() * Math.PI * 2;
             double speed = 0.15 + random.nextDouble() * 0.2;
