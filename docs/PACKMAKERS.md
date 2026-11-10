@@ -88,7 +88,12 @@ datapack works whether or not those mods are installed. Cog & Cultivar's own Far
 
 ## 5. Install
 
-Copy `cultivar_scaffold/` into `<world>/datapacks/` (or a global-datapack mod's folder) and run `/reload`.
+Copy `cultivar_scaffold/` into `<world>/datapacks/` (or a global-datapack mod's folder). With KubeJS, copy the
+contents of `cultivar_scaffold/data/` into `kubejs/data/` instead; that loads for every world and needs no
+`pack.mcmeta`.
+
+Then leave and rejoin the world (or restart the server). Plants, mutations, soils, blights and fertilizers are
+datapack registries, which Minecraft reads when a world loads; `/reload` does not refresh them.
 Everything is plain JSON, so keep editing it by hand from here. Field reference: `docs/design-spec.md` §2 and the
 shipped files under `data/minecraft/cultivar/` in the mod jar.
 
