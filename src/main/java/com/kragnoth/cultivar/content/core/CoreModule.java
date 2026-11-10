@@ -20,20 +20,19 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-/** Things every other module depends on: the six core stats, the genome component, the creative tab. */
+/** Things every other module depends on: the four core stats, the genome component, the creative tab. */
 public final class CoreModule implements CultivarModule {
     public static final DeferredRegister<Stat> STATS = DeferredRegister.create(CultivarRegistries.STAT_KEY, Cultivar.MOD_ID);
     public static final DeferredRegister.DataComponents COMPONENTS =
             DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, Cultivar.MOD_ID);
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Cultivar.MOD_ID);
 
-    // Core stats (spec §2.2). Colours are ARGB.
+    // Core stats (spec §2.2): Gain, Growth, Strength (tolerance, Hardy, weed resistance), Vigour. Colours are ARGB.
     public static final DeferredHolder<Stat, Stat> GAIN = STATS.register("gain", () -> new Stat(1, 10, 0xFF3F6FD8));
     public static final DeferredHolder<Stat, Stat> GROWTH = STATS.register("growth", () -> new Stat(1, 10, 0xFF4FAE4A));
     public static final DeferredHolder<Stat, Stat> STRENGTH = STATS.register("strength", () -> new Stat(1, 10, 0xFFC0473B));
-    public static final DeferredHolder<Stat, Stat> RESISTANCE = STATS.register("resistance", () -> new Stat(1, 10, 0xFFD6B055));
-    public static final DeferredHolder<Stat, Stat> FERTILITY = STATS.register("fertility", () -> new Stat(1, 10, 0xFFDD8B63));
-    public static final DeferredHolder<Stat, Stat> MUTATIVITY = STATS.register("mutativity", () -> new Stat(1, 10, 0xFF5FB3B0));
+    /** Breeding power: chance to be picked as a parent, and how far and which way offspring stats drift. */
+    public static final DeferredHolder<Stat, Stat> VIGOUR = STATS.register("vigour", () -> new Stat(1, 10, 0xFF5FB3B0));
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Genome>> GENOME =
             COMPONENTS.registerComponentType("genome", b -> b.persistent(Genome.CODEC).networkSynchronized(Genome.STREAM_CODEC));

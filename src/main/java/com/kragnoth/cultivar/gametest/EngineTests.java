@@ -47,10 +47,9 @@ public final class EngineTests {
         return new Plant(8, 0, growthChance, growthBonus, true, 0.1, List.of(), List.of(), List.of(), List.of(), Optional.empty(), Optional.empty(), 1);
     }
 
-    private static Genome genome(Holder<Plant> species, int fertility, int mutativity) {
+    private static Genome genome(Holder<Plant> species, int vigour) {
         return new Genome(species, Map.of(
-                CoreModule.FERTILITY.getKey(), AllelePair.of(fertility, fertility),
-                CoreModule.MUTATIVITY.getKey(), AllelePair.of(mutativity, mutativity),
+                CoreModule.VIGOUR.getKey(), AllelePair.of(vigour, vigour),
                 CoreModule.GROWTH.getKey(), AllelePair.of(5, 5)));
     }
 
@@ -65,10 +64,10 @@ public final class EngineTests {
 
     @GameTest(template = "empty")
     public static void weedChanceAndBeeSuppression(GameTestHelper h) {
-        near(h, GrowthMath.weedChance(true, 1, 10, NONE), 0.5, 1e-9, "resistance 1");
-        near(h, GrowthMath.weedChance(true, 10, 10, NONE), 0.0, 1e-9, "resistance 10");
+        near(h, GrowthMath.weedChance(true, 1, 10, NONE), 0.5, 1e-9, "strength 1");
+        near(h, GrowthMath.weedChance(true, 10, 10, NONE), 0.0, 1e-9, "strength 10");
         near(h, GrowthMath.weedChance(false, 1, 10, NONE), 0.5, 1e-9, "empty frame");
-        near(h, GrowthMath.weedChance(true, 1, 10, BEES), 0.375, 1e-9, "resistance 1 with bees");
+        near(h, GrowthMath.weedChance(true, 1, 10, BEES), 0.375, 1e-9, "strength 1 with bees");
         h.succeed();
     }
 
@@ -110,23 +109,20 @@ public final class EngineTests {
 
     @GameTest(template = "empty")
     public static void statDriftMatchesSpec(GameTestHelper h) {
-        Holder<Plant> sp = Holder.direct(plant(0.75, 0.025));
-        Genome high = genome(sp, 10, 10);
-        Genome low = genome(sp, 10, 1);
-        var settings = new BreedingEngine.Settings(Genetics.Expression.MAX, NONE, false);
         RandomSource r = RandomSource.create(1234L);
-        int growthKeyUp = 0;
-        int drifted = 0;
+        var growth = CoreModule.GROWTH.getKey();
+        int up = 0, drifted = 0;
         for (int i = 0; i < TRIALS; i++) {
-            Genome child = BreedingEngine.breed(List.of(high, high), List.of(), m -> false, settings, r).orElseThrow();
-            if (child.get(CoreModule.GROWTH.getKey()).dominant() == 6) growthKeyUp++;
-            Genome lowChild = BreedingEngine.breed(List.of(low, low), List.of(), m -> false, settings, r).orElseThrow();
-            if (lowChild.get(CoreModule.GROWTH.getKey()).dominant() != 5 || lowChild.get(CoreModule.GROWTH.getKey()).recessive() != 5) drifted++;
+            if (BreedingEngine.drift(growth, 5, 10, r) == 6) up++;
+            if (BreedingEngine.drift(growth, 5, 1, r) != 5) drifted++;
         }
-        // Mutativity 10: both alleles always step up, so dominant is always 6.
-        h.assertTrue(growthKeyUp == TRIALS, "mutativity 10 should always drift up, got " + growthKeyUp);
-        // Mutativity 1: each allele drifts 10 %, so P(pair changed) = 1 - 0.9^2 = 0.19.
-        near(h, drifted / (double) TRIALS, 0.19, 0.015, "mutativity 1 drift rate");
+        // Vigour 10: the allele always steps up. Vigour 1: it drifts 10 % of the time.
+        h.assertTrue(up == TRIALS, "vigour 10 should always drift up, got " + up);
+        near(h, drifted / (double) TRIALS, 0.10, 0.012, "vigour 1 drift rate");
+        Genome high = genome(Holder.direct(plant(0.75, 0.025)), 10);
+        var settings = new BreedingEngine.Settings(Genetics.Expression.MAX, NONE, false);
+        Genome child = BreedingEngine.breed(List.of(high, high), List.of(), m -> false, settings, r).orElseThrow();
+        h.assertTrue(child.get(growth).dominant() == 6, "high-vigour parents breed better children");
         h.succeed();
     }
 
@@ -136,8 +132,8 @@ public final class EngineTests {
         Holder<Plant> b = Holder.direct(plant(0.75, 0.025));
         Holder<Plant> child = Holder.direct(plant(0.75, 0.025));
         Mutation mutation = new Mutation(a, b, child, 0.25, List.of());
-        Genome pa = genome(a, 10, 1);
-        Genome pb = genome(b, 10, 1);
+        Genome pa = genome(a, 10);
+        Genome pb = genome(b, 10);
         RandomSource r = RandomSource.create(99L);
         int plain = 0, withBees = 0;
         var noBees = new BreedingEngine.Settings(Genetics.Expression.MAX, NONE, false);
@@ -156,7 +152,7 @@ public final class EngineTests {
     @GameTest(template = "empty")
     public static void pollinationRaisesParentSelection(GameTestHelper h) {
         Holder<Plant> sp = Holder.direct(plant(0.75, 0.025));
-        Genome parent = genome(sp, 3, 1);
+        Genome parent = genome(sp, 3);
         RandomSource r = RandomSource.create(7L);
         int crossesPlain = 0, crossesBees = 0;
         var noBees = new BreedingEngine.Settings(Genetics.Expression.MAX, NONE, false);
@@ -167,7 +163,7 @@ public final class EngineTests {
             if (BreedingEngine.breed(List.of(p, p), List.of(), m -> false, noBees, r).isPresent()) crossesPlain++;
             if (BreedingEngine.breed(List.of(p, p), List.of(), m -> false, bees, r).isPresent()) crossesBees++;
         }
-        // Spec §3.15: fertility 3 → both parents pass 0.3² = 9 %; with +1 pollination 0.4² = 16 %.
+        // Spec §3.15: vigour 3 → both parents pass 0.3² = 9 %; with +1 pollination 0.4² = 16 %.
         near(h, crossesPlain / (double) TRIALS, 0.09, 0.01, "two-parent cross rate, no bees");
         near(h, crossesBees / (double) TRIALS, 0.16, 0.012, "two-parent cross rate, bees");
         h.succeed();

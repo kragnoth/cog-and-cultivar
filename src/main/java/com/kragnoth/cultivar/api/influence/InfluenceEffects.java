@@ -9,8 +9,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  *
  * @param growthMultiplier   multiplies the per-tick growth chance (neutral 1)
  * @param mutationMultiplier multiplies a mutation's success chance when crossing (neutral 1)
- * @param fertilityBonus     added to parent fertility when rolling to be chosen as a parent: "pollination" (neutral 0)
- * @param mutativityBonus    added to mutativity when rolling stat drift on offspring, so more drift, biased upward (neutral 0)
+ * @param fertilityBonus     added to parent Vigour when rolling to be chosen as a parent: "pollination" (neutral 0)
+ * @param mutativityBonus    added to Vigour when rolling stat drift on offspring, so more drift, biased upward (neutral 0)
  * @param weedMultiplier     multiplies the chance a tick goes to weeds (neutral 1; below 1 suppresses weeds)
  */
 public record InfluenceEffects(double growthMultiplier,

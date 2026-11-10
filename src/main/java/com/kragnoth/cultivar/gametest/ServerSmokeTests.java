@@ -27,7 +27,7 @@ public final class ServerSmokeTests {
         access.registryOrThrow(CultivarRegistries.WEED);
         access.registryOrThrow(CultivarRegistries.FERTILIZER);
         access.registryOrThrow(CultivarRegistries.CROP_INFLUENCE);
-        helper.assertTrue(CultivarRegistries.STAT.size() >= 6, "Expected the six core stats to be registered");
+        helper.assertTrue(CultivarRegistries.STAT.size() >= 4, "Expected the four core stats to be registered");
         helper.succeed();
     }
 
