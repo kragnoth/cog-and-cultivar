@@ -137,13 +137,41 @@ public final class BedNetwork {
             }
 
             @Override
+            /** Balanced ("water-filling"): raises the lowest tanks to a common level, so one pipe waters the plot evenly. */
             public int fill(FluidStack resource, FluidAction action) {
-                int filled = 0;
-                for (PlanterBedBlockEntity bed : origin.cachedNetwork()) {
-                    if (filled >= resource.getAmount()) {
+                if (!origin.tank.isFluidValid(resource)) {
+                    return 0;
+                }
+                List<PlanterBedBlockEntity> beds = new ArrayList<>(origin.cachedNetwork());
+                beds.sort(java.util.Comparator.comparingInt(b -> b.tank.getFluidAmount()));
+                int n = beds.size(), cap = PlanterBedBlockEntity.CAPACITY, remaining = resource.getAmount();
+                int[] lv = new int[n];
+                for (int i = 0; i < n; i++) {
+                    lv[i] = beds.get(i).tank.getFluidAmount();
+                }
+                // Find the common level t the lowest k tanks can be raised to.
+                long sum = 0;
+                int k = 0;
+                double t = 0;
+                for (k = 1; k <= n; k++) {
+                    sum += lv[k - 1];
+                    t = Math.min(cap, (remaining + sum) / (double) k);
+                    if (k == n || t <= lv[k]) {
                         break;
                     }
-                    filled += bed.tank.fill(resource.copyWithAmount(resource.getAmount() - filled), action);
+                }
+                k = Math.min(k, n);
+                int filled = 0;
+                int target = (int) Math.floor(t);
+                for (int i = 0; i < k && filled < remaining; i++) {
+                    int add = Math.min(remaining - filled, Math.max(0, target - lv[i]));
+                    if (add > 0) {
+                        filled += beds.get(i).tank.fill(resource.copyWithAmount(add), action);
+                    }
+                }
+                // Rounding leftovers, 1 mB at a time, lowest first.
+                for (int i = 0; i < n && filled < remaining; i++) {
+                    filled += beds.get(i).tank.fill(resource.copyWithAmount(Math.min(remaining - filled, 1)), action);
                 }
                 return filled;
             }
