@@ -19,7 +19,7 @@ public class PruningShearsItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         Level level = ctx.getLevel();
-        if (!(level.getBlockEntity(ctx.getClickedPos()) instanceof CropBlockEntity crop)) {
+        if (!(CropBlockEntity.resolve(level, ctx.getClickedPos()).orElse(null) instanceof CropBlockEntity crop)) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide()) {

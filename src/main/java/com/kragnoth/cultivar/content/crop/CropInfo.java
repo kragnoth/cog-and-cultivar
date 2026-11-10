@@ -28,6 +28,11 @@ public final class CropInfo {
         if (genome != null) {
             out.add(CultivarSeedItem.plantName(genome).copy().append(" " + growthPercent(crop) + "%")
                     .withStyle(crop.isMature() ? ChatFormatting.GREEN : ChatFormatting.WHITE));
+            int missing = crop.segmentsMissing();
+            if (missing > 0) {
+                out.add(Component.translatableWithFallback("cultivar.info.needs_segments",
+                        "Needs %s more trellis stacked above", missing).withStyle(ChatFormatting.YELLOW));
+            }
             CoreModule.STATS.getEntries().forEach(stat -> out.add(Component.literal("  ")
                     .append(Component.translatable("stat.cultivar." + stat.getId().getPath()))
                     .append(": " + Genetics.expressed(genome, stat.getKey()))

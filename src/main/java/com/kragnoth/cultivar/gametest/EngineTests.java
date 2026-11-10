@@ -44,7 +44,7 @@ public final class EngineTests {
     }
 
     private static Plant plant(double growthChance, double growthBonus) {
-        return new Plant(8, 0, growthChance, growthBonus, true, 0.1, List.of(), List.of(), List.of(), List.of(), Optional.empty(), Optional.empty());
+        return new Plant(8, 0, growthChance, growthBonus, true, 0.1, List.of(), List.of(), List.of(), List.of(), Optional.empty(), Optional.empty(), 1);
     }
 
     private static Genome genome(Holder<Plant> species, int fertility, int mutativity) {
@@ -161,7 +161,7 @@ public final class EngineTests {
         int crossesPlain = 0, crossesBees = 0;
         var noBees = new BreedingEngine.Settings(Genetics.Expression.MAX, NONE, false);
         var bees = new BreedingEngine.Settings(Genetics.Expression.MAX, BEES, false);
-        Plant noClone = new Plant(8, 0, 0.75, 0.025, false, 0, List.of(), List.of(), List.of(), List.of(), Optional.empty(), Optional.empty());
+        Plant noClone = new Plant(8, 0, 0.75, 0.025, false, 0, List.of(), List.of(), List.of(), List.of(), Optional.empty(), Optional.empty(), 1);
         Genome p = new Genome(Holder.direct(noClone), parent.stats());
         for (int i = 0; i < TRIALS; i++) {
             if (BreedingEngine.breed(List.of(p, p), List.of(), m -> false, noBees, r).isPresent()) crossesPlain++;

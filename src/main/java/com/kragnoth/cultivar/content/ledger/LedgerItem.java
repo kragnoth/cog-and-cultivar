@@ -82,7 +82,7 @@ public class LedgerItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         Level level = ctx.getLevel();
-        if (!(level.getBlockEntity(ctx.getClickedPos()) instanceof CropBlockEntity crop) || crop.genome() == null) {
+        if (!(CropBlockEntity.resolve(level, ctx.getClickedPos()).orElse(null) instanceof CropBlockEntity crop) || crop.genome() == null) {
             return InteractionResult.PASS;
         }
         if (!level.isClientSide()) {

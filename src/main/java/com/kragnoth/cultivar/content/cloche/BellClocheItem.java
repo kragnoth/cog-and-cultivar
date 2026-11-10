@@ -21,8 +21,9 @@ public class BellClocheItem extends Item {
     public InteractionResult useOn(UseOnContext ctx) {
         Level level = ctx.getLevel();
         BlockState state = level.getBlockState(ctx.getClickedPos());
-        if (!(state.getBlock() instanceof TrellisBlock) || state.getValue(TrellisBlock.CLOCHE) || state.getValue(TrellisBlock.CROSS)) {
-            return InteractionResult.PASS;
+        if (!(state.getBlock() instanceof TrellisBlock) || state.getValue(TrellisBlock.CLOCHE) || state.getValue(TrellisBlock.CROSS)
+                || TrellisBlock.isSegment(level, ctx.getClickedPos()) || TrellisBlock.hasSegmentAbove(level, ctx.getClickedPos())) {
+            return InteractionResult.PASS; // cloches fit single trellises only
         }
         if (!level.isClientSide()) {
             level.setBlock(ctx.getClickedPos(), state.setValue(TrellisBlock.CLOCHE, true), Block.UPDATE_ALL);

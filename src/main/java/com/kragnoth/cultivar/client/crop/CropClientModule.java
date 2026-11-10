@@ -47,7 +47,7 @@ public final class CropClientModule implements ClientModule {
                 return -1;
             }
             int age = 7;
-            if (level != null && pos != null && level.getBlockEntity(pos) instanceof CropBlockEntity crop && crop.genome() != null) {
+            if (level != null && pos != null && CropBlockEntity.resolve(level, pos).orElse(null) instanceof CropBlockEntity crop && crop.genome() != null) {
                 int stages = crop.genome().species().value().stages();
                 age = stages <= 1 ? 7 : crop.stage() * 7 / (stages - 1);
             }

@@ -86,4 +86,32 @@ public final class CropTests {
                 "flooded is the ceiling");
         h.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void tallCropNeedsStackedTrellis(GameTestHelper h) {
+        var cane = h.getLevel().registryAccess().registryOrThrow(CultivarRegistries.PLANT)
+                .getHolderOrThrow(ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.withDefaultNamespace("sugar_cane")));
+        BlockPos base = new BlockPos(1, 2, 1);
+        h.setBlock(base.below(), Blocks.MUD);
+        h.setBlock(base, CropModule.TIMBER_TRELLIS.get());
+        CropBlockEntity crop = (CropBlockEntity) h.getBlockEntity(base);
+        crop.plant(Genome.base(cane), 5);
+        crop.clampToSpace();
+        h.assertTrue(crop.stage() == 1 && crop.segmentsMissing() == 2, "one trellis holds one block of cane");
+
+        h.setBlock(base.above(), CropModule.TIMBER_TRELLIS.get());
+        h.setBlock(base.above(2), CropModule.IRON_TRELLIS.get());
+        h.assertTrue(crop.segmentsAvailable() == 3 && crop.segmentsMissing() == 0, "two segments give room for 3 blocks");
+        CropBlockEntity segment = (CropBlockEntity) h.getBlockEntity(base.above());
+        h.assertTrue(segment.isSegment() && !segment.plant(Genome.base(cane)), "segments never take a plant of their own");
+        h.assertTrue(CropBlockEntity.resolve(h.getLevel(), h.absolutePos(base.above(2))).orElseThrow() == crop, "segments resolve to the base");
+
+        crop.uproot();
+        crop.plant(Genome.base(cane), 5);
+        h.setBlock(base.above(2), Blocks.AIR);
+        h.assertTrue(crop.stage() == 3, "removing the top segment shrinks the cane to fit two blocks");
+        h.setBlock(base.above(), Blocks.AIR);
+        h.assertTrue(crop.stage() == 1, "and to one block");
+        h.succeed();
+    }
 }

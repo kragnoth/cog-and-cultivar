@@ -40,7 +40,7 @@ public class TransplantingSpadeItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         Level level = ctx.getLevel();
-        if (!(level.getBlockEntity(ctx.getClickedPos()) instanceof CropBlockEntity crop)
+        if (!(CropBlockEntity.resolve(level, ctx.getClickedPos()).orElse(null) instanceof CropBlockEntity crop)
                 || ctx.getLevel().getBlockState(ctx.getClickedPos()).getValue(TrellisBlock.CROSS)) {
             return InteractionResult.PASS;
         }
