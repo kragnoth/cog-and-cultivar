@@ -48,7 +48,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 |---|---|---|
 | **Cultivar Seed** | ✅ genome, assay gating, JEI subtypes, filters, milling, compost | Item description |
 | **Cutting** | ✅ clone loop, Strength take roll, millable, assayable (seed-planting bypass fixed in #33) | JEI subtype (hide the blank one); item description; optional: Planter Bed accepts cuttings with the take roll, for clone automation |
-| **Assay Card** | ⚠️ made only by the Engine; nothing consumes it | Give it a use: Create filters already read its genome, and a Display Link could show a card's stats. Otherwise fold it into the assayed seed and drop it |
+| ~~Assay Card~~ | Removed (#35): it was a souvenir nothing used | — |
 | **Seed Meal** | ✅ cull loop, fertilizer, compost | Item description; JEI fertilizer info |
 | **Bell Cloche** | ⚠️ cloche influence works, placed by beds | The spec's +1 humidity step was never added; item description |
 | **Transplanting Spade** | ✅ | Item description; deployer behaviour unverified in game |
@@ -75,7 +75,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
    - Wrench support on Sprinkler and both beds.
    - One redstone convention across machines: pause, or strip + dump for plots.
 3. **Tool tags for trellises** (axe for timber, pickaxe for iron).
-4. **Purpose review:** Loupe (differentiate or drop), Tillers (keep, merge or drop), Assay Card (give it a use or drop it).
+4. **Purpose review:** Loupe (differentiate or drop), Tillers (keep, merge or drop). Assay Card: dropped.
 5. **JEI:**
    - Cutting subtype.
    - Categories for mutations (parents, child, habitat), the Assaying Engine, fertilizers and soils.

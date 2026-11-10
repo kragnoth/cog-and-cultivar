@@ -17,7 +17,6 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -29,7 +28,7 @@ public final class AssayTests {
     private AssayTests() {}
 
     @GameTest(template = "empty")
-    public static void engineAssaysPrintsAndRecords(GameTestHelper h) {
+    public static void engineAssaysAndRecords(GameTestHelper h) {
         ResourceKey<Plant> wheatKey = ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.withDefaultNamespace("wheat"));
         Holder<Plant> wheat = h.getLevel().registryAccess().registryOrThrow(CultivarRegistries.PLANT).getHolderOrThrow(wheatKey);
         BlockPos pos = new BlockPos(1, 1, 1);
@@ -39,7 +38,6 @@ public final class AssayTests {
         ItemStack seeds = CultivarSeedItem.of(Genome.base(wheat)).copyWithCount(2);
         h.assertTrue(!CultivarSeedItem.statsVisible(seeds), "fresh seeds are unassayed");
         be.automation.insertItem(SEED_IN, seeds, false);
-        be.automation.insertItem(PAPER, new ItemStack(Items.PAPER), false);
         be.automation.insertItem(LEDGER, new ItemStack(LedgerModule.LEDGER.get()), false);
         h.assertTrue(be.automation.extractItem(SEED_IN, 1, true).isEmpty(), "inputs cannot be pulled by automation");
 
@@ -51,8 +49,6 @@ public final class AssayTests {
         ItemStack out = be.automation.extractItem(SEED_OUT, 64, false);
         h.assertTrue(out.getCount() == 2 && out.has(CoreModule.ASSAYED.get()), "both seeds come out assayed");
         h.assertTrue(CultivarSeedItem.statsVisible(out), "assayed seeds show stats");
-        ItemStack card = be.automation.extractItem(CARD_OUT, 1, false);
-        h.assertTrue(card.is(AssayModule.ASSAY_CARD.get()) && card.has(CoreModule.GENOME.get()), "one paper prints one card");
         h.assertTrue(LedgerItem.data(be.inventory.getStackInSlot(LEDGER)).knows(wheatKey), "the ledger recorded wheat");
         h.succeed();
     }

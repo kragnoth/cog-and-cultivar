@@ -11,7 +11,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,7 +19,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * Assaying Engine (spec §3.12, Phase 2c): a shaft from below spins the drum; seeds go in, come out assayed.
- * Paper adds an Assay Card; a ledger in its slot records every species that passes through.
+ * A ledger in its slot records every species that passes through.
  */
 public class AssayingEngineBlock extends KineticBlock implements IBE<AssayingEngineBlockEntity> {
     public AssayingEngineBlock(Properties properties) {
@@ -51,7 +50,6 @@ public class AssayingEngineBlock extends KineticBlock implements IBE<AssayingEng
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {
         int slot = stack.has(CoreModule.GENOME.get()) ? AssayingEngineBlockEntity.SEED_IN
-                : stack.is(Items.PAPER) ? AssayingEngineBlockEntity.PAPER
                 : stack.getItem() instanceof LedgerItem ? AssayingEngineBlockEntity.LEDGER : -1;
         if (slot < 0) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -78,8 +76,7 @@ public class AssayingEngineBlock extends KineticBlock implements IBE<AssayingEng
         return onBlockEntityUse(level, pos, be -> {
             int[] order = player.isShiftKeyDown()
                     ? new int[]{AssayingEngineBlockEntity.LEDGER}
-                    : new int[]{AssayingEngineBlockEntity.SEED_OUT, AssayingEngineBlockEntity.CARD_OUT,
-                    AssayingEngineBlockEntity.SEED_IN, AssayingEngineBlockEntity.PAPER};
+                    : new int[]{AssayingEngineBlockEntity.SEED_OUT, AssayingEngineBlockEntity.SEED_IN};
             for (int slot : order) {
                 ItemStack taken = be.inventory.extractItem(slot, 64, false);
                 if (!taken.isEmpty()) {

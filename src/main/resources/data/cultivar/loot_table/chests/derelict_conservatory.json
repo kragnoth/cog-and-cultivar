@@ -260,11 +260,6 @@
               }
             }
           ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "cultivar:assay_card",
-          "weight": 2
         }
       ]
     }

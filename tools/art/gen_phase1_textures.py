@@ -187,19 +187,6 @@ for x, y in ((11, 1), (12, 1), (12, 2)):
 ledger.save(f'{OUT}/item/botanical_ledger.png')
 print('ledger ok')
 
-# ---- Phase 2c: Assay Card: Excalibur paper punched like a brass-edged tabulator card, with stat-colour bars
-card = Image.open(f'{EXC}/item/paper.png').convert('RGBA')
-bars = [(0x3f, 0x6f, 0xd8), (0x4f, 0xae, 0x4a), (0xc0, 0x47, 0x3b), (0xd6, 0xb0, 0x55)]
-for i, col in enumerate(bars):
-    y = 5 + i * 2
-    for x in range(5, 5 + 3 + (i * 2) % 5):
-        if card.getpixel((x, y))[3] > 0:
-            card.putpixel((x, y), col + (255,))
-for y in range(4, 12, 2):
-    if card.getpixel((11, y))[3] > 0:
-        card.putpixel((11, y), BRASS[1])
-card.save(f'{OUT}/item/assay_card.png')
-print('assay card ok')
 
 
 # ---- Cutting: a leafy sprig snipped from a sapling sprite, bound with a brass band at the cut end

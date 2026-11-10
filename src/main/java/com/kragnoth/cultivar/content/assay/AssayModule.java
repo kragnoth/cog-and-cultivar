@@ -22,7 +22,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-/** Assaying Engine and Assay Card (spec §3.12, Phase 2c). */
+/** Assaying Engine (spec §3.12, Phase 2c). */
 public final class AssayModule implements CultivarModule {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Cultivar.MOD_ID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Cultivar.MOD_ID);
@@ -36,8 +36,6 @@ public final class AssayModule implements CultivarModule {
             () -> new AssayingEngineBlock(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_YELLOW)
                     .strength(2.0f).sound(SoundType.METAL).noOcclusion()));
     public static final DeferredItem<BlockItem> ENGINE_ITEM = ITEMS.registerSimpleBlockItem(ENGINE);
-    public static final DeferredItem<AssayCardItem> ASSAY_CARD = ITEMS.registerItem("assay_card",
-            AssayCardItem::new, new Item.Properties().stacksTo(1));
 
     @SuppressWarnings("DataFlowIssue")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AssayingEngineBlockEntity>> ENGINE_BE =

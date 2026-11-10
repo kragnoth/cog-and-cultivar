@@ -95,10 +95,8 @@ public final class ToolTests {
                 .allMatch(s -> genome.equals(s.get(CoreModule.GENOME.get()))), "cuttings are exact clones");
         h.assertTrue(SeedSatchelItem.insert(new ItemStack(ToolsModule.SEED_SATCHEL.get()), drops.get(0)) == 0,
                 "cuttings don't go in the satchel");
-        h.assertTrue(com.kragnoth.cultivar.content.crop.TrellisBlock.genomeFor(drops.get(0), h.getLevel()).isEmpty()
-                && com.kragnoth.cultivar.content.crop.TrellisBlock.genomeFor(
-                        com.kragnoth.cultivar.content.assay.AssayCardItem.of(genome), h.getLevel()).isEmpty(),
-                "cuttings and assay cards are not seeds (no planting bypass, not accepted by beds)");
+        h.assertTrue(com.kragnoth.cultivar.content.crop.TrellisBlock.genomeFor(drops.get(0), h.getLevel()).isEmpty(),
+                "cuttings are not seeds (no planting bypass, not accepted by beds)");
 
         h.assertTrue(!crop.isHardy() && crop.requirements().size() == wheat.value().requirements().size(), "base wheat is not hardy");
         var strength = CoreModule.STRENGTH.getKey();
