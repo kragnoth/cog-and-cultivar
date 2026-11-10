@@ -226,7 +226,7 @@ Parents that can't grow in the child's habitat (e.g. potatoes in the dark) are b
 > | Leach-creep | low nutrients or less | slow, slows | bone meal, flint |
 > | Glut Canker | very high nutrients | lethal | sugar, rare honeycomb |
 >
-> Art: `tools/art/gen_blight_textures.py` recolours the Rust-rot sprites per blight.
+> Art: `tools/art/gen_blight_textures.py` kitbashes each blight from its own Excalibur plant (seagrass, dry grass, crimson roots, berry bush, fern, dead bush, hanging roots, crimson fungus) with its own palette and detail (slime beads, rot tips, embers, pustules, mould fuzz, char, pale tips, galls).
 
 ### 2.7 Harvest & Drops
 
