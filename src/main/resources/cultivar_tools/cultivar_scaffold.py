@@ -300,28 +300,92 @@ def cmd_mutations(args):
 
 # ----------------------------------------------------------------------------- check
 def load_pack(pack):
-    plants, mutations = set(), []
+    plants, mutations, soils = {}, [], {}
     if not pack:
-        return plants, mutations
+        return plants, mutations, soils
     data = os.path.join(pack, "data")
     for ns in os.listdir(data) if os.path.isdir(data) else []:
-        for kind in ("plant", "mutation"):
+        for kind in ("plant", "mutation", "soil"):
             d = os.path.join(data, ns, "cultivar", kind)
             for name in os.listdir(d) if os.path.isdir(d) else []:
                 if not name.endswith(".json"):
                     continue
+                entry = json.load(open(os.path.join(d, name), encoding="utf-8"))
                 if kind == "plant":
-                    plants.add(f"{ns}:{name[:-5]}")
+                    plants[f"{ns}:{name[:-5]}"] = entry
+                elif kind == "soil":
+                    soils[f"{ns}:{name[:-5]}"] = entry
                 else:
-                    mutations.append(json.load(open(os.path.join(d, name), encoding="utf-8")))
-    return plants, mutations
+                    mutations.append(entry)
+    return plants, mutations, soils
+
+
+# Breedability: parents and the grafting frame are adjacent, so they share light (neighbouring blocks differ by at
+# most 1); each plant has its own soil, shifted by heat (-1), water (+1) and a Bell Cloche (+1). Checked at base
+# stats (Strength 1), so a warning means a fresh seed can't do it; bred-up Strength may still manage.
+HUMIDITY = ["arid", "dry", "damp", "wet", "watery", "flooded"]
+SCALES = {"cultivar:humidity": (0, HUMIDITY),
+          "cultivar:acidity": (1, ["highly_acidic", "acidic", "slightly_acidic", "neutral", "slightly_alkaline",
+                                   "alkaline", "highly_alkaline"]),
+          "cultivar:nutrients": (2, ["none", "very_low", "low", "medium", "high", "very_high"])}
+
+
+def soil_states(soils):
+    states = set()
+    for s in soils.values():
+        h = HUMIDITY.index(s.get("humidity", "wet"))
+        a = SCALES["cultivar:acidity"][1].index(s.get("acidity", "slightly_acidic"))
+        n = SCALES["cultivar:nutrients"][1].index(s.get("nutrients", "high"))
+        for shifted in range(h - 1, h + 3):
+            states.add((max(0, min(5, shifted)), a, n))
+    return states
+
+
+def light_range(conds):
+    lo, hi = 0, 15
+    for c in conds:
+        if c.get("type") == "cultivar:light":
+            widen = int(c.get("tolerance", 0.5))
+            lo, hi = max(lo, c.get("min", 0) - widen), min(hi, c.get("max", 15) + widen)
+    return (lo, hi) if lo <= hi else None
+
+
+def soil_fits(states, *cond_lists):
+    windows = []
+    for conds in cond_lists:
+        for c in conds:
+            if c.get("type") in SCALES:
+                slot, scale = SCALES[c["type"]]
+                i, widen, cmp = scale.index(c["value"]), int(c.get("tolerance", 0)), c.get("comparison", "equal")
+                windows.append((slot, -99 if cmp == "at_most" else i - widen, 99 if cmp == "at_least" else i + widen))
+    return any(all(lo <= st[slot] <= hi for slot, lo, hi in windows) for st in states)
+
+
+def breedability(m, plants, states):
+    """Reasons this cross can't be bred on plain trellises at base stats (empty if it can)."""
+    need = lambda p: plants.get(p, {}).get("requirements", [])
+    habitat, child = m.get("conditions", []), need(m["child"])
+    frame, la, lb = light_range(habitat + child), light_range(need(m["parent_a"])), light_range(need(m["parent_b"]))
+    issues = []
+    if frame is None or la is None or lb is None:
+        issues.append("a light requirement is empty")
+    elif max(frame[0], la[0] - 1, lb[0] - 1) > min(frame[1], la[1] + 1, lb[1] + 1):
+        issues.append(f"no shared light: frame {frame}, {m['parent_a']} {la}, {m['parent_b']} {lb}")
+    if not soil_fits(states, habitat, child):
+        issues.append("no soil meets the habitat and the child's needs together")
+    for p in (m["parent_a"], m["parent_b"]):
+        if not soil_fits(states, need(p)):
+            issues.append(f"no soil grows {p}")
+    return issues
 
 
 def cmd_check(args):
     export = json.load(open(args.export, encoding="utf-8"))
-    pack_plants, pack_mutations = load_pack(args.pack)
-    plants = set(export.get("plants", {})) | pack_plants
+    pack_plants, pack_mutations, pack_soils = load_pack(args.pack)
+    plant_data = {**export.get("plants", {}), **pack_plants}
+    plants = set(plant_data)
     mutations = list(export.get("mutations", {}).values()) + pack_mutations
+    states = soil_states({**export.get("soils", {}), **pack_soils})
     problems = 0
     produced = defaultdict(list)
     pairs = defaultdict(list)
@@ -332,6 +396,9 @@ def cmd_check(args):
                 problems += 1
         produced[m["child"]].append(m)
         pairs[tuple(sorted((m["parent_a"], m["parent_b"])))].append(m)
+        if all(m[k] in plants for k in ("parent_a", "parent_b", "child")):
+            for issue in breedability(m, plant_data, states):
+                print(f"WARN {m['parent_a']} x {m['parent_b']} -> {m['child']} can't be bred on plain trellises: {issue}")
     for pair, ms in pairs.items():
         if len(ms) > 1 and any(not m.get("conditions") for m in ms):
             print(f"WARN {pair[0]} x {pair[1]} forks into {len(ms)} children but not all have habitat conditions")
@@ -362,7 +429,7 @@ def main():
     m.add_argument("plan")
     m.add_argument("--out", help="datapack folder (default: the plan's folder)")
     m.add_argument("--namespace", help="namespace for the mutation files (default: the child's)")
-    c = sub.add_parser("check", help="report unknown plants, unconditioned forks, roots and uncovered crops")
+    c = sub.add_parser("check", help="report unknown plants, unbreedable crosses, unconditioned forks, roots and uncovered crops")
     c.add_argument("export")
     c.add_argument("--pack", help="scaffolded datapack folder to include")
     args = ap.parse_args()
