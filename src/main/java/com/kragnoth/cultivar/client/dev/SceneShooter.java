@@ -69,7 +69,10 @@ public final class SceneShooter {
             new Shot("ledger_01_index", 4.5, Y + 1.4, 4.6, 180f, 20f),
             new Shot("ledger_02_carrot", 4.5, Y + 1.4, 4.6, 180f, 20f),
             new Shot("assay_01_engine", 15.2, Y + 2.4, DZ + 2.6, 160f, 20f),
-            new Shot("assay_02_goggles", 14.5, Y + 2.3, DZ + 3.0, 180f, 18f));
+            new Shot("assay_02_goggles", 14.5, Y + 2.3, DZ + 3.0, 180f, 18f),
+            new Shot("crops_01_row", 6.5, Y + 2.6, -16.5, 180f, 22f),
+            new Shot("crops_02_close_left", 3.0, Y + 1.6, -17.8, 180f, 18f),
+            new Shot("crops_03_close_right", 10.0, Y + 1.6, -17.8, 180f, 18f));
 
     private static int tick = -1;
     private static boolean worldRequested;
@@ -221,6 +224,16 @@ public final class SceneShooter {
         if (level.getBlockEntity(engine) instanceof com.kragnoth.cultivar.content.assay.AssayingEngineBlockEntity be) {
             be.inventory.setStackInSlot(com.kragnoth.cultivar.content.assay.AssayingEngineBlockEntity.SEED_IN,
                     com.kragnoth.cultivar.content.crop.CultivarSeedItem.of(com.kragnoth.cultivar.api.genetics.Genome.base(carrot)).copyWithCount(64));
+        }
+
+        // Every vanilla crop on the trellis: mature on the back row, mid-growth in front.
+        String[] crops = {"pumpkin", "melon", "sugar_cane", "bamboo", "cactus", "cocoa", "sweet_berries",
+                "glow_berries", "nether_wart", "brown_mushroom", "red_mushroom", "torchflower", "pitcher_plant"};
+        for (int i = 0; i < crops.length; i++) {
+            Holder<Plant> p = plant(level, crops[i]);
+            int stages = p.value().stages();
+            crop(level, i, -22, timber, p, stages - 1);
+            crop(level, i, -20, iron, p, stages / 2);
         }
 
         // A wider field for the establishing shot.

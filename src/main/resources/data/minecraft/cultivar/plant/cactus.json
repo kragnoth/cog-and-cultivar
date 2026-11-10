@@ -1,0 +1,38 @@
+{
+  "stages": 6,
+  "after_harvest_stage": 2,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:cactus",
+  "products": [
+    {
+      "item": "minecraft:cactus",
+      "min": 1,
+      "max": 2
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 12,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "at_most",
+      "tolerance": 0.15
+    }
+  ],
+  "render": {
+    "shape": "cross",
+    "models": [
+      "cultivar:crop/cactus_stage0",
+      "cultivar:crop/cactus_stage1",
+      "cultivar:crop/cactus_stage2",
+      "cultivar:crop/cactus_stage3"
+    ]
+  }
+}

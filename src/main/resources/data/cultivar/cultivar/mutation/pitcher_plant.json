@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:torchflower",
+  "parent_b": "minecraft:sugar_cane",
+  "child": "minecraft:pitcher_plant",
+  "chance": 0.1,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "flooded",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

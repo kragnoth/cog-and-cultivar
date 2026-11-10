@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:carrot",
+  "parent_b": "minecraft:beetroot",
+  "child": "minecraft:pumpkin",
+  "chance": 0.35,
+  "conditions": [
+    {
+      "type": "cultivar:nutrients",
+      "value": "very_high",
+      "comparison": "at_least",
+      "tolerance": 0
+    }
+  ]
+}

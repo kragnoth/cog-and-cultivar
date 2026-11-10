@@ -1,0 +1,38 @@
+{
+  "stages": 4,
+  "after_harvest_stage": 2,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:glow_berries",
+  "products": [
+    {
+      "item": "minecraft:glow_berries",
+      "min": 1,
+      "max": 2
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 7,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    }
+  ],
+  "render": {
+    "shape": "cross",
+    "models": [
+      "cultivar:crop/glow_berries_stage0",
+      "cultivar:crop/glow_berries_stage1",
+      "cultivar:crop/glow_berries_stage2",
+      "cultivar:crop/glow_berries_stage3"
+    ]
+  }
+}

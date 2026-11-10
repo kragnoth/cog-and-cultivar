@@ -1,1 +1,20 @@
-{ "parent_a": "minecraft:wheat", "parent_b": "minecraft:potato", "child": "minecraft:carrot", "chance": 0.5 }
+{
+  "parent_a": "minecraft:potato",
+  "parent_b": "minecraft:beetroot",
+  "child": "minecraft:carrot",
+  "chance": 0.5,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 10,
+      "max": 15,
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "high",
+      "comparison": "at_least",
+      "tolerance": 0
+    }
+  ]
+}

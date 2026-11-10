@@ -1,0 +1,10 @@
+{
+  "blocks": [
+    "minecraft:sand",
+    "minecraft:red_sand"
+  ],
+  "humidity": "arid",
+  "acidity": "alkaline",
+  "nutrients": "low",
+  "growth_modifier": 0.85
+}

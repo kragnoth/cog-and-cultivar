@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:brown_mushroom",
+  "parent_b": "minecraft:beetroot",
+  "child": "minecraft:red_mushroom",
+  "chance": 0.35,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 7,
+      "tolerance": 0
+    }
+  ]
+}

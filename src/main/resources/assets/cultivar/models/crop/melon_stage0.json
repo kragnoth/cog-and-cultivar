@@ -1,0 +1,99 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "minecraft:block/melon_stem",
+    "stem": "minecraft:block/melon_stem"
+  },
+  "elements": [
+    {
+      "from": [
+        0.7999999999999998,
+        0,
+        8
+      ],
+      "to": [
+        15.2,
+        6,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            10,
+            16,
+            16
+          ],
+          "texture": "#stem",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            10,
+            16,
+            16
+          ],
+          "texture": "#stem",
+          "tintindex": 0
+        }
+      }
+    },
+    {
+      "from": [
+        0.7999999999999998,
+        0,
+        8
+      ],
+      "to": [
+        15.2,
+        6,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            10,
+            16,
+            16
+          ],
+          "texture": "#stem",
+          "tintindex": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            10,
+            16,
+            16
+          ],
+          "texture": "#stem",
+          "tintindex": 0
+        }
+      }
+    }
+  ]
+}

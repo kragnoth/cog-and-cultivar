@@ -1,0 +1,7 @@
+{
+  "blocks": "minecraft:mud",
+  "humidity": "flooded",
+  "acidity": "neutral",
+  "nutrients": "high",
+  "growth_modifier": 1.0
+}
