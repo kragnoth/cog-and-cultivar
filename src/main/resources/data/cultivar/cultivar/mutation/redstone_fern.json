@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:coalroot",
+  "parent_b": "minecraft:glow_berries",
+  "child": "cultivar:redstone_fern",
+  "chance": 0.2,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 5,
+      "tolerance": 0
+    }
+  ]
+}

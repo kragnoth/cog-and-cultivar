@@ -1,0 +1,43 @@
+{
+  "stages": 4,
+  "growth_chance": 0.5,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.05,
+  "products": [
+    {
+      "item": "create:crushed_raw_gold",
+      "min": 1,
+      "max": 1,
+      "chance": 0.25
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 10,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "at_most",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "medium",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "models": [
+      "cultivar:crop/aurum_thistle_stage0",
+      "cultivar:crop/aurum_thistle_stage1",
+      "cultivar:crop/aurum_thistle_stage2",
+      "cultivar:crop/aurum_thistle_stage3"
+    ],
+    "shape": "cross"
+  }
+}

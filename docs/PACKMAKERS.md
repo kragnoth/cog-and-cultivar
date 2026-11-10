@@ -95,5 +95,7 @@ shipped files under `data/minecraft/cultivar/` in the mod jar.
   build the habitat.
 - **Water** beside a soil block makes it one humidity step wetter, and dry farmland reads one step drier. Mud is
   flooded.
+- **Resource crops** are ordinary plants: copy one of `data/cultivar/cultivar/plant/ferrous_bloom.json`, point its product
+  at your metal's crushed ore (or nugget) and add a mutation. Give it a `chance` below 1 to keep yields modest.
 - **Overriding art:** a resource pack can re-skin any crop by overriding the textures it names, or the
   `cultivar:crop/...` model.

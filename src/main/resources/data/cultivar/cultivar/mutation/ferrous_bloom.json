@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:coalroot",
+  "parent_b": "minecraft:beetroot",
+  "child": "cultivar:ferrous_bloom",
+  "chance": 0.25,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 7,
+      "tolerance": 0
+    }
+  ]
+}

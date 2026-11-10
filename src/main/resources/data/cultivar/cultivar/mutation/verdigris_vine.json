@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:ferrous_bloom",
+  "parent_b": "minecraft:sugar_cane",
+  "child": "cultivar:verdigris_vine",
+  "chance": 0.25,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "flooded",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}
