@@ -1,5 +1,8 @@
 package com.kragnoth.cultivar.content.crop;
 
+import com.kragnoth.cultivar.content.core.condition.Hydration;
+import com.kragnoth.cultivar.api.soil.SoilLevels;
+
 import com.kragnoth.cultivar.Cultivar;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import net.minecraft.network.chat.Component;
@@ -139,6 +142,17 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
 
     public List<InfluenceLookup.Active> activeInfluences() {
         return activeInfluences;
+    }
+
+    /** Soil values as conditions see them: humidity shifted by nearby water (see {@link Hydration}). */
+    public Optional<SoilLevels.Humidity> humidity() {
+        return soil().map(s -> Hydration.effective(level, worldPosition.below(), s.humidity()));
+    }
+
+    private GrowthContext growthContext(Optional<Soil> soil) {
+        return new GrowthContext(level, worldPosition, soil,
+                soil.map(s -> Hydration.effective(level, worldPosition.below(), s.humidity())),
+                soil.map(Soil::acidity), soil.map(Soil::nutrients));
     }
 
     public Optional<Soil> soil() {
@@ -355,7 +369,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         Optional<Soil> soil = soil();
         int strength = stat(CoreModule.STRENGTH.getKey()) + tier().strengthBonus();
         GrowthResponse response = soil.isEmpty() ? GrowthResponse.INFERTILE
-                : GrowthCondition.testAll(plant.requirements(), GrowthContext.of(level, worldPosition, soil), strength);
+                : GrowthCondition.testAll(plant.requirements(), growthContext(soil), strength);
         switch (response) {
             case KILL -> {
                 genome = null;
@@ -394,7 +408,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
             return;
         }
         List<Mutation> mutations = level.registryAccess().registryOrThrow(CultivarRegistries.MUTATION).stream().toList();
-        GrowthContext ctx = GrowthContext.of(level, worldPosition, soil());
+        GrowthContext ctx = growthContext(soil());
         var settings = new BreedingEngine.Settings(CultivarServerConfig.STAT_EXPRESSION.get(), fx,
                 CultivarServerConfig.CLONE_MUTATIONS.get());
         BreedingEngine.breed(parents, mutations, m -> GrowthCondition.testAll(m.conditions(), ctx, 1).canGrow(), settings, random)

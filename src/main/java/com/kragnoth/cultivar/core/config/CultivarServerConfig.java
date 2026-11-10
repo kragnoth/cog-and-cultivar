@@ -13,6 +13,7 @@ public final class CultivarServerConfig {
 
     public static final ModConfigSpec.DoubleValue GROWTH_MULTIPLIER;
     public static final ModConfigSpec.BooleanValue WEEDS_ENABLED;
+    public static final ModConfigSpec.BooleanValue WATER_SHIFTS_HUMIDITY;
     public static final ModConfigSpec.IntValue WORK_BUDGET_PER_TICK;
     public static final ModConfigSpec.EnumValue<Genetics.Expression> STAT_EXPRESSION;
     public static final ModConfigSpec.BooleanValue CLONE_MUTATIONS;
@@ -29,6 +30,8 @@ public final class CultivarServerConfig {
                 .defineInRange("growthMultiplier", 1.0, 0.0, 10.0);
         WEEDS_ENABLED = b.comment("Whether blight/weeds can spawn on crops.")
                 .define("weedsEnabled", true);
+        WATER_SHIFTS_HUMIDITY = b.comment("Water beside a soil block makes it one humidity step wetter; dry farmland reads one step drier.")
+                .define("waterShiftsHumidity", true);
         b.pop();
 
         b.push("genetics");
