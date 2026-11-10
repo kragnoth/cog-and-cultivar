@@ -77,7 +77,8 @@ public final class SceneShooter {
             new Shot("ruin_01_greenhouse", 33.5, Y + 6.5, -15.0, 25f, 22f),
             new Shot("ruin_02_inside", 28.5, Y + 1.6, -7.2, 0f, 8f),
             new Shot("ruin_03_lean_to", 41.0, Y + 4.0, -6.5, 0f, 28f),
-            new Shot("sprinkler_01", 54.2, Y + 2.6, 3.6, 155f, 24f));
+            new Shot("sprinkler_01", 54.2, Y + 2.6, 3.6, 155f, 24f),
+            new Shot("bed_01_row", 66.5, Y + 3.0, 4.5, 150f, 26f));
 
     /** CULTIVAR_SCENES=1 shoots everything; any other value shoots only names starting with it (e.g. "tall"). */
     private static final List<Shot> SHOTS = selectShots();
@@ -273,6 +274,25 @@ public final class SceneShooter {
         level.setBlock(pipe.offset(-1, 1, 0), sprinkler.setValue(F, net.minecraft.core.Direction.UP), Block.UPDATE_ALL);
         level.setBlock(pipe.offset(0, 0, 1), sprinkler.setValue(F, net.minecraft.core.Direction.SOUTH), Block.UPDATE_ALL);
         level.setBlock(pipe.offset(1, -1, 0), sprinkler.setValue(F, net.minecraft.core.Direction.DOWN), Block.UPDATE_ALL);
+
+        // Planter beds: a touching row with different soils, crops planted in some, one cloche.
+        Block[] soils = {Blocks.FARMLAND, Blocks.PODZOL, Blocks.MUD, Blocks.SAND, Blocks.SOUL_SAND, Blocks.MOSS_BLOCK};
+        String[] bedCrops = {"wheat", "carrot", "sugar_cane", "cactus", "nether_wart", null};
+        for (int i = 0; i < soils.length; i++) {
+            BlockPos bp = new BlockPos(61 + i, Y, 0);
+            level.setBlock(bp, com.kragnoth.cultivar.content.bed.PlanterBedModule.BED.get().defaultBlockState(), Block.UPDATE_ALL);
+            if (level.getBlockEntity(bp) instanceof com.kragnoth.cultivar.content.bed.PlanterBedBlockEntity bed) {
+                bed.setSoil(soils[i].defaultBlockState());
+            }
+            if (bedCrops[i] != null) {
+                level.setBlock(bp.above(), timber.setValue(TrellisBlock.CLOCHE, i == 1), Block.UPDATE_ALL);
+                if (level.getBlockEntity(bp.above()) instanceof CropBlockEntity c) {
+                    Holder<Plant> p = plant(level, bedCrops[i]);
+                    c.plant(Genome.base(p), p.value().matureStage());
+                    c.clampToSpace();
+                }
+            }
+        }
 
         // A wider field for the establishing shot.
         for (int x = 0; x < 8; x++) {

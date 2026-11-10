@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Effective soil humidity: the soil's datapack value, one step wetter if water touches the soil block's side
- * (a channel or a waterlogged block), one step drier on unwatered farmland. Four block reads; pure function of
+ * (a channel or a waterlogged block) or a Planter Bed holds water, one step drier on unwatered farmland. Four block reads; pure function of
  * world state, so the server's growth checks and the client's Loupe readout always agree.
  */
 public final class Hydration {
@@ -22,6 +22,10 @@ public final class Hydration {
             return base;
         }
         int shift = 0;
+        BlockState host = level.getBlockState(soilPos);
+        if (host.getBlock() instanceof com.kragnoth.cultivar.api.soil.SoilHost h && h.suppliesWater(level, soilPos)) {
+            shift = 1;
+        }
         for (Direction d : Direction.Plane.HORIZONTAL) {
             if (level.getFluidState(soilPos.relative(d)).is(FluidTags.WATER)) {
                 shift = 1;

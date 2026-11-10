@@ -260,10 +260,62 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         if (level == null) {
             return Optional.empty();
         }
-        BlockState below = level.getBlockState(worldPosition.below());
+        BlockState under = level.getBlockState(worldPosition.below());
+        BlockState below = under.getBlock() instanceof com.kragnoth.cultivar.api.soil.SoilHost host
+                ? host.hostedSoil(level, worldPosition.below()) : under;
+        if (below == null) {
+            return Optional.empty();
+        }
         return level.registryAccess().registryOrThrow(CultivarRegistries.SOIL).stream()
                 .filter(soil -> soil.blocks().contains(below.getBlockHolder()))
                 .findFirst();
+    }
+
+    // ---------------------------------------------------------------- fertilizer
+
+    public static Optional<com.kragnoth.cultivar.api.plant.Fertilizer> fertilizerFor(Level level, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return Optional.empty();
+        }
+        return level.registryAccess().registryOrThrow(CultivarRegistries.FERTILIZER).stream()
+                .filter(f -> f.items().contains(stack.getItemHolder())).findFirst();
+    }
+
+    /**
+     * Applies a fertilizer: a growing plant advances {@code potency} stages (only where it could grow, and only as far
+     * as the trellis stack allows); a grafting frame gets an immediate breeding attempt if the fertilizer
+     * {@code triggers_mutation}. Returns whether anything happened (so the item is only spent when it does).
+     */
+    public boolean fertilize(ServerLevel level, RandomSource random, com.kragnoth.cultivar.api.plant.Fertilizer fertilizer) {
+        if (isSegment()) {
+            return false;
+        }
+        if (isCross()) {
+            if (!fertilizer.triggersMutation() || genome != null) {
+                return false;
+            }
+            tickBreeding(level, random, influence());
+            return true;
+        }
+        if (genome == null || isMature()) {
+            return false;
+        }
+        Optional<Soil> soil = soil();
+        int strength = stat(CoreModule.STRENGTH.getKey()) + tier().strengthBonus();
+        if (soil.isEmpty() || GrowthCondition.testAll(requirements(), growthContext(soil), strength) != GrowthResponse.FERTILE) {
+            return false;
+        }
+        Plant plant = genome.species().value();
+        int target = Math.min(plant.matureStage(), stage + fertilizer.potency());
+        while (target > stage && plant.blocksAt(target) > segmentsAvailable()) {
+            target--;
+        }
+        if (target == stage) {
+            return false;
+        }
+        stage = target;
+        changed();
+        return true;
     }
 
     // ---------------------------------------------------------------- mutation

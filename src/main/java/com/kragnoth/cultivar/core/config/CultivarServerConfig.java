@@ -15,6 +15,10 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.BooleanValue WEEDS_ENABLED;
     public static final ModConfigSpec.BooleanValue WATER_SHIFTS_HUMIDITY;
     public static final ModConfigSpec.IntValue WORK_BUDGET_PER_TICK;
+    public static final ModConfigSpec.IntValue BED_CYCLE;
+    public static final ModConfigSpec.IntValue BED_TICKS_PER_MB;
+    public static final ModConfigSpec.IntValue BED_GROWTH_ODDS;
+    public static final ModConfigSpec.IntValue BED_FERTILIZER_ODDS;
     public static final ModConfigSpec.IntValue SPRINKLER_RADIUS;
     public static final ModConfigSpec.IntValue SPRINKLER_INTERVAL;
     public static final ModConfigSpec.IntValue SPRINKLER_ATTEMPTS;
@@ -76,6 +80,17 @@ public final class CultivarServerConfig {
                 .defineInRange("ticksPerMillibucket", 4, 1, 1200);
         SPRINKLER_BONEMEAL_CHANCE = b.comment("Chance per watered position to also apply a bone-meal effect (moss spreads, crops jump).")
                 .defineInRange("bonemealChance", 0.05, 0.0, 1.0);
+        b.pop();
+
+        b.push("planter_bed");
+        BED_CYCLE = b.comment("Ticks between a Planter Bed's work cycles (plant, harvest, water, fertilize).")
+                .defineInRange("cycle", 10, 1, 200);
+        BED_TICKS_PER_MB = b.comment("Ticks a bed runs per mB of water (4000 mB tank). Water gives extra growth and +1 humidity.")
+                .defineInRange("ticksPerMillibucket", 8, 1, 1200);
+        BED_GROWTH_ODDS = b.comment("With water, each cycle gives the crop an extra growth tick with chance 1 in N (default ~4x vanilla).")
+                .defineInRange("growthOdds", 40, 1, 10_000);
+        BED_FERTILIZER_ODDS = b.comment("Each cycle, chance 1 in N to spend one fertilizer on a growing crop.")
+                .defineInRange("fertilizerOdds", 12, 1, 10_000);
         b.pop();
 
         b.push("performance");
