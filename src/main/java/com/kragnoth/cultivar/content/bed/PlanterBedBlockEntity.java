@@ -69,7 +69,10 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         }
     };
 
-    /** Automation: seeds, fertilizer, trellises and cloches go in; outputs and spare trellises/cloches come out. */
+    /**
+     * Automation: seeds, fertilizer, trellises and cloches go in. Normally only the crop outputs come out; while the
+     * plot is powered (dump mode) every slot can be pulled, so the whole plot empties through its pipes.
+     */
     public final IItemHandler automation = new IItemHandler() {
         @Override
         public int getSlots() {
@@ -88,7 +91,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
 
         @Override
         public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return slot >= TRELLIS ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
+            return slot >= OUT_START || isPlotPowered() ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
         }
 
         @Override
@@ -162,6 +165,36 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         return network;
     }
 
+    private boolean plotPowered;
+    private long poweredTick = Long.MIN_VALUE;
+
+    /** True if any bed in the plot has a redstone signal: the plot strips down and dumps everything. */
+    public boolean isPlotPowered() {
+        long now = level == null ? 0 : level.getGameTime();
+        if (poweredTick != now) {
+            boolean powered = false;
+            List<PlanterBedBlockEntity> plot = cachedNetwork();
+            for (PlanterBedBlockEntity bed : plot) {
+                if (bed.level != null && bed.level.hasNeighborSignal(bed.worldPosition)) {
+                    powered = true;
+                    break;
+                }
+            }
+            for (PlanterBedBlockEntity bed : plot) {
+                bed.plotPowered = powered;
+                bed.poweredTick = now;
+            }
+        }
+        return plotPowered;
+    }
+
+    /** A neighbour changed (maybe redstone): re-check the plot's power on the next query. */
+    void invalidatePower() {
+        for (PlanterBedBlockEntity bed : cachedNetwork()) {
+            bed.poweredTick = Long.MIN_VALUE;
+        }
+    }
+
     public boolean isBreeding() {
         return breeding;
     }
@@ -198,8 +231,9 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
      */
     public void work(ServerLevel server, boolean watered) {
         BlockPos above = worldPosition.above();
-        // Redstone strips the bed: cloche and trellis back into stock, any plant banked as a seed.
-        if (server.hasNeighborSignal(worldPosition)) {
+        // Redstone on any bed: the plot strips down (cloche and trellis back into stock, plants banked as seeds)
+        // and dumps everything through its pipes (see automation).
+        if (isPlotPowered()) {
             strip(server, above);
             return;
         }

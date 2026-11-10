@@ -102,6 +102,10 @@ public final class PlanterBedTests {
         bed.work(level, false);
         h.assertTrue(h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE), "a fed cloche covers it");
         ((CropBlockEntity) h.getBlockEntity(pos.above())).plant(wheat(h, 4), 3);
+        h.assertTrue(items.extractItem(PlanterBedBlockEntity.SEEDS, 1, true).isEmpty()
+                && items.extractItem(PlanterBedBlockEntity.FERTILIZER, 1, true).isEmpty(),
+                "unpowered: pipes pull only crop outputs");
+        bed.inventory.setStackInSlot(PlanterBedBlockEntity.SEEDS, new ItemStack(Items.WHEAT_SEEDS, 3));
 
         h.setBlock(pos.east(), Blocks.REDSTONE_BLOCK);
         bed.work(level, false);
@@ -111,7 +115,8 @@ public final class PlanterBedTests {
         h.assertTrue(h.getBlockState(pos.above()).isAir() && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.TRELLIS).isEmpty(),
                 "then the trellis");
         h.assertTrue(!bed.inventory.getStackInSlot(PlanterBedBlockEntity.SEEDS).isEmpty(), "the plant is banked as a seed");
-        h.assertTrue(!items.extractItem(PlanterBedBlockEntity.TRELLIS, 1, false).isEmpty(), "pipes can pull trellises back out");
+        h.assertTrue(!items.extractItem(PlanterBedBlockEntity.TRELLIS, 1, false).isEmpty()
+                && !items.extractItem(PlanterBedBlockEntity.SEEDS, 1, false).isEmpty(), "powered: dump mode, every slot can be pulled");
         h.succeed();
     }
 

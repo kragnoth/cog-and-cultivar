@@ -33,8 +33,9 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Planter Bed. Right-click with: a soil block to fill it; a trellis to set one on top; a Bell Cloche to cover that
  * trellis; seeds or fertilizer to load it; a water bucket to fill it. Empty hand takes the outputs; sneak with an
- * empty hand to empty the soil. Pipes can also feed trellises and cloches, which the bed places itself; a redstone
- * signal strips the bed (cloche, then trellis, back into stock; plants banked as seeds). Pipes and funnels see the whole connected plot (see {@link BedNetwork}).
+ * empty hand to empty the soil. Pipes can also feed trellises and cloches, which the bed places itself. Pipes pull
+ * only crop outputs, unless any bed in the plot has a redstone signal: then the plot strips down (cloche, then
+ * trellis, back into stock; plants banked as seeds) and every slot can be pulled (dump mode). Pipes and funnels see the whole connected plot (see {@link BedNetwork}).
  */
 public class PlanterBedBlock extends BaseEntityBlock implements SoilHost {
     public static final MapCodec<PlanterBedBlock> CODEC = simpleCodec(PlanterBedBlock::new);
@@ -165,6 +166,14 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost {
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, BlockPos from, boolean moving) {
+        super.neighborChanged(state, level, pos, neighbor, from, moving);
+        if (level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed) {
+            bed.invalidatePower();
+        }
     }
 
     @Override
