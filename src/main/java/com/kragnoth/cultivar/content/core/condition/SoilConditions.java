@@ -26,6 +26,11 @@ public final class SoilConditions {
 
     public record Humidity(SoilLevels.Humidity value, ToleranceWindow.Comparison comparison, double tolerance)
             implements GrowthCondition {
+        @Override
+        public boolean isSoilProperty() {
+            return true;
+        }
+
         public static final MapCodec<Humidity> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 SoilLevels.Humidity.CODEC.fieldOf("value").forGetter(Humidity::value),
                 ToleranceWindow.Comparison.CODEC.optionalFieldOf("comparison", ToleranceWindow.Comparison.EQUAL).forGetter(Humidity::comparison),
@@ -45,6 +50,11 @@ public final class SoilConditions {
 
     public record Acidity(SoilLevels.Acidity value, ToleranceWindow.Comparison comparison, double tolerance)
             implements GrowthCondition {
+        @Override
+        public boolean isSoilProperty() {
+            return true;
+        }
+
         public static final MapCodec<Acidity> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 SoilLevels.Acidity.CODEC.fieldOf("value").forGetter(Acidity::value),
                 ToleranceWindow.Comparison.CODEC.optionalFieldOf("comparison", ToleranceWindow.Comparison.EQUAL).forGetter(Acidity::comparison),
@@ -64,6 +74,11 @@ public final class SoilConditions {
 
     public record Nutrients(SoilLevels.Nutrients value, ToleranceWindow.Comparison comparison, double tolerance)
             implements GrowthCondition {
+        @Override
+        public boolean isSoilProperty() {
+            return true;
+        }
+
         public static final MapCodec<Nutrients> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 SoilLevels.Nutrients.CODEC.fieldOf("value").forGetter(Nutrients::value),
                 ToleranceWindow.Comparison.CODEC.optionalFieldOf("comparison", ToleranceWindow.Comparison.AT_LEAST).forGetter(Nutrients::comparison),

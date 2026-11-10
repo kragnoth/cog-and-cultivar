@@ -28,6 +28,9 @@ public final class CropInfo {
         if (genome != null) {
             out.add(CultivarSeedItem.plantName(genome).copy().append(" " + growthPercent(crop) + "%")
                     .withStyle(crop.isMature() ? ChatFormatting.GREEN : ChatFormatting.WHITE));
+            if (crop.isHardy()) {
+                out.add(Component.translatableWithFallback("cultivar.info.hardy", "Hardy: grows on any soil").withStyle(ChatFormatting.GOLD));
+            }
             int missing = crop.segmentsMissing();
             if (missing > 0) {
                 out.add(Component.translatableWithFallback("cultivar.info.needs_segments",

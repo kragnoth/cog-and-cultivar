@@ -72,4 +72,39 @@ public final class ToolTests {
         h.assertTrue(satchel.get(ToolsModule.SATCHEL_CONTENTS.get()).total() == 2, "the keeper and the unassayed seed remain");
         h.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void shearsTakeClonesAndStrengthTenIsHardy(GameTestHelper h) {
+        var plants = h.getLevel().registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.PLANT);
+        var wheat = plants.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(com.kragnoth.cultivar.api.CultivarRegistries.PLANT,
+                net.minecraft.resources.ResourceLocation.withDefaultNamespace("wheat")));
+        BlockPos pos = new BlockPos(1, 2, 1);
+        h.setBlock(pos.below(), net.minecraft.world.level.block.Blocks.FARMLAND);
+        h.setBlock(pos, com.kragnoth.cultivar.content.crop.CropModule.TIMBER_TRELLIS.get());
+        var crop = (com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(pos);
+        Genome genome = Genome.base(wheat);
+        crop.plant(genome, 3);
+        java.util.List<ItemStack> drops = new java.util.ArrayList<>();
+        int snips = 0;
+        while (crop.clip(drops::add)) {
+            snips++;
+        }
+        h.assertTrue(snips == 2 && crop.stage() == 1, "each snip costs a stage; no cuttings below stage 2");
+        long cuttings = drops.stream().filter(s -> s.is(ToolsModule.CUTTING.get())).count();
+        h.assertTrue(cuttings == 2 && drops.stream().filter(s -> s.is(ToolsModule.CUTTING.get()))
+                .allMatch(s -> genome.equals(s.get(CoreModule.GENOME.get()))), "cuttings are exact clones");
+        h.assertTrue(SeedSatchelItem.insert(new ItemStack(ToolsModule.SEED_SATCHEL.get()), drops.get(0)) == 0,
+                "cuttings don't go in the satchel");
+
+        h.assertTrue(!crop.isHardy() && crop.requirements().size() == wheat.value().requirements().size(), "base wheat is not hardy");
+        var strength = CoreModule.STRENGTH.getKey();
+        var stats = new java.util.HashMap<>(genome.stats());
+        stats.put(strength, new com.kragnoth.cultivar.api.genetics.AllelePair(10, 10));
+        crop.uproot();
+        crop.plant(new Genome(wheat, stats), 0);
+        h.assertTrue(crop.isHardy() && crop.requirements().stream().noneMatch(c -> c.isSoilProperty()),
+                "strength 10 drops the soil-property requirements");
+        h.assertTrue(com.kragnoth.cultivar.content.tools.CuttingItem.takeChance(new Genome(wheat, stats)) == 1.0, "strong cuttings always take");
+        h.succeed();
+    }
 }

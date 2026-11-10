@@ -42,6 +42,8 @@ public final class ToolsModule implements CultivarModule {
             SeedSatchelItem::new, new Item.Properties().stacksTo(1));
     public static final DeferredItem<Item> BRASS_DIAL = ITEMS.registerSimpleItem("brass_dial");
     /** Held in either hand, shows the crop readout (client overlay). Create goggles show the same readout. */
+    public static final DeferredItem<CuttingItem> CUTTING = ITEMS.registerItem("cutting",
+            CuttingItem::new, new Item.Properties());
     public static final DeferredItem<Item> BOTANISTS_LOUPE = ITEMS.registerItem("botanists_loupe",
             Item::new, new Item.Properties().stacksTo(1));
 
@@ -57,7 +59,7 @@ public final class ToolsModule implements CultivarModule {
         NeoForge.EVENT_BUS.addListener(SeedSatchelItem::onItemPickup);
         modBus.addListener((BuildCreativeModeTabContentsEvent event) -> {
             if (event.getTabKey() == CoreModule.TAB.getKey()) {
-                ITEMS.getEntries().forEach(item -> event.accept(item.get()));
+                ITEMS.getEntries().stream().filter(item -> item != CUTTING).forEach(item -> event.accept(item.get()));
             }
         });
     }
