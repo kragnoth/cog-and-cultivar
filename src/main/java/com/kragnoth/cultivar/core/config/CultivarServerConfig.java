@@ -24,6 +24,10 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.DoubleValue BED_QUALITY_GROWTH;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_STRENGTH;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_VIGOUR;
+    public static final ModConfigSpec.IntValue TRIAL_INTERVAL_MINUTES;
+    public static final ModConfigSpec.DoubleValue TRIAL_CHANCE;
+    public static final ModConfigSpec.IntValue TRIAL_FULL_SIZE;
+    public static final ModConfigSpec.BooleanValue TRIAL_CONSUMES_SEEDS;
     public static final ModConfigSpec.IntValue SPRINKLER_RADIUS;
     public static final ModConfigSpec.IntValue SPRINKLER_INTERVAL;
     public static final ModConfigSpec.IntValue SPRINKLER_ATTEMPTS;
@@ -71,6 +75,17 @@ public final class CultivarServerConfig {
                 .defineInRange("maxMutationMultiplier", 1.5, 1.0, 4.0);
         MIN_WEED_MULTIPLIER = b.comment("Floor on the combined weed multiplier (lower = stronger suppression).")
                 .defineInRange("minWeedMultiplier", 0.5, 0.0, 1.0);
+        b.pop();
+
+        b.push("trial_bed");
+        TRIAL_INTERVAL_MINUTES = b.comment("Minutes between a trial plot's discovery rolls.")
+                .defineInRange("intervalMinutes", 5, 1, 1440);
+        TRIAL_CHANCE = b.comment("Chance per roll to discover an untested mutation, for a full-size plot.")
+                .defineInRange("chance", 0.05, 0.0, 1.0);
+        TRIAL_FULL_SIZE = b.comment("Beds for the full chance (81 = a 9x9). Smaller plots scale the chance down.")
+                .defineInRange("fullSize", 81, 1, 128);
+        TRIAL_CONSUMES_SEEDS = b.comment("Whether a discovery spends one seed of each parent.")
+                .define("consumesSeeds", true);
         b.pop();
 
         b.push("sprinkler");

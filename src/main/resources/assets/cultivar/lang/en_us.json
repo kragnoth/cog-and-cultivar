@@ -118,5 +118,11 @@
   "cultivar.bed.water_total": "Water: %s / %s mB",
   "cultivar.bed.stock": "Stock: %s seeds, %s fertilizer",
   "cultivar.bed.best": "Best seed: %s (quality %s)",
-  "cultivar.bed.outputs": "Outputs: %s / %s slots used"
+  "cultivar.bed.outputs": "Outputs: %s / %s slots used",
+  "block.cultivar.trial_bed": "Trial Bed",
+  "cultivar.trial.plot": "Trial plot: %s / %s beds",
+  "cultivar.trial.chance": "%s%% chance every %s min",
+  "cultivar.trial.stock": "Species stocked: %s",
+  "cultivar.trial.no_ledger": "No Ledger loaded",
+  "cultivar.trial.ledger": "Ledger: %s species, %s crosses left to test"
 }
