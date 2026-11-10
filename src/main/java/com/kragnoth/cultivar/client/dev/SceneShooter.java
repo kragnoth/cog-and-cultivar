@@ -73,7 +73,10 @@ public final class SceneShooter {
             new Shot("crops_01_row", 6.5, Y + 2.6, -16.5, 180f, 22f),
             new Shot("crops_02_close_left", 3.0, Y + 1.6, -17.8, 180f, 18f),
             new Shot("crops_03_close_right", 10.0, Y + 1.6, -17.8, 180f, 18f),
-            new Shot("tall_01_stacks", 3.5, Y + 2.8, -21.0, 180f, 12f));
+            new Shot("tall_01_stacks", 3.5, Y + 2.8, -21.0, 180f, 12f),
+            new Shot("ruin_01_greenhouse", 33.5, Y + 6.5, -15.0, 25f, 22f),
+            new Shot("ruin_02_inside", 28.5, Y + 1.6, -7.2, 0f, 8f),
+            new Shot("ruin_03_lean_to", 41.0, Y + 4.0, -6.5, 0f, 28f));
 
     /** CULTIVAR_SCENES=1 shoots everything; any other value shoots only names starting with it (e.g. "tall"). */
     private static final List<Shot> SHOTS = selectShots();
@@ -253,6 +256,10 @@ public final class SceneShooter {
         stack(level, 5, -28, Blocks.MUD, 4, plant(level, "bamboo"), 7);
         stack(level, 7, -28, Blocks.SAND, 3, plant(level, "cactus"), 5);
 
+        // Derelict conservatories, placed with their decay processor as worldgen would.
+        ruin(level, "greenhouse", new BlockPos(24, Y - 1, -8));
+        ruin(level, "lean_to", new BlockPos(38, Y - 1, -1));
+
         // A wider field for the establishing shot.
         for (int x = 0; x < 8; x++) {
             for (int z = 4; z < 8; z++) {
@@ -260,6 +267,17 @@ public final class SceneShooter {
                 crop(level, x, z, (x % 2 == 0 ? timber : iron).setValue(TrellisBlock.CLOCHE, cloche), x < 4 ? wheat : carrot, (x + z) % 8);
             }
         }
+    }
+
+    private static void ruin(ServerLevel level, String piece, BlockPos at) {
+        var manager = level.getServer().getStructureManager();
+        manager.get(com.kragnoth.cultivar.Cultivar.id("derelict_conservatory/" + piece)).ifPresent(t -> {
+            var settings = new net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings();
+            level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.PROCESSOR_LIST)
+                    .getOptional(com.kragnoth.cultivar.Cultivar.id("derelict_decay"))
+                    .ifPresent(list -> list.list().forEach(settings::addProcessor));
+            t.placeInWorld(level, at, at, settings, level.random, Block.UPDATE_ALL);
+        });
     }
 
     private static void stack(ServerLevel level, int x, int z, Block soil, int height, Holder<Plant> plant, int stage) {

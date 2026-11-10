@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "cultivar:derelict_conservatory",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 91847215,
+    "spacing": 40,
+    "separation": 14
+  }
+}
