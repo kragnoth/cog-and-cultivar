@@ -137,6 +137,8 @@ Example (wheat-like, `0.75 / 0.025`): growth 1 → 77.5 %/tick; growth 10 → 10
 
 Vanilla soil defaults (1.21 datagen): farmland WET/SLIGHTLY_ACIDIC/HIGH ×1.0; sand ARID/NEUTRAL/LOW ×0.8; clay FLOODED ×1.0; podzol DAMP/VERY_HIGH ×1.1; mycelium DAMP/LOW ×0.8; soul sand ARID/HIGH ×0.8; soul soil ARID/VERY_HIGH ×1.0; nylium ARID/LOW ×0.75 (crimson is HIGHLY_ACIDIC, warped is HIGHLY_ALKALINE); gravel DRY/SLIGHTLY_ALKALINE/LOW ×0.5. FD rich soil ×1.8.
 
+> **Cog & Cultivar humidity levers** (`Hydration`, per check, no stored state): water beside the soil +1 step, a Bell Cloche on the trellis +1, a lit heat source beside or under the soil −1 (`#cultivar:soil_heaters`: fuelled Blaze Burner, lit campfire, magma block). Steps add up and clamp at ARID / FLOODED; with no water or heat, unwatered farmland reads −1. Coarse dirt ships as an overworld DRY / NEUTRAL / LOW soil.
+
 **How — condition evaluation (strength-scaled tolerance):**
 - **Soil property:** a plant states `(value, type ∈ {EQUAL, EQUAL_OR_HIGHER, EQUAL_OR_LOWER}, toleranceFactor f)`. Accepted index window = `[value − ⌊f·strength⌋, value + ⌊f·strength⌋]`, clipped by the type (HIGHER drops the upper bound, LOWER drops the lower).
   *Example:* humidity WET, EQUAL, f = 0.15. At strength 1 the window is exactly WET; at strength 7 (⌊1.05⌋ = 1) it is DAMP–WATERY.

@@ -50,7 +50,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 | **Cutting** | ✅ clone loop, Strength take roll, millable, assayable (seed-planting bypass fixed in #33) | JEI subtype (hide the blank one); item description; optional: Planter Bed accepts cuttings with the take roll, for clone automation |
 | ~~Assay Card~~ | Removed (#35): it was a souvenir nothing used | — |
 | **Seed Meal** | ✅ cull loop, fertilizer, compost | Item description; JEI fertilizer info |
-| **Bell Cloche** | ⚠️ cloche influence works, placed by beds | The spec's +1 humidity step was never added; item description |
+| **Bell Cloche** | ✅ cloche influence, +1 humidity step, placed by beds | Item description |
 | **Transplanting Spade** | ✅ | Item description; deployer behaviour unverified in game |
 | **Pruning Shears** | ✅ cuttings, clip products | Item description; deployer behaviour unverified |
 | ~~Timber / Iron Tiller~~ | Removed (#37): hoes clear blight on a trellis; beds have none | — |
@@ -82,7 +82,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
    - Cutting subtype.
    - Categories for mutations (parents, child, habitat), the Assaying Engine, fertilizers and soils.
    - Info pages for beds and the Sprinkler.
-6. **Bell Cloche +1 humidity** (spec gap), or remove it from the spec.
+6. ~~**Bell Cloche +1 humidity**~~ (done, with heat as the drying lever).
 7. **Advancements:** a short progression from first trellis to the first mutation, the Assaying Engine, a Planter Bed plot and a full Ledger.
 8. **Phase 6 content:** ~~ore-blooms~~ (done), blight variants, Brass Apiary.
 9. **Phase 7:** Ponder scenes for every block, sounds, art pass.
@@ -107,3 +107,4 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   Crossbreeding category hidden until known (`genetics.revealAllMutations` to show all), info pages for bred
   plants, Cutting subtype, `/cultivar knowledge` commands. Still open from item 5: Assaying Engine, fertilizer and
   soil categories; bed and Sprinkler info pages.
+- 2026-11-10: Bell Cloche +1 humidity; heat sources (`#cultivar:soil_heaters`) dry soil one step; coarse dirt soil.

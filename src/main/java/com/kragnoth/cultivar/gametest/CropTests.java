@@ -88,6 +88,32 @@ public final class CropTests {
     }
 
     @GameTest(template = "empty")
+    public static void heatAndClocheShiftHumidity(GameTestHelper h) {
+        BlockPos fire = new BlockPos(1, 2, 1), cold = new BlockPos(4, 2, 1), both = new BlockPos(7, 2, 1);
+        h.setBlock(fire, Blocks.COARSE_DIRT);
+        h.setBlock(fire.below(), Blocks.MAGMA_BLOCK);
+        h.setBlock(cold, Blocks.COARSE_DIRT);
+        h.setBlock(cold.east(), Blocks.CAMPFIRE.defaultBlockState().setValue(net.minecraft.world.level.block.CampfireBlock.LIT, false));
+        h.setBlock(both, Blocks.MOSS_BLOCK);
+        h.setBlock(both.east(), Blocks.CAMPFIRE);
+        h.setBlock(both.west(), Blocks.WATER);
+        var level = h.getLevel();
+        h.assertTrue(Hydration.effective(level, h.absolutePos(fire), SoilLevels.Humidity.DRY) == SoilLevels.Humidity.ARID,
+                "a magma block under dry soil makes it arid");
+        h.assertTrue(Hydration.effective(level, h.absolutePos(cold), SoilLevels.Humidity.DRY) == SoilLevels.Humidity.DRY,
+                "an unlit campfire does nothing");
+        h.assertTrue(Hydration.effective(level, h.absolutePos(both), SoilLevels.Humidity.DAMP) == SoilLevels.Humidity.DAMP,
+                "water and heat cancel");
+        BlockPos jar = new BlockPos(10, 2, 1);
+        h.setBlock(jar, Blocks.COARSE_DIRT);
+        h.setBlock(jar.above(), com.kragnoth.cultivar.content.crop.CropModule.TIMBER_TRELLIS.get().defaultBlockState()
+                .setValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE, true));
+        h.assertTrue(Hydration.effective(level, h.absolutePos(jar), SoilLevels.Humidity.DRY) == SoilLevels.Humidity.DAMP,
+                "a Bell Cloche makes the soil one step wetter");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void tallCropNeedsStackedTrellis(GameTestHelper h) {
         var cane = h.getLevel().registryAccess().registryOrThrow(CultivarRegistries.PLANT)
                 .getHolderOrThrow(ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.withDefaultNamespace("sugar_cane")));

@@ -1,0 +1,7 @@
+{
+  "blocks": "minecraft:coarse_dirt",
+  "humidity": "dry",
+  "acidity": "neutral",
+  "nutrients": "low",
+  "growth_modifier": 1.0
+}
