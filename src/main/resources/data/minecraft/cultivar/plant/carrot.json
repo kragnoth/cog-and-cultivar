@@ -20,8 +20,9 @@
     },
     {
       "type": "cultivar:humidity",
-      "value": "wet",
-      "tolerance": 0.15
+      "value": "damp",
+      "tolerance": 0.15,
+      "comparison": "at_least"
     },
     {
       "type": "cultivar:nutrients",

@@ -331,7 +331,7 @@ def load_pack(pack):
 
 
 # Breedability: parents and the grafting frame are adjacent, so they share light (neighbouring blocks differ by at
-# most 1); each plant has its own soil, shifted by heat (-1), water (+1) and a Bell Cloche (+1). Checked at base
+# most 1); each plant has its own soil, shifted by heat (-1), water (+1, not on farmland) and a Bell Cloche (+1). Checked at base
 # stats (Strength 1), so a warning means a fresh seed can't do it; bred-up Strength may still manage.
 # Defaults match the mod's codecs: /cultivar export leaves out any field at its default value.
 LIGHT_DEFAULTS = {"min": 10, "max": 15, "tolerance": 0.5}
@@ -348,9 +348,10 @@ def soil_states(soils):
     states = set()
     for s in soils.values():
         h = HUMIDITY.index(s.get("humidity", "wet"))
+        top = 2 if "farmland" in str(s.get("blocks", "")) else 3  # farmland's moisture already counts nearby water
         a = SCALES["cultivar:acidity"][1].index(s.get("acidity", "slightly_acidic"))
         n = SCALES["cultivar:nutrients"][1].index(s.get("nutrients", "high"))
-        for shifted in range(h - 1, h + 3):
+        for shifted in range(h - 1, h + top):
             states.add((max(0, min(5, shifted)), a, n))
     return states
 

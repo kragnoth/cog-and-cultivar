@@ -34,7 +34,10 @@ def soil_states():
     states = set()
     for s in soils.values():
         h = HUM.index(s["humidity"])
-        for hi in range(h - 1, h + 3):  # heat (or dry farmland) -1 .. water and a cloche +2
+        # Farmland: dry or heated -1 .. cloche +1 (its moisture already counts the water). Other soils: heat -1 ..
+        # water beside and a cloche +2.
+        top = 2 if "farmland" in str(s.get("blocks", "")) else 3
+        for hi in range(h - 1, h + top):
             states.add((max(0, min(5, hi)), ACID.index(s["acidity"]), NUT.index(s["nutrients"])))
     return states
 

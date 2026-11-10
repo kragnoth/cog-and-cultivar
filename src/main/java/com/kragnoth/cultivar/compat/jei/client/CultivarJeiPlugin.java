@@ -59,6 +59,7 @@ import org.jetbrains.annotations.Nullable;
 @JeiPlugin
 public final class CultivarJeiPlugin implements IModPlugin {
     private static final List<MutationCategory.Cross> CROSSES = new ArrayList<>();
+    private static final List<GrowingCategory.Growing> GROWING = new ArrayList<>();
     private static @Nullable IJeiRuntime runtime;
     private static boolean listening;
 
@@ -102,6 +103,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
         IGuiHelper gui = registration.getJeiHelpers().getGuiHelper();
         registration.addRecipeCategories(
                 new MutationCategory(gui),
+                new GrowingCategory(gui),
                 new AssayCategory(gui),
                 new LinesCategory<>(gui, SOILS, "jei.cultivar.soil", new ItemStack(Items.FARMLAND), 6, CultivarJeiPlugin::soilItems, CultivarJeiPlugin::soilLines),
                 new LinesCategory<>(gui, FERTILIZERS, "jei.cultivar.fertilizer", new ItemStack(Items.BONE_MEAL), 3,
@@ -178,6 +180,11 @@ public final class CultivarJeiPlugin implements IModPlugin {
         bred.forEach(plant -> registration.addItemStackInfo(MutationCategory.seed(plant), info));
 
         var access = level.registryAccess();
+        GROWING.clear();
+        var soilList = access.registryOrThrow(CultivarRegistries.SOIL).stream().toList();
+        access.registryOrThrow(CultivarRegistries.PLANT).holders()
+                .forEach(h -> GROWING.add(GrowingCategory.Growing.of(h, soilList)));
+        registration.addRecipes(GrowingCategory.TYPE, List.copyOf(GROWING));
         registration.addRecipes(SOILS, access.registryOrThrow(CultivarRegistries.SOIL).stream().map(SoilPage::new).toList());
         registration.addRecipes(BLIGHTS, access.registryOrThrow(CultivarRegistries.WEED).entrySet().stream()
                 .map(e -> new BlightPage(e.getKey().location(), e.getValue())).toList());
@@ -208,7 +215,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(TrialModule.TRIAL_BED.get(), MutationCategory.TYPE);
         registration.addRecipeCatalyst(AssayModule.ENGINE_ITEM.get(), AssayCategory.TYPE);
         for (var trellis : List.of(CropModule.TIMBER_TRELLIS.get(), CropModule.IRON_TRELLIS.get())) {
-            registration.addRecipeCatalyst(trellis, SOILS, FERTILIZERS, BLIGHTS);
+            registration.addRecipeCatalyst(trellis, GrowingCategory.TYPE, SOILS, FERTILIZERS, BLIGHTS);
         }
         registration.addRecipeCatalyst(PlanterBedModule.BED_ITEM.get(), FERTILIZERS);
     }
@@ -231,7 +238,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
     /** Shows the crosses the player knows and hides the rest. */
     private static void applyKnowledge() {
         IJeiRuntime rt = runtime;
-        if (rt == null || CROSSES.isEmpty()) {
+        if (rt == null || CROSSES.isEmpty() && GROWING.isEmpty()) {
             return;
         }
         LedgerItem.Data known = ClientKnowledge.get();
@@ -245,6 +252,19 @@ public final class CultivarJeiPlugin implements IModPlugin {
         }
         rt.getRecipeManager().unhideRecipes(MutationCategory.TYPE, shown);
         rt.getRecipeManager().hideRecipes(MutationCategory.TYPE, hidden);
+
+        // Growing pages: any plant with a real seed item (vanilla or modded) always shows; plants that only exist by
+        // breeding (the blooms) show once you know them.
+        java.util.Set<Holder<Plant>> bred = new java.util.HashSet<>();
+        CROSSES.forEach(c -> bred.add(c.mutation().child()));
+        List<GrowingCategory.Growing> grow = new ArrayList<>(), hide = new ArrayList<>();
+        for (GrowingCategory.Growing g : GROWING) {
+            boolean breedOnly = g.plant().value().seeds().isEmpty() && bred.stream().anyMatch(x -> x.is(g.plant()));
+            boolean visible = reveal || !breedOnly || knows(known, g.plant());
+            (visible ? grow : hide).add(g);
+        }
+        rt.getRecipeManager().unhideRecipes(GrowingCategory.TYPE, grow);
+        rt.getRecipeManager().hideRecipes(GrowingCategory.TYPE, hide);
     }
 
     private static boolean knows(LedgerItem.Data known, Holder<Plant> plant) {

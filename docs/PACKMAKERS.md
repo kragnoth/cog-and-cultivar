@@ -101,6 +101,10 @@ shipped files under `data/minecraft/cultivar/` in the mod jar.
 
 - **Habitat conditions** on mutations use tolerance 0, so a high Strength stat never widens them. Players have to
   build the habitat.
+- **Farmland** reads its own moisture: moist farmland is its base humidity (wet) even right beside water, dry
+  farmland one step drier. Water beside other soils counts as below.
+- **JEI's Growing page** shows every plant's requirements and which soils fit, as-is or with water/cloche/heat,
+  worked out from your data. Plants with a seed item always show; breed-only plants once the player knows them.
 - **Water** beside a soil block makes it one humidity step wetter, a Bell Cloche one more, and a lit heat source
   beside or under it one step drier (add blocks to `#cultivar:soil_heaters`). Steps add up. With no water or heat,
   dry farmland reads one step drier. Mud is flooded; coarse dirt is dry.

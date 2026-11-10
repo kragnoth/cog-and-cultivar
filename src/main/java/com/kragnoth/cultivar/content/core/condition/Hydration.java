@@ -19,7 +19,8 @@ import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
 /**
  * Effective soil humidity: the soil's datapack value,
  * <ul>
- *   <li>one step wetter if water touches the soil block's side (a channel or a waterlogged block) or a Planter Bed
+ *   <li>one step wetter if water touches the side of a non-farmland soil (farmland's own moisture already counts
+ *       nearby water: moist farmland is its base value, dry farmland one step drier), or a Planter Bed
  *       holds water;</li>
  *   <li>one more step wetter under a Bell Cloche (on the trellis standing on the soil);</li>
  *   <li>one step drier if a lit heat source ({@code #cultivar:soil_heaters}: a burning Blaze Burner, lit campfire,
@@ -41,14 +42,17 @@ public final class Hydration {
         if (host.getBlock() instanceof com.kragnoth.cultivar.api.soil.SoilHost h && h.suppliesWater(level, soilPos)) {
             wet = true;
         }
+        // Farmland already tracks nearby water in its MOISTURE (that's what makes it read wet), so water beside it
+        // doesn't count again: moist farmland is its base humidity, dry farmland one step drier.
+        boolean farmland = host.hasProperty(FarmBlock.MOISTURE);
         boolean heated = isHeat(level.getBlockState(soilPos.below()));
         for (Direction d : Direction.Plane.HORIZONTAL) {
             BlockPos side = soilPos.relative(d);
-            wet |= level.getFluidState(side).is(FluidTags.WATER);
+            wet |= !farmland && level.getFluidState(side).is(FluidTags.WATER);
             heated |= isHeat(level.getBlockState(side));
         }
         int shift = (wet ? 1 : 0) - (heated ? 1 : 0);
-        if (!wet && !heated && host.hasProperty(FarmBlock.MOISTURE) && host.getValue(FarmBlock.MOISTURE) == 0) {
+        if (farmland && !wet && !heated && host.getValue(FarmBlock.MOISTURE) == 0) {
             shift = -1;
         }
         BlockState above = level.getBlockState(soilPos.above());
