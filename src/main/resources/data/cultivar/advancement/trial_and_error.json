@@ -1,0 +1,27 @@
+{
+  "parent": "cultivar:assay_office",
+  "display": {
+    "icon": {
+      "id": "cultivar:trial_bed"
+    },
+    "title": {
+      "translate": "advancement.cultivar.trial_and_error"
+    },
+    "description": {
+      "translate": "advancement.cultivar.trial_and_error.desc"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "cultivar:trial_bed"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "parent": "cultivar:field_notes",
+  "display": {
+    "icon": {
+      "id": "cultivar:botanical_ledger"
+    },
+    "title": {
+      "translate": "advancement.cultivar.herbarium"
+    },
+    "description": {
+      "translate": "advancement.cultivar.herbarium.desc"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "cultivar:learned_plant",
+      "conditions": {
+        "complete": true
+      }
+    }
+  }
+}

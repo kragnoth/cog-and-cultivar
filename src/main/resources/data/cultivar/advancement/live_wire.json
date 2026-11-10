@@ -1,0 +1,23 @@
+{
+  "parent": "cultivar:coal_from_soil",
+  "display": {
+    "icon": {
+      "id": "minecraft:redstone"
+    },
+    "title": {
+      "translate": "advancement.cultivar.live_wire"
+    },
+    "description": {
+      "translate": "advancement.cultivar.live_wire.desc"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "cultivar:learned_plant",
+      "conditions": {
+        "plant": "cultivar:redstone_fern"
+      }
+    }
+  }
+}

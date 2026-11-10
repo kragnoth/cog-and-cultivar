@@ -597,6 +597,16 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
                     genome = child;
                     stage = 0;
                     changed();
+                    boolean novel = parents.stream().noneMatch(p -> p.species().equals(child.species()));
+                    if (novel) { // a new species: chime and sparkle so a player notices the find
+                        level.playSound(null, worldPosition, net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,
+                                net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1.3f);
+                        level.sendParticles(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER,
+                                worldPosition.getX() + 0.5, worldPosition.getY() + 0.6, worldPosition.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0);
+                    } else {
+                        level.playSound(null, worldPosition, net.minecraft.sounds.SoundEvents.CROP_PLANTED,
+                                net.minecraft.sounds.SoundSource.BLOCKS, 0.7f, 1f);
+                    }
                 });
     }
 

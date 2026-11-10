@@ -1,0 +1,23 @@
+{
+  "parent": "cultivar:gilded_garden",
+  "display": {
+    "icon": {
+      "id": "minecraft:diamond"
+    },
+    "title": {
+      "translate": "advancement.cultivar.in_the_rough"
+    },
+    "description": {
+      "translate": "advancement.cultivar.in_the_rough.desc"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "cultivar:learned_plant",
+      "conditions": {
+        "plant": "cultivar:diamond_briar"
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "parent": "cultivar:root",
+  "display": {
+    "icon": {
+      "id": "cultivar:botanical_ledger"
+    },
+    "title": {
+      "translate": "advancement.cultivar.field_notes"
+    },
+    "description": {
+      "translate": "advancement.cultivar.field_notes.desc"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "cultivar:learned_plant",
+      "conditions": {}
+    }
+  }
+}

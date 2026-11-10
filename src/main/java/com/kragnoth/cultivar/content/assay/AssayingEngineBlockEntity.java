@@ -146,6 +146,9 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
             genome.species().unwrapKey().ifPresent(key -> LedgerItem.record(ledger, key));
             inventory.setStackInSlot(LEDGER, ledger);
         }
+        if (level != null) {
+            com.simibubi.create.AllSoundEvents.CLIPBOARD_CHECKMARK.playOnServer(level, worldPosition, 0.5f, 1f);
+        }
         sendData();
     }
 

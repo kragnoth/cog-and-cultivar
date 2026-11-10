@@ -1,0 +1,23 @@
+{
+  "parent": "cultivar:iron_roots",
+  "display": {
+    "icon": {
+      "id": "create:crushed_raw_gold"
+    },
+    "title": {
+      "translate": "advancement.cultivar.gilded_garden"
+    },
+    "description": {
+      "translate": "advancement.cultivar.gilded_garden.desc"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "cultivar:learned_plant",
+      "conditions": {
+        "plant": "cultivar:aurum_thistle"
+      }
+    }
+  }
+}

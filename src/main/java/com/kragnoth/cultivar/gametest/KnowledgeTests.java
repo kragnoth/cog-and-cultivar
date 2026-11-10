@@ -51,6 +51,16 @@ public final class KnowledgeTests {
     }
 
     @GameTest(template = "empty")
+    public static void advancementsLoad(GameTestHelper h) {
+        var advancements = h.getLevel().getServer().getAdvancements();
+        for (String id : List.of("root", "field_notes", "new_growth", "assay_office", "self_tending", "trial_and_error",
+                "coal_from_soil", "iron_roots", "live_wire", "gilded_garden", "in_the_rough", "herbarium")) {
+            h.assertTrue(advancements.get(Cultivar.id(id)) != null, "advancement " + id + " should load");
+        }
+        h.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void knowledgeCommandsGrantAndRevoke(GameTestHelper h) {
         var player = fake(h, "b");
         var server = h.getLevel().getServer();

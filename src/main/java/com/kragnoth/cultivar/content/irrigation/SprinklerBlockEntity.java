@@ -98,6 +98,9 @@ public class SprinklerBlockEntity extends BlockEntity implements com.simibubi.cr
     public void pulse(ServerLevel level, RandomSource random, int attempts, double bonemealChance) {
         int r = CultivarServerConfig.SPRINKLER_RADIUS.get();
         boolean hanging = getBlockState().getValue(SprinklerBlock.FACING) == Direction.DOWN;
+        if (random.nextInt(12) == 0) { // pulses are frequent; an occasional soft spray is enough
+            com.simibubi.create.AllSoundEvents.SPOUTING.playOnServer(level, worldPosition, 0.15f, 1.4f);
+        }
         int yMin = hanging ? -5 : -2, yMax = hanging ? -1 : 1;
         for (int i = 0; i < attempts; i++) {
             BlockPos pos = worldPosition.offset(random.nextInt(2 * r + 1) - r, yMin + random.nextInt(yMax - yMin + 1), random.nextInt(2 * r + 1) - r);

@@ -36,7 +36,20 @@ public final class Knowledge {
             return 0;
         }
         set(player, new LedgerItem.Data(merged));
+        Set<ResourceKey<Plant>> fresh = new HashSet<>(merged);
+        fresh.removeAll(current.researched());
+        award(player, fresh);
         return merged.size() - before;
+    }
+
+    /** Fires {@code cultivar:learned_plant} for newly learned species. */
+    public static void award(ServerPlayer player, Set<ResourceKey<Plant>> learned) {
+        var access = player.serverLevel().registryAccess();
+        var plants = access.registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.PLANT);
+        var mutations = access.registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.MUTATION);
+        boolean bred = mutations.stream().anyMatch(m -> m.child().unwrapKey().map(learned::contains).orElse(false));
+        long known = get(player).researched().stream().filter(plants::containsKey).count();
+        LedgerModule.LEARNED_PLANT.get().trigger(player, learned, bred, plants.size() > 0 && known >= plants.size());
     }
 
     /** Removes species (or everything when {@code plants} is null) and syncs. Returns the number removed. */

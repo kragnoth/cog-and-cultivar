@@ -108,5 +108,7 @@ shipped files under `data/minecraft/cultivar/` in the mod jar.
   every cross in JEI and the Ledger.
 - **Blights** (`data/<ns>/cultivar/weed/*.json`) take an optional `habitat` list of growth conditions; a blight only
   takes root where it fits. `rake_products` drop when a mature blight is cleared with a hoe.
+- **Advancements and quests** can use the `cultivar:learned_plant` trigger: optional `plant` (that species was
+  learned), `bred: true` (any bred species), `complete: true` (every species known).
 - **Overriding art:** a resource pack can re-skin any crop by overriding the textures it names, or the
   `cultivar:crop/...` model.
