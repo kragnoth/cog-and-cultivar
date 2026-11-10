@@ -52,5 +52,11 @@
   "ledger.cultivar.cond.nutrients": "%s nutrients",
   "ledger.cultivar.cond.biome": "particular biomes",
   "ledger.cultivar.cond.not_biome": "avoids some biomes",
-  "ledger.cultivar.cond.dimension": "particular dimensions"
+  "ledger.cultivar.cond.dimension": "particular dimensions",
+  "block.cultivar.assaying_engine": "Assaying Engine",
+  "item.cultivar.assay_card": "Assay Card",
+  "item.cultivar.assay_card.of": "Assay Card: %s",
+  "item.cultivar.seed.unassayed": "Unassayed: stats unknown",
+  "cultivar.assay.idle": "Idle: no seeds loaded",
+  "cultivar.assay.progress": "Assaying %s: %s%%"
 }

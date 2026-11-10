@@ -3,7 +3,9 @@ package com.kragnoth.cultivar.content.crop;
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.content.core.genetics.Genetics;
+import com.kragnoth.cultivar.core.config.CultivarServerConfig;
 import net.minecraft.ChatFormatting;
+import net.minecraft.util.Unit;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -19,9 +21,22 @@ public class CultivarSeedItem extends Item {
     }
 
     public static ItemStack of(Genome genome) {
+        return of(genome, false);
+    }
+
+    public static ItemStack of(Genome genome, boolean assayed) {
         ItemStack stack = new ItemStack(CropModule.SEED.get());
         stack.set(CoreModule.GENOME.get(), genome);
+        if (assayed) {
+            stack.set(CoreModule.ASSAYED.get(), Unit.INSTANCE);
+        }
         return stack;
+    }
+
+    /** Whether this seed's stats may be shown (assayed, or assaying not required by the server). */
+    public static boolean statsVisible(ItemStack stack) {
+        boolean required = !CultivarServerConfig.SPEC.isLoaded() || CultivarServerConfig.REQUIRE_ASSAY.get();
+        return !required || stack.has(CoreModule.ASSAYED.get());
     }
 
     @Override
@@ -47,6 +62,10 @@ public class CultivarSeedItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         Genome genome = stack.get(CoreModule.GENOME.get());
         if (genome == null) {
+            return;
+        }
+        if (!statsVisible(stack)) {
+            tooltip.add(Component.translatable("item.cultivar.seed.unassayed").withStyle(ChatFormatting.DARK_GRAY));
             return;
         }
         var expression = Genetics.current();

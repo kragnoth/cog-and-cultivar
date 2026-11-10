@@ -67,7 +67,9 @@ public final class SceneShooter {
             // Loupe overlay: iron + cloche potato at (4, Y, 2), also in range of the beehive at (7, Y, 2).
             new Shot("loupe_01_overlay", 4.5, Y + 1.4, 4.6, 180f, 20f),
             new Shot("ledger_01_index", 4.5, Y + 1.4, 4.6, 180f, 20f),
-            new Shot("ledger_02_carrot", 4.5, Y + 1.4, 4.6, 180f, 20f));
+            new Shot("ledger_02_carrot", 4.5, Y + 1.4, 4.6, 180f, 20f),
+            new Shot("assay_01_engine", 15.2, Y + 2.4, DZ + 2.6, 160f, 20f),
+            new Shot("assay_02_goggles", 14.5, Y + 2.3, DZ + 3.0, 180f, 18f));
 
     private static int tick = -1;
     private static boolean worldRequested;
@@ -122,9 +124,14 @@ public final class SceneShooter {
             if (tick == base) {
                 server.execute(() -> {
                     ServerPlayer p = server.getPlayerList().getPlayers().getFirst();
-                    boolean loupe = shot.name().startsWith("loupe");
+                    boolean goggles = shot.name().startsWith("assay_02");
+                    boolean loupe = shot.name().startsWith("loupe") || goggles;
+                    if (goggles) {
+                        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(
+                                net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("create", "goggles"))));
+                    }
                     p.setGameMode(loupe ? GameType.CREATIVE : GameType.SPECTATOR);
-                    if (loupe) {
+                    if (loupe && !goggles) {
                         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ToolsModule.BOTANISTS_LOUPE.get()));
                         p.getAbilities().flying = true;
                         p.onUpdateAbilities();
@@ -141,7 +148,8 @@ public final class SceneShooter {
                 mc.player.xRotO = shot.pitch();
             }
             if (tick == base + 75) {
-                mc.options.hideGui = !shot.name().startsWith("loupe") && !shot.name().startsWith("ledger");
+                mc.options.hideGui = !shot.name().startsWith("loupe") && !shot.name().startsWith("ledger")
+                        && !shot.name().startsWith("assay_02");
                 mc.setScreen(null);
                 if (shot.name().startsWith("ledger")) {
                     ItemStack ledger = new ItemStack(LedgerModule.LEDGER.get());
@@ -202,6 +210,18 @@ public final class SceneShooter {
         crop(level, 6, DZ, iron.setValue(TrellisBlock.CLOCHE, true), carrot, 3);
         crop(level, 10, DZ, timber.setValue(TrellisBlock.CLOCHE, true), wheat, 5);
         crop(level, 11, DZ, timber, wheat, 5);
+
+        // Assaying Engine on a creative motor, loaded with seeds so it runs.
+        BlockState motor = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(
+                ResourceLocation.fromNamespaceAndPath("create", "creative_motor")).defaultBlockState();
+        motor = motor.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING, net.minecraft.core.Direction.UP);
+        level.setBlock(new BlockPos(14, Y, DZ), motor, Block.UPDATE_ALL);
+        BlockPos engine = new BlockPos(14, Y + 1, DZ);
+        level.setBlock(engine, com.kragnoth.cultivar.content.assay.AssayModule.ENGINE.get().defaultBlockState(), Block.UPDATE_ALL);
+        if (level.getBlockEntity(engine) instanceof com.kragnoth.cultivar.content.assay.AssayingEngineBlockEntity be) {
+            be.inventory.setStackInSlot(com.kragnoth.cultivar.content.assay.AssayingEngineBlockEntity.SEED_IN,
+                    com.kragnoth.cultivar.content.crop.CultivarSeedItem.of(com.kragnoth.cultivar.api.genetics.Genome.base(carrot)).copyWithCount(64));
+        }
 
         // A wider field for the establishing shot.
         for (int x = 0; x < 8; x++) {

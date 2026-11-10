@@ -6,6 +6,7 @@ import com.kragnoth.cultivar.client.crop.CropClientModule;
 import com.kragnoth.cultivar.client.dev.SceneShooter;
 import com.kragnoth.cultivar.client.loupe.LoupeClientModule;
 import com.kragnoth.cultivar.client.ledger.LedgerClientModule;
+import com.kragnoth.cultivar.client.assay.AssayClientModule;
 import com.kragnoth.cultivar.client.tools.ToolsClientModule;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -30,7 +31,8 @@ public final class CultivarClient {
             CropClientModule::new,
             ToolsClientModule::new,
             LoupeClientModule::new,
-            LedgerClientModule::new
+            LedgerClientModule::new,
+            AssayClientModule::new
     );
 
     public CultivarClient(IEventBus modBus, ModContainer container) {

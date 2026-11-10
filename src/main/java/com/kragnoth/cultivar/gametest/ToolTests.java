@@ -56,18 +56,20 @@ public final class ToolTests {
         Genome weak = new Genome(wheat, Map.of(CoreModule.GROWTH.getKey(), AllelePair.of(2, 2)));
         Genome strong = new Genome(wheat, Map.of(CoreModule.GROWTH.getKey(), AllelePair.of(9, 9)));
         ItemStack satchel = new ItemStack(ToolsModule.SEED_SATCHEL.get());
-        SeedSatchelItem.insert(satchel, CultivarSeedItem.of(weak).copyWithCount(3));
-        SeedSatchelItem.insert(satchel, CultivarSeedItem.of(strong));
+        SeedSatchelItem.insert(satchel, CultivarSeedItem.of(weak, true).copyWithCount(3));
+        SeedSatchelItem.insert(satchel, CultivarSeedItem.of(strong, true));
         satchel.set(ToolsModule.SATCHEL_DIAL.get(), new SeedSatchelItem.Dial(CoreModule.GROWTH.getKey()));
-        Genome first = SeedSatchelItem.takeOne(satchel).orElseThrow();
+        Genome first = SeedSatchelItem.takeOne(satchel).orElseThrow().get(CoreModule.GENOME.get());
         h.assertTrue(first.equals(strong), "dial set to growth takes the growth-9 seed first");
         h.assertTrue(satchel.get(ToolsModule.SATCHEL_CONTENTS.get()).total() == 3, "three seeds remain");
         // Put the strong seed back: growth 2 is more than 2 below growth 9, so all three weak seeds are culls.
-        SeedSatchelItem.insert(satchel, CultivarSeedItem.of(strong));
+        SeedSatchelItem.insert(satchel, CultivarSeedItem.of(strong, true));
+        // An unassayed seed is never culled, whatever its stats.
+        SeedSatchelItem.insert(satchel, CultivarSeedItem.of(weak));
         int culled = 0;
         while (SeedSatchelItem.cullOne(satchel).isPresent()) culled++;
         h.assertTrue(culled == 3, "all three growth-2 seeds culled, got " + culled);
-        h.assertTrue(satchel.get(ToolsModule.SATCHEL_CONTENTS.get()).total() == 1, "the keeper remains");
+        h.assertTrue(satchel.get(ToolsModule.SATCHEL_CONTENTS.get()).total() == 2, "the keeper and the unassayed seed remain");
         h.succeed();
     }
 }

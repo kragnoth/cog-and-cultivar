@@ -16,6 +16,7 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.IntValue WORK_BUDGET_PER_TICK;
     public static final ModConfigSpec.EnumValue<Genetics.Expression> STAT_EXPRESSION;
     public static final ModConfigSpec.BooleanValue CLONE_MUTATIONS;
+    public static final ModConfigSpec.BooleanValue REQUIRE_ASSAY;
     public static final ModConfigSpec.BooleanValue INFLUENCE_ENABLED;
     public static final ModConfigSpec.DoubleValue MAX_MUTATION_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue MIN_WEED_MULTIPLIER;
@@ -35,6 +36,9 @@ public final class CultivarServerConfig {
                 .defineEnum("statExpression", Genetics.Expression.MAX);
         CLONE_MUTATIONS = b.comment("Whether a single-parent clone can still drift stats.")
                 .define("cloneMutations", false);
+        REQUIRE_ASSAY = b.comment("Seed item tooltips hide stats until the seed is assayed (Assaying Engine).",
+                        "The Loupe and goggles always read crops in the field.")
+                .define("requireAssay", true);
         b.pop();
 
         b.push("influence");
