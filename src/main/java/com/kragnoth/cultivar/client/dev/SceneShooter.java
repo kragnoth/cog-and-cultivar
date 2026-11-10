@@ -76,7 +76,8 @@ public final class SceneShooter {
             new Shot("tall_01_stacks", 3.5, Y + 2.8, -21.0, 180f, 12f),
             new Shot("ruin_01_greenhouse", 33.5, Y + 6.5, -15.0, 25f, 22f),
             new Shot("ruin_02_inside", 28.5, Y + 1.6, -7.2, 0f, 8f),
-            new Shot("ruin_03_lean_to", 41.0, Y + 4.0, -6.5, 0f, 28f));
+            new Shot("ruin_03_lean_to", 41.0, Y + 4.0, -6.5, 0f, 28f),
+            new Shot("sprinkler_01", 54.2, Y + 2.6, 3.6, 155f, 24f));
 
     /** CULTIVAR_SCENES=1 shoots everything; any other value shoots only names starting with it (e.g. "tall"). */
     private static final List<Shot> SHOTS = selectShots();
@@ -259,6 +260,19 @@ public final class SceneShooter {
         // Derelict conservatories, placed with their decay processor as worldgen would.
         ruin(level, "greenhouse", new BlockPos(24, Y - 1, -8));
         ruin(level, "lean_to", new BlockPos(38, Y - 1, -1));
+
+        // Sprinklers: on top of a Create pipe, on its side and hanging under it, fed with water.
+        BlockPos pipe = new BlockPos(52, Y + 1, 0);
+        var pipeBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("create", "fluid_pipe"));
+        for (int dx = -1; dx <= 1; dx++) {
+            level.setBlock(pipe.offset(dx, 0, 0), pipeBlock.defaultBlockState(), Block.UPDATE_ALL);
+        }
+        var sprinkler = com.kragnoth.cultivar.content.irrigation.IrrigationModule.SPRINKLER.get().defaultBlockState()
+                .setValue(com.kragnoth.cultivar.content.irrigation.SprinklerBlock.ACTIVE, true);
+        var F = com.kragnoth.cultivar.content.irrigation.SprinklerBlock.FACING;
+        level.setBlock(pipe.offset(-1, 1, 0), sprinkler.setValue(F, net.minecraft.core.Direction.UP), Block.UPDATE_ALL);
+        level.setBlock(pipe.offset(0, 0, 1), sprinkler.setValue(F, net.minecraft.core.Direction.SOUTH), Block.UPDATE_ALL);
+        level.setBlock(pipe.offset(1, -1, 0), sprinkler.setValue(F, net.minecraft.core.Direction.DOWN), Block.UPDATE_ALL);
 
         // A wider field for the establishing shot.
         for (int x = 0; x < 8; x++) {
