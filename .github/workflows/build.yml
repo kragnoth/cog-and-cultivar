@@ -34,6 +34,9 @@ jobs:
       - name: Every shipped cross is breedable
         run: python3 tools/data/check_crosses.py
 
+      - name: Ponder lang matches the scenes
+        run: python3 tools/ponder/ponder_lang.py --check
+
       - name: Datagen is up to date
         if: matrix.create == '6.0.10-281'
         run: |
