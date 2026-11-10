@@ -125,3 +125,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 - 2026-11-10: balance pass. Parent selection 0.5 + 0.05 x Vigour (was v/10: ~1 % cross rate for fresh seeds);
   drift 27-45 % with an upward bias that fades near 10 (was 100 % up at Vigour 10, a snowball). Blight spawns
   3 % (was 10 %). Ore/gem blooms grow 0.3 + 0.02 x Growth; emerald 6 %, diamond 3 %. tools/data/sim_breeding.py.
+- 2026-11-10: Ponder scenes: Spreading crops (frames, clones, cuttings, blight), Improving crop stats (the four
+  stats, breeding the same species, keeping the best, parallel frames, bees, Vigour), Crossbreeding (habitat, shared
+  light, Ledger/JEI, humidity levers, Trial Bed), Assaying seeds (rotation, input/output, speed, Ledger, goggles).
+  Text mirrored to lang by tools/ponder/ponder_lang.py (checked in CI); structures by gen_ponder_schematics.py.

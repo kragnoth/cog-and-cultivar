@@ -93,3 +93,10 @@ Phase 5 (temperature) is the worked example.
 
 - `gametest/` holds dedicated-server game tests. Use the `cultivar:empty` template or add structure files under `data/cultivar/structure/`.
 - Run locally with `./gradlew runGameTestServer`.
+
+## Ponder scenes
+
+Storyboards live in `client/ponder/CultivarScenes.java`; their structures in `assets/cultivar/ponder/*.nbt`
+(`tools/ponder/gen_ponder_schematics.py`). Ponder reads text from lang keys `cultivar.ponder.<scene>.header` and
+`.text_N`, numbered in the order texts are created, so after editing a scene run
+`python3 tools/ponder/ponder_lang.py` (CI fails if the lang is stale). Keep each `.text("...")` a single literal.

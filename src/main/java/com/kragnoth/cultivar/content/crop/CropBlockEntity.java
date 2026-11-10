@@ -334,6 +334,18 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     }
 
     /** Plants at a given stage (transplanting keeps growth). */
+    /**
+     * Display only (Ponder scenes): shows {@code shown} at {@code atStage}, or an empty trellis when null. Clears blight,
+     * no planting rules or side effects beyond the usual sync.
+     */
+    public void setDisplay(@Nullable Genome shown, int atStage) {
+        genome = shown;
+        weed = null;
+        weedStage = 0;
+        stage = shown == null ? 0 : Math.max(0, Math.min(atStage, shown.species().value().matureStage()));
+        changed();
+    }
+
     public boolean plant(Genome newGenome, int atStage) {
         if (!plant(newGenome)) {
             return false;
