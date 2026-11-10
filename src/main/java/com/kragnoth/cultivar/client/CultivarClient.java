@@ -3,6 +3,7 @@ package com.kragnoth.cultivar.client;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.client.config.CultivarClientConfig;
 import com.kragnoth.cultivar.client.crop.CropClientModule;
+import com.kragnoth.cultivar.client.dev.SceneShooter;
 import com.kragnoth.cultivar.client.tools.ToolsClientModule;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -31,6 +32,7 @@ public final class CultivarClient {
     public CultivarClient(IEventBus modBus, ModContainer container) {
         container.registerConfig(ModConfig.Type.CLIENT, CultivarClientConfig.SPEC);
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        SceneShooter.registerIfEnabled();
 
         for (Supplier<ClientModule> factory : MODULES) {
             ClientModule module = factory.get();

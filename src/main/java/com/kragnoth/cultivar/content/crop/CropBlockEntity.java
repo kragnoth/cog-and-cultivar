@@ -238,6 +238,13 @@ public class CropBlockEntity extends BlockEntity {
         }
     }
 
+    /** Sets a weed directly (commands, tests, scene setup). */
+    public void setWeed(@Nullable Holder<Weed> newWeed, int newStage) {
+        weed = newWeed;
+        weedStage = newWeed == null ? 0 : Math.max(0, Math.min(newStage, newWeed.value().stages() - 1));
+        changed();
+    }
+
     /** Removes weeds, dropping their rake products. */
     public boolean clearWeeds(Consumer<ItemStack> drops) {
         if (weed == null || level == null) {
