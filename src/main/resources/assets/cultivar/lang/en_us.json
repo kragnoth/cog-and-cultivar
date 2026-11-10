@@ -107,5 +107,11 @@
   "cultivar.display.crop.ready": "%s: ready",
   "cultivar.display.crop.growing": "%s %s%%",
   "cultivar.display.ledger": "Ledger %s/%s species",
-  "block.cultivar.sprinkler": "Sprinkler"
+  "block.cultivar.sprinkler": "Sprinkler",
+  "block.cultivar.planter_bed": "Planter Bed",
+  "cultivar.bed.soil": "Soil: %s",
+  "cultivar.bed.no_soil": "none (right-click with a soil block)",
+  "cultivar.bed.water": "Water: %s",
+  "cultivar.bed.yes": "yes",
+  "cultivar.bed.no": "no"
 }

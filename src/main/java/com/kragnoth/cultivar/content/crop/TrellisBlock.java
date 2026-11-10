@@ -219,6 +219,15 @@ public class TrellisBlock extends BaseEntityBlock {
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
+        // Fertilizers (datapack registry: bone meal, seed meal...) push growth or trigger a cross.
+        var fertilizer = CropBlockEntity.fertilizerFor(level, stack);
+        if (fertilizer.isPresent()) {
+            if (level instanceof ServerLevel server && crop.fertilize(server, server.random, fertilizer.get())) {
+                stack.consume(1, player);
+                server.levelEvent(1505, pos, 0);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide());
+        }
         // Knives (and anything else tagged cultivar:clippers) clip like Pruning Shears.
         if (stack.is(CLIPPERS) && crop.hasPlant()) {
             if (!level.isClientSide() && crop.clip(drop -> popResource(level, pos, drop))) {
@@ -285,7 +294,7 @@ public class TrellisBlock extends BaseEntityBlock {
     }
 
     /** Genome from a cultivar seed, or a base genome for a vanilla/modded seed listed by some plant. */
-    static Optional<Genome> genomeFor(ItemStack stack, Level level) {
+    public static Optional<Genome> genomeFor(ItemStack stack, Level level) {
         Genome existing = stack.get(CoreModule.GENOME.get());
         if (existing != null) {
             return Optional.of(existing);

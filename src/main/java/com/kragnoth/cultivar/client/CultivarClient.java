@@ -32,7 +32,8 @@ public final class CultivarClient {
             ToolsClientModule::new,
             LoupeClientModule::new,
             LedgerClientModule::new,
-            AssayClientModule::new
+            AssayClientModule::new,
+            com.kragnoth.cultivar.client.bed.BedClientModule::new
     );
 
     public CultivarClient(IEventBus modBus, ModContainer container) {

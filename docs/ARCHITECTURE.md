@@ -82,6 +82,8 @@ Phase 5 (temperature) is the worked example.
   JSON file naming its blocks, radius and effects. If you need a new strength curve, register an
   `InfluenceScalingType`. For a brand-new kind of effect, use your own condition: it can scan for its source
   blocks around `GrowthContext.pos()`, since conditions run on the crop's random tick, which is cheap.
+- **Soil containers**: implement `api.soil.SoilHost` on a block to hold a soil for the crop above it (the Planter
+  Bed does this); crops resolve their soil and water through it.
 - **New stats**: register a `Stat` in `CultivarRegistries.STAT`. Genomes carry any registered stat, and the
   breeding engine, assay cards, satchel dial and Create filters pick it up automatically.
 - **Plants, soils, mutations, weeds, fertilizers**: datapack JSON only. See docs/PACKMAKERS.md.

@@ -9,6 +9,7 @@ import com.kragnoth.cultivar.content.ledger.LedgerModule;
 import com.kragnoth.cultivar.content.assay.AssayModule;
 import com.kragnoth.cultivar.content.packtools.PackToolsModule;
 import com.kragnoth.cultivar.content.irrigation.IrrigationModule;
+import com.kragnoth.cultivar.content.bed.PlanterBedModule;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -26,6 +27,7 @@ public final class CultivarModules {
             LedgerModule::new,
             AssayModule::new,
             IrrigationModule::new,
+            PlanterBedModule::new,
             PackToolsModule::new,
             CreateModule::new
     );
