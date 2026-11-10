@@ -63,7 +63,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 
 ## Planned content still open
 
-- Phase 6: ~~ore-blooms~~ (done), ~~habitat blight variants~~ (done), Brass Apiary (one block).
+- Phase 6: ~~ore-blooms~~ (done), ~~habitat blight variants~~ (done). Brass Apiary dropped.
 - Optional: Wall Trellis.
 - Phase 7: Ponder, JEI categories, sounds, final art pass.
 
@@ -84,7 +84,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
    - Info pages for beds and the Sprinkler.
 6. ~~**Bell Cloche +1 humidity**~~ (done, with heat as the drying lever).
 7. **Advancements:** a short progression from first trellis to the first mutation, the Assaying Engine, a Planter Bed plot and a full Ledger.
-8. **Phase 6 content:** ~~ore-blooms~~, ~~blight variants~~ (done), Brass Apiary.
+8. **Phase 6 content:** ~~ore-blooms~~, ~~blight variants~~ (done); Brass Apiary dropped.
 9. **Phase 7:** Ponder scenes for every block, sounds, art pass.
 10. **In-game verification:** deployer actions with spade, shears, satchel and cutting; Pipez and Modern Dynamics feeding the Sprinkler and beds.
 
