@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "active=true,facing=up": {
+      "model": "cultivar:block/sprinkler"
+    },
+    "active=false,facing=up": {
+      "model": "cultivar:block/sprinkler"
+    },
+    "active=true,facing=down": {
+      "model": "cultivar:block/sprinkler",
+      "x": 180
+    },
+    "active=false,facing=down": {
+      "model": "cultivar:block/sprinkler",
+      "x": 180
+    },
+    "active=true,facing=north": {
+      "model": "cultivar:block/sprinkler",
+      "x": 90
+    },
+    "active=false,facing=north": {
+      "model": "cultivar:block/sprinkler",
+      "x": 90
+    },
+    "active=true,facing=south": {
+      "model": "cultivar:block/sprinkler",
+      "x": 90,
+      "y": 180
+    },
+    "active=false,facing=south": {
+      "model": "cultivar:block/sprinkler",
+      "x": 90,
+      "y": 180
+    },
+    "active=true,facing=west": {
+      "model": "cultivar:block/sprinkler",
+      "x": 90,
+      "y": 270
+    },
+    "active=false,facing=west": {
+      "model": "cultivar:block/sprinkler",
+      "x": 90,
+      "y": 270
+    },
+    "active=true,facing=east": {
+      "model": "cultivar:block/sprinkler",
+      "x": 90,
+      "y": 90
+    },
+    "active=false,facing=east": {
+      "model": "cultivar:block/sprinkler",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

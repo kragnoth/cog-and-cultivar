@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NBN",
+    " P "
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:copper_ingot"
+    },
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "P": {
+      "item": "create:fluid_pipe"
+    }
+  },
+  "result": {
+    "id": "cultivar:sprinkler",
+    "count": 2
+  }
+}

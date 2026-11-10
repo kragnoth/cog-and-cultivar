@@ -15,6 +15,11 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.BooleanValue WEEDS_ENABLED;
     public static final ModConfigSpec.BooleanValue WATER_SHIFTS_HUMIDITY;
     public static final ModConfigSpec.IntValue WORK_BUDGET_PER_TICK;
+    public static final ModConfigSpec.IntValue SPRINKLER_RADIUS;
+    public static final ModConfigSpec.IntValue SPRINKLER_INTERVAL;
+    public static final ModConfigSpec.IntValue SPRINKLER_ATTEMPTS;
+    public static final ModConfigSpec.IntValue SPRINKLER_TICKS_PER_MB;
+    public static final ModConfigSpec.DoubleValue SPRINKLER_BONEMEAL_CHANCE;
     public static final ModConfigSpec.EnumValue<Genetics.Expression> STAT_EXPRESSION;
     public static final ModConfigSpec.BooleanValue CLONE_MUTATIONS;
     public static final ModConfigSpec.BooleanValue REQUIRE_ASSAY;
@@ -51,6 +56,20 @@ public final class CultivarServerConfig {
                 .defineInRange("maxMutationMultiplier", 1.5, 1.0, 4.0);
         MIN_WEED_MULTIPLIER = b.comment("Floor on the combined weed multiplier (lower = stronger suppression).")
                 .defineInRange("minWeedMultiplier", 0.5, 0.0, 1.0);
+        b.pop();
+
+        b.push("sprinkler");
+        SPRINKLER_RADIUS = b.comment("Horizontal reach (blocks each way). 4 = a 9x9 area.")
+                .defineInRange("radius", 4, 1, 8);
+        SPRINKLER_INTERVAL = b.comment("Ticks between sprays.")
+                .defineInRange("interval", 5, 1, 200);
+        SPRINKLER_ATTEMPTS = b.comment("Random positions watered per spray. Defaults give crops in range roughly 4-5x vanilla growth.")
+                .defineInRange("attempts", 4, 1, 64);
+        SPRINKLER_TICKS_PER_MB = b.comment("Ticks a sprinkler runs per mB of water. It holds 1000 mB and only runs while it has water.",
+                        "Default 4: a full tank lasts 4000 ticks (200 s); a slow Create pump keeps it topped up.")
+                .defineInRange("ticksPerMillibucket", 4, 1, 1200);
+        SPRINKLER_BONEMEAL_CHANCE = b.comment("Chance per watered position to also apply a bone-meal effect (moss spreads, crops jump).")
+                .defineInRange("bonemealChance", 0.05, 0.0, 1.0);
         b.pop();
 
         b.push("performance");

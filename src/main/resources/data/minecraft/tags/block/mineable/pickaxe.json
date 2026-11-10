@@ -1,1 +1,6 @@
-{ "values": ["cultivar:assaying_engine"] }
+{
+  "values": [
+    "cultivar:assaying_engine",
+    "cultivar:sprinkler"
+  ]
+}
