@@ -63,7 +63,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 
 ## Planned content still open
 
-- Phase 6: ~~ore-blooms~~ (done), habitat blight variants (data-only), Brass Apiary (one block).
+- Phase 6: ~~ore-blooms~~ (done), ~~habitat blight variants~~ (done), Brass Apiary (one block).
 - Optional: Wall Trellis.
 - Phase 7: Ponder, JEI categories, sounds, final art pass.
 
@@ -84,7 +84,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
    - Info pages for beds and the Sprinkler.
 6. ~~**Bell Cloche +1 humidity**~~ (done, with heat as the drying lever).
 7. **Advancements:** a short progression from first trellis to the first mutation, the Assaying Engine, a Planter Bed plot and a full Ledger.
-8. **Phase 6 content:** ~~ore-blooms~~ (done), blight variants, Brass Apiary.
+8. **Phase 6 content:** ~~ore-blooms~~, ~~blight variants~~ (done), Brass Apiary.
 9. **Phase 7:** Ponder scenes for every block, sounds, art pass.
 10. **In-game verification:** deployer actions with spade, shears, satchel and cutting; Pipez and Modern Dynamics feeding the Sprinkler and beds.
 
@@ -112,3 +112,4 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 - 2026-11-10: JEI finished: Soils (humidity/acidity/nutrients/growth, shift note), Fertilizers, Assaying (seed →
   assayed seed, optional Ledger), info pages for trellises, Bell Cloche, Ledger, Planter Bed, Trial Bed, Sprinkler.
   The pack-maker `check` warns about crosses that can't be bred on plain trellises.
+- 2026-11-10: 9 habitat blights (humidity, acidity, nutrients, light) with mature-only cleanup drops; JEI Blight page.

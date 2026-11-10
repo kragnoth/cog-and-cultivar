@@ -357,12 +357,15 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
 
     public record Uprooted(Genome genome, int stage) {}
 
-    /** Knocks the weed back one stage; a stage-0 weed is removed (with its rake products). */
+    /** Knocks the weed back one stage (a mature one drops its rake products first); a stage-0 weed is removed. */
     public boolean regressWeed(Consumer<ItemStack> drops) {
         if (weed == null) {
             return false;
         }
         if (weedStage > 0) {
+            if (level != null && weedStage >= weed.value().stages() - 1) {
+                rollList(weed.value().rakeProducts(), drops, level.random);
+            }
             weedStage--;
             changed();
             return true;
@@ -422,15 +425,13 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         changed();
     }
 
-    /** Removes weeds, dropping their rake products. */
+    /** Removes weeds; a mature weed drops its rake products. */
     public boolean clearWeeds(Consumer<ItemStack> drops) {
         if (weed == null || level == null) {
             return false;
         }
-        for (Product product : weed.value().rakeProducts()) {
-            if (level.random.nextFloat() < product.chance()) {
-                drops.accept(new ItemStack(product.item(), Math.max(1, product.min())));
-            }
+        if (weedStage >= weed.value().stages() - 1) {
+            rollList(weed.value().rakeProducts(), drops, level.random);
         }
         weed = null;
         weedStage = 0;
@@ -474,6 +475,25 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         }
     }
 
+    /** Blights whose habitat this trellis meets: the soil (with its water/cloche/heat shifts) and the light here. */
+    public List<Holder<Weed>> eligibleWeeds() {
+        if (level == null) {
+            return List.of();
+        }
+        Optional<Soil> soil = soil();
+        if (soil.isEmpty()) {
+            return List.of();
+        }
+        GrowthContext ctx = growthContext(soil);
+        List<Holder<Weed>> out = new java.util.ArrayList<>();
+        level.registryAccess().registryOrThrow(CultivarRegistries.WEED).holders().forEach(w -> {
+            if (GrowthCondition.testAll(w.value().habitat(), ctx, 1) == GrowthResponse.FERTILE) {
+                out.add(w);
+            }
+        });
+        return out;
+    }
+
     private boolean tickWeeds(ServerLevel level, RandomSource random, InfluenceEffects fx) {
         if (!CultivarServerConfig.WEEDS_ENABLED.get()) {
             return false;
@@ -484,7 +504,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
             return false;
         }
         if (weed == null) {
-            List<Holder.Reference<Weed>> weeds = level.registryAccess().registryOrThrow(CultivarRegistries.WEED).holders().toList();
+            List<Holder<Weed>> weeds = eligibleWeeds();
             if (!weeds.isEmpty()) {
                 Holder<Weed> candidate = weeds.get(random.nextInt(weeds.size()));
                 if (random.nextDouble() < candidate.value().spawnChance()) {
