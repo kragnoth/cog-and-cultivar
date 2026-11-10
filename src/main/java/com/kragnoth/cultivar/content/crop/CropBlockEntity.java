@@ -397,9 +397,10 @@ public class CropBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         var ops = registries.createSerializationContext(NbtOps.INSTANCE);
+        // Always write stage: an empty tag is skipped by the client, which would leave a ghost plant after uprooting.
+        tag.putInt("stage", stage);
         if (genome != null) {
             Genome.CODEC.encodeStart(ops, genome).resultOrPartial(Cultivar.LOGGER::error).ifPresent(t -> tag.put("genome", t));
-            tag.putInt("stage", stage);
         }
         if (weed != null) {
             RegistryFixedCodec.create(CultivarRegistries.WEED).encodeStart(ops, weed)

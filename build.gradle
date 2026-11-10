@@ -84,6 +84,8 @@ dependencies {
     // Optional integrations: compile against their APIs, present only in dev runs (never required by players)
     compileOnly "maven.modrinth:jade:${jade_version}"
     runtimeOnly "maven.modrinth:jade:${jade_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
     runtimeOnly "dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}"
 }

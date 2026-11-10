@@ -1,6 +1,15 @@
 {
-  "blocks": "cultivar:bell_cloche",
+  "blocks": [
+    "cultivar:timber_trellis",
+    "cultivar:iron_trellis"
+  ],
   "radius": 0,
-  "height": 1,
-  "effects": { "growth_multiplier": 1.1, "weed_multiplier": 0.5 }
+  "height": 0,
+  "properties": {
+    "cloche": "true"
+  },
+  "effects": {
+    "growth_multiplier": 1.1,
+    "weed_multiplier": 0.5
+  }
 }

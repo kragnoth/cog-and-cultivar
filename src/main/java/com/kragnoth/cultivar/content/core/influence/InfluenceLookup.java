@@ -60,7 +60,7 @@ public final class InfluenceLookup {
                 continue;
             }
             BlockState state = level.getBlockState(pos);
-            if (entry.blocks().contains(state.getBlockHolder())) {
+            if (entry.matches(state)) {
                 best = Math.max(best, strength(level, pos, state, entry));
             }
         }
@@ -72,7 +72,7 @@ public final class InfluenceLookup {
                     continue;
                 }
                 BlockState state = level.getBlockState(pos);
-                if (PoiTypes.forState(state).isEmpty() && entry.blocks().contains(state.getBlockHolder())) {
+                if (PoiTypes.forState(state).isEmpty() && entry.matches(state)) {
                     best = Math.max(best, strength(level, pos.immutable(), state, entry));
                 }
             }

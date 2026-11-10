@@ -1,3 +1,28 @@
-{ "variants": {
-  "cross=false": { "model": "cultivar:block/iron_trellis" },
-  "cross=true":  { "model": "cultivar:block/iron_trellis_cross" } } }
+{
+  "multipart": [
+    {
+      "when": {
+        "cross": "false"
+      },
+      "apply": {
+        "model": "cultivar:block/iron_trellis"
+      }
+    },
+    {
+      "when": {
+        "cross": "true"
+      },
+      "apply": {
+        "model": "cultivar:block/iron_trellis_cross"
+      }
+    },
+    {
+      "when": {
+        "cloche": "true"
+      },
+      "apply": {
+        "model": "cultivar:block/bell_cloche"
+      }
+    }
+  ]
+}

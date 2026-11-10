@@ -130,9 +130,12 @@ def to_ramp(ramp):
 shovel = Image.open(f'{EXC}/item/iron_shovel.png').convert('RGBA')
 shovel.save(f'{OUT}/item/transplanting_spade.png')
 full = shovel.copy()
-for x, y, c in ((10, 2, (0x4f, 0xae, 0x4a, 255)), (11, 1, (0x4f, 0xae, 0x4a, 255)), (12, 2, (0x3a, 0x8a, 0x36, 255)),
-                (11, 3, (0x6b, 0x4a, 0x2a, 255)), (10, 3, (0x6b, 0x4a, 0x2a, 255)), (12, 3, (0x6b, 0x4a, 0x2a, 255))):
-    full.putpixel((x, y), c)                                   # sprout + soil clump on the blade
+SOIL = [(0x3b, 0x26, 0x18, 255), (0x55, 0x38, 0x22, 255), (0x6e, 0x4a, 0x2c, 255)]
+LEAF = [(0x2e, 0x6b, 0x2a, 255), (0x4f, 0xae, 0x4a, 255), (0x7c, 0xd0, 0x5a, 255)]
+for x, y, c in ((9, 4, SOIL[1]), (10, 4, SOIL[2]), (11, 4, SOIL[1]), (12, 4, SOIL[0]), (10, 5, SOIL[0]), (11, 5, SOIL[1]),
+                (8, 5, SOIL[0]), (12, 5, SOIL[0]), (9, 5, SOIL[2]),                      # soil clump on the blade
+                (10, 3, LEAF[0]), (10, 2, LEAF[1]), (9, 1, LEAF[2]), (11, 1, LEAF[1]), (12, 0, LEAF[2]), (8, 0, LEAF[1])):  # sprout
+    full.putpixel((x, y), c)
 full.save(f'{OUT}/item/transplanting_spade_holding.png')
 shears = Image.open(f'{EXC}/item/shears.png').convert('RGBA')
 for x, y in ((7, 7), (8, 8), (7, 8), (8, 7)):

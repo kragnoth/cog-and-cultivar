@@ -5,7 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Optional;
 
@@ -25,17 +27,25 @@ import java.util.Optional;
  * @param height     vertical reach above and below the source
  * @param effects    effects at full strength
  * @param scaling    optional live strength (e.g. bee occupancy); absent means always full strength
+ * @param properties optional blockstate filter, e.g. {@code {"cloche": "true"}} for trellises wearing a cloche
  */
 public record CropInfluence(HolderSet<Block> blocks,
                             int radius,
                             int height,
                             InfluenceEffects effects,
-                            Optional<InfluenceScaling> scaling) {
+                            Optional<InfluenceScaling> scaling,
+                            Optional<StatePropertiesPredicate> properties) {
     public static final Codec<CropInfluence> CODEC = RecordCodecBuilder.create(i -> i.group(
             RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("blocks").forGetter(CropInfluence::blocks),
             Codec.intRange(0, 16).optionalFieldOf("radius", 4).forGetter(CropInfluence::radius),
             Codec.intRange(0, 8).optionalFieldOf("height", 2).forGetter(CropInfluence::height),
             InfluenceEffects.CODEC.fieldOf("effects").forGetter(CropInfluence::effects),
-            InfluenceScaling.CODEC.optionalFieldOf("scaling").forGetter(CropInfluence::scaling)
+            InfluenceScaling.CODEC.optionalFieldOf("scaling").forGetter(CropInfluence::scaling),
+            StatePropertiesPredicate.CODEC.optionalFieldOf("properties").forGetter(CropInfluence::properties)
     ).apply(i, CropInfluence::new));
+
+    /** True if {@code state} is one of this entry's blocks and matches its optional property filter. */
+    public boolean matches(BlockState state) {
+        return blocks.contains(state.getBlockHolder()) && properties.map(p -> p.matches(state)).orElse(true);
+    }
 }
