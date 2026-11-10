@@ -2,7 +2,7 @@
   "parent": "block/block",
   "textures": {
     "casing": "create:block/brass_casing",
-    "floor": "minecraft:block/rooted_dirt",
+    "floor": "cultivar:block/trial_soil",
     "particle": "create:block/brass_casing"
   },
   "elements": [

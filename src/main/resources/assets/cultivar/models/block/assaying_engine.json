@@ -4,7 +4,7 @@
   "textures": {
     "casing": "create:block/brass_casing",
     "brass": "create:block/brass_block",
-    "glass": "minecraft:block/glass",
+    "glass": "cultivar:block/assay_glass",
     "particle": "create:block/brass_casing"
   },
   "elements": [
