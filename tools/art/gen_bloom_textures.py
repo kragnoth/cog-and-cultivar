@@ -77,29 +77,42 @@ def scatter(im, every, offset):
 
 # --------------------------------------------------------------------------------------------------- stage builders
 
-def petals(base, product, highlight=True, leaf_shade=1.0, glint=None):
-    """Foliage kept (optionally shaded), petals recoloured. Returns [bud-only, muted, ripe] full-size images."""
+def petals(base, product, highlight=True, leaf_shade=1.0, glint=None, head_rows=None):
+    """Foliage kept (optionally shaded), petals recoloured. Returns [bud-only, muted, ripe] full-size images.
+
+    head_rows: for sprites whose stem isn't green (eyeblossoms), only rows above this are petals; the stem below
+    is repainted in a shaded green.
+    """
     im = source(base)
     if leaf_shade != 1.0:
         for p in opaque(im):
             if is_foliage(im.getpixel(p)):
                 im.putpixel(p, darker(im.getpixel(p), leaf_shade))
+    if head_rows is not None:
+        stem = [(x, y) for x, y in opaque(im) if y >= head_rows and not is_foliage(im.getpixel((x, y)))]
+        sl = [lum(im.getpixel(p)) for p in stem] or [0]
+        for p in stem:
+            im.putpixel(p, mapped(im.getpixel(p), FERN_GREEN, min(sl), max(sl)))
     pet = [(x, y) for x, y in opaque(im) if not is_foliage(im.getpixel((x, y)))]
-    leaf = [im.getpixel(p) for p in opaque(im) if is_foliage(im.getpixel(p))] or [hexes('4d6b2a')[0]]
-    leaf.sort(key=lum)
-    bud_c = leaf[len(leaf) // 3]
+    leaf = sorted({im.getpixel(p) for p in opaque(im) if is_foliage(im.getpixel(p))}, key=lum)
+    leaf_ramp = ramp_from(leaf) if len(leaf) >= 3 else FERN_GREEN
     lums = [lum(im.getpixel(p)) for p in pet] or [0]
     lo, hi = min(lums), max(lums)
     bud, muted, ripe = im.copy(), im.copy(), im.copy()
     for p in pet:
         c = mapped(im.getpixel(p), product, lo, hi)
-        bud.putpixel(p, bud_c)
+        bud.putpixel(p, mapped(im.getpixel(p), leaf_ramp[1:-1], lo, hi))  # shaded green bud
         muted.putpixel(p, darker(c, 0.62))
         ripe.putpixel(p, c)
     if highlight and pet:
         top = min(pet, key=lambda p: (p[1], p[0]))
         ripe.putpixel(top, glint or product[-1])
     return bud, muted, ripe
+
+
+def ramp_from(colours, n=6):
+    k = len(colours)
+    return [colours[min(k - 1, i * k // n)] for i in range(n)]
 
 
 def whole(base, palette, product, every=13, offset=0, fruit_on=None):
@@ -156,13 +169,13 @@ BLOOMS = {
     'woad': lambda: petals('lilac_top', item_ramp('blue_dye')),
     'clayreed': lambda: whole('kelp_plant', CLAY, item_ramp('clay_ball'), every=9, offset=1),
     'silkweed': lambda: petals('azure_bluet', item_ramp('string')),
-    'glowcap': lambda: petals('closed_eyeblossom', item_ramp('glowstone_dust')),
+    'glowcap': lambda: petals('closed_eyeblossom', item_ramp('glowstone_dust'), head_rows=10),
     'coalroot': lambda: whole('bush', COAL, item_ramp('coal'), every=11, offset=3),
     'flintwort': lambda: whole('tall_grass_top', FLINT, item_ramp('flint'), fruit_on=every_other_tip),
     'slimecap': lambda: petals('sweet_berry_bush_stage3', SLIME, leaf_shade=0.5),
     'brimstone_puff': lambda: petals('firefly_bush', item_ramp('gunpowder')),
     'rustwort': lambda: petals('pink_tulip', RUST, glint=item_ramp('iron_nugget')[-1]),
-    'shardbloom': lambda: petals('open_eyeblossom', item_ramp('amethyst_shard')),
+    'shardbloom': lambda: petals('open_eyeblossom', item_ramp('amethyst_shard'), head_rows=10),
     # ores and gems
     'ferrous_bloom': lambda: petals('oxeye_daisy', item_ramp('raw_iron')),
     'redstone_fern': lambda: whole('fern3', FERN_GREEN, item_ramp('redstone'), fruit_on=every_other_tip),
