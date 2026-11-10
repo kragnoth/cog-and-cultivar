@@ -113,5 +113,10 @@
   "cultivar.bed.no_soil": "none (right-click with a soil block)",
   "cultivar.bed.water": "Water: %s",
   "cultivar.bed.yes": "yes",
-  "cultivar.bed.no": "no"
+  "cultivar.bed.no": "no",
+  "cultivar.bed.plot": "Planter plot: %s beds (%s breeding)",
+  "cultivar.bed.water_total": "Water: %s / %s mB",
+  "cultivar.bed.stock": "Stock: %s seeds, %s fertilizer",
+  "cultivar.bed.best": "Best seed: %s (quality %s)",
+  "cultivar.bed.outputs": "Outputs: %s / %s slots used"
 }

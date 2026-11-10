@@ -19,6 +19,11 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.IntValue BED_TICKS_PER_MB;
     public static final ModConfigSpec.IntValue BED_GROWTH_ODDS;
     public static final ModConfigSpec.IntValue BED_FERTILIZER_ODDS;
+    public static final ModConfigSpec.IntValue BED_BREED_HOLD;
+    public static final ModConfigSpec.DoubleValue BED_QUALITY_GAIN;
+    public static final ModConfigSpec.DoubleValue BED_QUALITY_GROWTH;
+    public static final ModConfigSpec.DoubleValue BED_QUALITY_STRENGTH;
+    public static final ModConfigSpec.DoubleValue BED_QUALITY_VIGOUR;
     public static final ModConfigSpec.IntValue SPRINKLER_RADIUS;
     public static final ModConfigSpec.IntValue SPRINKLER_INTERVAL;
     public static final ModConfigSpec.IntValue SPRINKLER_ATTEMPTS;
@@ -91,6 +96,14 @@ public final class CultivarServerConfig {
                 .defineInRange("growthOdds", 40, 1, 10_000);
         BED_FERTILIZER_ODDS = b.comment("Each cycle, chance 1 in N to spend one fertilizer on a growing crop.")
                 .defineInRange("fertilizerOdds", 12, 1, 10_000);
+        BED_BREED_HOLD = b.comment("Cycles a mature crop next to a breeding bed waits before harvest, so the grafting frame can use it as a parent.")
+                .defineInRange("breedHoldCycles", 40, 0, 10_000);
+        BED_QUALITY_GAIN = b.comment("Seed ranking weights: beds plant, keep and upgrade to the highest weighted stat total.",
+                        "Defaults favour output: Gain 3, Growth 2, Strength 1, Vigour 1.")
+                .defineInRange("qualityGain", 3.0, 0.0, 100.0);
+        BED_QUALITY_GROWTH = b.defineInRange("qualityGrowth", 2.0, 0.0, 100.0);
+        BED_QUALITY_STRENGTH = b.defineInRange("qualityStrength", 1.0, 0.0, 100.0);
+        BED_QUALITY_VIGOUR = b.defineInRange("qualityVigour", 1.0, 0.0, 100.0);
         b.pop();
 
         b.push("performance");
