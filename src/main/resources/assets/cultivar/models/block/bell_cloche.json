@@ -1,19 +1,306 @@
 {
-  "render_type": "minecraft:cutout",
+  "render_type": "minecraft:translucent",
   "ambientocclusion": false,
-  "textures": { "glass": "cultivar:block/bell_cloche", "knob": "cultivar:block/brass_knob", "particle": "cultivar:block/bell_cloche" },
+  "textures": {
+    "glass": "cultivar:block/bell_cloche",
+    "rim": "cultivar:block/brass_knob",
+    "particle": "cultivar:block/bell_cloche"
+  },
   "elements": [
-    { "from": [0.5, 0, 0.5], "to": [15.5, 13, 15.5], "faces": {
-      "north": { "uv": [0, 3, 16, 16], "texture": "#glass" }, "south": { "uv": [0, 3, 16, 16], "texture": "#glass" },
-      "east": { "uv": [0, 3, 16, 16], "texture": "#glass" }, "west": { "uv": [0, 3, 16, 16], "texture": "#glass" },
-      "up": { "uv": [0, 0, 16, 16], "texture": "#glass" } } },
-    { "from": [3, 13, 3], "to": [13, 15, 13], "faces": {
-      "north": { "uv": [3, 1, 13, 3], "texture": "#glass" }, "south": { "uv": [3, 1, 13, 3], "texture": "#glass" },
-      "east": { "uv": [3, 1, 13, 3], "texture": "#glass" }, "west": { "uv": [3, 1, 13, 3], "texture": "#glass" },
-      "up": { "uv": [3, 3, 13, 13], "texture": "#glass" } } },
-    { "from": [7, 15, 7], "to": [9, 16, 9], "faces": {
-      "north": { "uv": [0, 0, 2, 1], "texture": "#knob" }, "south": { "uv": [0, 0, 2, 1], "texture": "#knob" },
-      "east": { "uv": [0, 0, 2, 1], "texture": "#knob" }, "west": { "uv": [0, 0, 2, 1], "texture": "#knob" },
-      "up": { "uv": [0, 0, 2, 2], "texture": "#knob" } } }
+    {
+      "from": [
+        -1,
+        0,
+        -1
+      ],
+      "to": [
+        17,
+        1.5,
+        17
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#rim"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#rim"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#rim"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#rim"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#rim"
+        }
+      }
+    },
+    {
+      "from": [
+        -1,
+        1.5,
+        -1
+      ],
+      "to": [
+        17,
+        14,
+        17
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ],
+          "texture": "#glass"
+        },
+        "south": {
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ],
+          "texture": "#glass"
+        },
+        "east": {
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ],
+          "texture": "#glass"
+        },
+        "west": {
+          "uv": [
+            0,
+            2,
+            16,
+            16
+          ],
+          "texture": "#glass"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#glass"
+        }
+      }
+    },
+    {
+      "from": [
+        0.5,
+        14,
+        0.5
+      ],
+      "to": [
+        15.5,
+        17,
+        15.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#glass"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#glass"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#glass"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#glass"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#glass"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        17,
+        3
+      ],
+      "to": [
+        13,
+        19,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3,
+            0,
+            13,
+            2
+          ],
+          "texture": "#glass"
+        },
+        "south": {
+          "uv": [
+            3,
+            0,
+            13,
+            2
+          ],
+          "texture": "#glass"
+        },
+        "east": {
+          "uv": [
+            3,
+            0,
+            13,
+            2
+          ],
+          "texture": "#glass"
+        },
+        "west": {
+          "uv": [
+            3,
+            0,
+            13,
+            2
+          ],
+          "texture": "#glass"
+        },
+        "up": {
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ],
+          "texture": "#glass"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        19,
+        7
+      ],
+      "to": [
+        9,
+        21,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#rim"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#rim"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#rim"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#rim"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#rim"
+        }
+      }
+    }
   ]
 }

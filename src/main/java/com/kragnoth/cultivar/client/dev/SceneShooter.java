@@ -49,12 +49,15 @@ public final class SceneShooter {
 
     // Scene is built around the origin of a default flat world (grass at y=-61).
     private static final int Y = -60;
+    // Display pieces sit on z = -6, spaced 3 apart; close-up cameras look north (yaw 180) so +X is to the right.
+    private static final int DZ = -6;
     private static final List<Shot> SHOTS = List.of(
-            new Shot("cloche_01_closeup", 0.5, Y + 1.6, -2.2, 0f, 25f),
-            new Shot("cloche_02_compare_row", 2.5, Y + 2.4, -4.5, 0f, 22f),
-            new Shot("cloche_03_high_angle", 2.5, Y + 4.5, -2.5, 0f, 55f),
-            new Shot("cloche_04_side", -3.0, Y + 1.8, 1.5, -90f, 18f),
-            new Shot("cloche_05_field_wide", 9.0, Y + 6.0, -9.0, 35f, 30f));
+            new Shot("cloche_01_wheat_closeup", 0.5, Y + 1.0, DZ + 2.6, 180f, 12f),
+            new Shot("cloche_02_empty_closeup", 3.5, Y + 1.0, DZ + 2.6, 180f, 12f),
+            new Shot("cloche_03_iron_carrot_closeup", 6.5, Y + 1.0, DZ + 2.6, 180f, 12f),
+            new Shot("cloche_04_with_vs_without", 11.0, Y + 1.4, DZ + 3.4, 180f, 15f),
+            new Shot("cloche_05_high_angle", 0.5, Y + 2.8, DZ + 2.2, 180f, 45f),
+            new Shot("cloche_06_field", 3.5, Y + 4.5, 12.0, 180f, 28f));
 
     private static int tick = -1;
     private static boolean worldRequested;
@@ -78,7 +81,7 @@ public final class SceneShooter {
         Minecraft mc = Minecraft.getInstance();
         mc.options.hideGui = true;
         mc.options.renderDistance().set(4);
-        mc.options.fov().set(70);
+        mc.options.fov().set(55);
         GameRules rules = new GameRules();
         rules.getRule(GameRules.RULE_DAYLIGHT).set(false, null);
         rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
@@ -110,8 +113,16 @@ public final class SceneShooter {
                 server.execute(() -> {
                     ServerPlayer p = server.getPlayerList().getPlayers().getFirst();
                     p.setGameMode(GameType.SPECTATOR);
-                    p.teleportTo(server.overworld(), shot.x(), shot.y(), shot.z(), shot.yaw(), shot.pitch());
+                    p.teleportTo(server.overworld(), shot.x(), shot.y() - p.getEyeHeight(), shot.z(), shot.yaw(), shot.pitch()); // shot.y is eye height
                 });
+            }
+            if (tick == base + 40 || tick == base + 70) {
+                // The server teleport doesn't reliably carry rotation to the client camera; set it directly.
+                mc.player.setYRot(shot.yaw());
+                mc.player.setXRot(shot.pitch());
+                mc.player.setYHeadRot(shot.yaw());
+                mc.player.yRotO = shot.yaw();
+                mc.player.xRotO = shot.pitch();
             }
             if (tick == base + 80) {
                 Screenshot.grab(mc.gameDirectory, shot.name() + ".png", mc.getMainRenderTarget(),
@@ -155,6 +166,13 @@ public final class SceneShooter {
             c.setWeed(rot, 3);
         }
         level.setBlock(new BlockPos(7, Y, 2), Blocks.BEEHIVE.defaultBlockState().setValue(BeehiveBlock.HONEY_LEVEL, 5), Block.UPDATE_ALL);
+
+        // Isolated display pieces for close-ups.
+        crop(level, 0, DZ, timber.setValue(TrellisBlock.CLOCHE, true), wheat, 7);
+        crop(level, 3, DZ, timber.setValue(TrellisBlock.CLOCHE, true), null, 0);
+        crop(level, 6, DZ, iron.setValue(TrellisBlock.CLOCHE, true), carrot, 3);
+        crop(level, 10, DZ, timber.setValue(TrellisBlock.CLOCHE, true), wheat, 5);
+        crop(level, 11, DZ, timber, wheat, 5);
 
         // A wider field for the establishing shot.
         for (int x = 0; x < 8; x++) {
