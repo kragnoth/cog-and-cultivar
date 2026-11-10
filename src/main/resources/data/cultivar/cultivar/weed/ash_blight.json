@@ -1,7 +1,7 @@
 {
   "stages": 4,
   "growth_chance": 0.5,
-  "spawn_chance": 0.1,
+  "spawn_chance": 0.03,
   "lethal": false,
   "aggressive": false,
   "rake_products": [

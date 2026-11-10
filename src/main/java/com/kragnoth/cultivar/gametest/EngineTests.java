@@ -111,18 +111,27 @@ public final class EngineTests {
     public static void statDriftMatchesSpec(GameTestHelper h) {
         RandomSource r = RandomSource.create(1234L);
         var growth = CoreModule.GROWTH.getKey();
-        int up = 0, drifted = 0;
+        int up = 0, drifted = 0, topUp = 0;
         for (int i = 0; i < TRIALS; i++) {
             if (BreedingEngine.drift(growth, 5, 10, r) == 6) up++;
             if (BreedingEngine.drift(growth, 5, 1, r) != 5) drifted++;
+            if (BreedingEngine.drift(growth, 9, 1, r) == 10) topUp++;
         }
-        // Vigour 10: the allele always steps up. Vigour 1: it drifts 10 % of the time.
-        h.assertTrue(up == TRIALS, "vigour 10 should always drift up, got " + up);
-        near(h, drifted / (double) TRIALS, 0.10, 0.012, "vigour 1 drift rate");
+        // Vigour 10 at allele 5: drifts 45 %, up 73 % of that. Vigour 1: drifts 27 %. The last step is the hard one:
+        // allele 9 at Vigour 1 reaches 10 with 27 % x 35 %.
+        near(h, up / (double) TRIALS, 0.45 * 0.73, 0.015, "vigour 10 step-up rate");
+        near(h, drifted / (double) TRIALS, 0.27, 0.015, "vigour 1 drift rate");
+        near(h, topUp / (double) TRIALS, 0.27 * 0.35, 0.012, "last step to max");
         Genome high = genome(Holder.direct(plant(0.75, 0.025)), 10);
+        Genome low = genome(Holder.direct(plant(0.75, 0.025)), 1);
         var settings = new BreedingEngine.Settings(Genetics.Expression.MAX, NONE, false);
-        Genome child = BreedingEngine.breed(List.of(high, high), List.of(), m -> false, settings, r).orElseThrow();
-        h.assertTrue(child.get(growth).dominant() == 6, "high-vigour parents breed better children");
+        double highSum = 0, lowSum = 0;
+        for (int i = 0; i < 2000; i++) {
+            highSum += BreedingEngine.breed(List.of(high, high), List.of(), m -> false, settings, r).orElseThrow().get(growth).dominant();
+            var c = BreedingEngine.breed(List.of(low, low), List.of(), m -> false, settings, r);
+            lowSum += c.isPresent() ? c.get().get(growth).dominant() : 5;
+        }
+        h.assertTrue(highSum > lowSum, "high-vigour parents breed better children on average");
         h.succeed();
     }
 
@@ -163,9 +172,9 @@ public final class EngineTests {
             if (BreedingEngine.breed(List.of(p, p), List.of(), m -> false, noBees, r).isPresent()) crossesPlain++;
             if (BreedingEngine.breed(List.of(p, p), List.of(), m -> false, bees, r).isPresent()) crossesBees++;
         }
-        // Spec §3.15: vigour 3 → both parents pass 0.3² = 9 %; with +1 pollination 0.4² = 16 %.
-        near(h, crossesPlain / (double) TRIALS, 0.09, 0.01, "two-parent cross rate, no bees");
-        near(h, crossesBees / (double) TRIALS, 0.16, 0.012, "two-parent cross rate, bees");
+        // Each parent passes with 0.5 + 0.05 x Vigour: vigour 3 → 0.65² ≈ 42 %; +1 pollination → 0.7² = 49 %.
+        near(h, crossesPlain / (double) TRIALS, 0.4225, 0.02, "two-parent cross rate, no bees");
+        near(h, crossesBees / (double) TRIALS, 0.49, 0.02, "two-parent cross rate, bees");
         h.succeed();
     }
 }

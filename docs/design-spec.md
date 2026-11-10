@@ -165,7 +165,7 @@ Vanilla soil defaults (1.21 datagen): farmland WET/SLIGHTLY_ACIDIC/HIGH ×1.0; s
 3. **Combining, per gene:** pick one random allele from each parent.
    - **Species gene:** look up all mutations whose parents match the allele pair. Each mutation's conditions return `FORCE < PASS < FORBID` (sorted best-first). FORBID entries are dropped, the best tier wins (ties shuffled), then roll `chance`. FORCE skips the roll. The result is `(child, random parent allele)`. On failure the pair is just the two picked alleles.
    - **Stat genes:** each allele independently: if `rand(max) < parentMutativity`, apply a delta; the delta is +1 if `rand(max) < ⌊(max + mutativity) / 2⌋`, else −1.
-     *Actual math, which differs from the source comment:* mutativity 1 → 10 % chance to drift, 50/50 up or down. Mutativity 10 → 100 % drift, always up. So mutativity is the engine of stat progression.
+     *Cog & Cultivar (rebalanced 2026-11-10, see `tools/data/sim_breeding.py`):* each parent joins a cross with chance 0.5 + 0.05 × Vigour (55 % → 100 %). An inherited allele drifts with chance 0.25 + 0.02 × Vigour (27 % → 45 %), upward with chance 0.75 − 0.05 × (allele − 1) + 0.02 × (Vigour − 1), clamped 20–90 %: low stats climb easily, the last steps to 10 are the hard ones. AgriCraft's linear v/max made fresh seeds cross ~1 % of the time and Vigour-10 lines climb every generation; this flattens both ends. On one frame a fresh pair crosses about every 7 min, all stats reach 5 in ~13 h and 10 in ~24 h (4 frames: ~6 h / ~11 h).
 4. **Fertilizer on a cross crop** can trigger a cross tick (config).
 5. The engine is swappable (selector, cloner and combiner are lambdas), which is good for an API.
 
@@ -534,12 +534,12 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 > | Lazuli Bell | 5 | Redstone Fern × Woad | twilight (light 9–11) | lapis 1–2 |
 > | Brassleaf | 6 | Verdigris Vine × Ferrous Bloom | light ≤ 7 | crushed raw zinc |
 > | Aurum Thistle | 7 | Brassleaf × Silkweed | arid | crushed raw gold |
-> | Emerald Fern | 8 | Aurum Thistle × Woad | light ≥ 13 | emerald (10%) |
-> | Diamond Briar | 9 | Emerald Fern × Quartz Lily | arid (heat-dried) | diamond (5%) |
+> | Emerald Fern | 8 | Aurum Thistle × Woad | light ≥ 13 | emerald (6%) |
+> | Diamond Briar | 9 | Emerald Fern × Quartz Lily | arid (heat-dried) | diamond (3%) |
 >
 > **Breedable by design:** parents and the frame share light (adjacent blocks differ by at most 1), so every cross has a light level both parents and the child tolerate. Crops grow at light ≥ 9 and mushrooms at ≤ 12 (vanilla's own rules), which leaves a twilight band (9–11) for crop × mushroom crosses. `tools/data/check_crosses.py` verifies every shipped cross in CI.
 >
-> Blooms grow slowly (growth chance 0.5) and mostly want dim (light ≤ 10), damp, medium-nutrient soil. Exceptions: Verdigris wants watery soil, Aurum (poor, dry soil) and Emerald want bright light, Quartz shares Nether Wart's soil, and Diamond Briar grows only in scorched (dry or arid) ground at any light. They have no seed item: seeds come from the Seed Satchel only. Art: each bloom is kitbashed from its own Excalibur plant by `tools/art/gen_bloom_textures.py`; flowers keep their foliage and take the product's colours on the petals, other plants are recoloured whole and show the product as nuggets or gems when ripe. Young stages are green buds.
+> Stepping-stone blooms grow at 0.5–0.6; ore and gem blooms slower (0.3 + 0.02 × Growth), so a maxed crop gives about 9 crushed iron, 14 redstone, 2 emeralds or 1 diamond an hour and a fresh one under 1 iron. Blooms and mostly want dim (light ≤ 10), damp, medium-nutrient soil. Exceptions: Verdigris wants watery soil, Aurum (poor, dry soil) and Emerald want bright light, Quartz shares Nether Wart's soil, and Diamond Briar grows only in scorched (dry or arid) ground at any light. They have no seed item: seeds come from the Seed Satchel only. Art: each bloom is kitbashed from its own Excalibur plant by `tools/art/gen_bloom_textures.py`; flowers keep their foliage and take the product's colours on the petals, other plants are recoloured whole and show the product as nuggets or gems when ripe. Young stages are green buds.
 
 The original AgriCraft-derived notes below are kept for reference.
 
@@ -592,7 +592,7 @@ The original AgriCraft-derived notes below are kept for reference.
 |---|---|---|
 | `fertility_bonus` | **+1** | Pollination. Parent-selection chance per parent goes from fertility/10 to (fertility+1)/10 |
 | `mutation_multiplier` | **×1.25** | A 25 % mutation becomes 31.25 %; a 50 % one becomes 62.5 % |
-| `mutativity_bonus` | **+1** | Offspring stat drift: at mutativity 1, drift chance goes 10 % → 20 %, and the drift bias tilts upward. Stats still have to be *bred* up; bees never add stat points directly |
+| `mutativity_bonus` | **+1** | Offspring stat drift as if Vigour were one higher: drift chance +2 % and the upward bias +2 %. Stats still have to be *bred* up; bees never add stat points directly |
 | `weed_multiplier` | **×0.75** | At resistance 1, the weed share of ticks drops from 50 % to 37.5 % |
 | `growth_multiplier` | ×1.0 | No growth speed-up, to avoid overlapping with sprinklers |
 

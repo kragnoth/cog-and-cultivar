@@ -1,7 +1,7 @@
 {
   "stages": 4,
-  "growth_chance": 0.5,
-  "growth_bonus": 0.025,
+  "growth_chance": 0.3,
+  "growth_bonus": 0.02,
   "spread_chance": 0.05,
   "products": [
     {

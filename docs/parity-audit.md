@@ -122,3 +122,6 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   the standard layout); vanilla crops' requirements now match vanilla (farmland crops light >= 9 on moist or dry
   farmland; sugar cane, cactus, cocoa, glow berries any light). JEI Growing page with matching soils. Game test
   guards vanilla farmland growth.
+- 2026-11-10: balance pass. Parent selection 0.5 + 0.05 x Vigour (was v/10: ~1 % cross rate for fresh seeds);
+  drift 27-45 % with an upward bias that fades near 10 (was 100 % up at Vigour 10, a snowball). Blight spawns
+  3 % (was 10 %). Ore/gem blooms grow 0.3 + 0.02 x Growth; emerald 6 %, diamond 3 %. tools/data/sim_breeding.py.
