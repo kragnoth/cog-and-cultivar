@@ -1,5 +1,6 @@
 package com.kragnoth.cultivar.content.crop;
 
+import net.minecraft.world.item.BlockItem;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.api.CultivarRegistries;
 import net.minecraft.core.registries.Registries;
@@ -119,8 +120,40 @@ public class TrellisBlock extends BaseEntityBlock {
 
     @Override
     protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP)
-                || level.getBlockState(pos.below()).is(Blocks.FARMLAND);
+        BlockState below = level.getBlockState(pos.below());
+        if (below.getBlock() instanceof TrellisBlock) {
+            // Stacking: a plain segment on a plain trellis, up to the stack limit.
+            return !below.getValue(CROSS) && !below.getValue(CLOCHE) && !state.getValue(CROSS) && !state.getValue(CLOCHE)
+                    && stackDepth(level, pos) < CropBlockEntity.MAX_STACK;
+        }
+        return below.isFaceSturdy(level, pos.below(), Direction.UP) || below.is(Blocks.FARMLAND);
+    }
+
+    /** 0 for a base trellis, 1 for the segment above it, and so on. */
+    static int stackDepth(BlockGetter level, BlockPos pos) {
+        int depth = 0;
+        BlockPos p = pos.below();
+        while (depth < CropBlockEntity.MAX_STACK && level.getBlockState(p).getBlock() instanceof TrellisBlock) {
+            depth++;
+            p = p.below();
+        }
+        return depth;
+    }
+
+    public static boolean isSegment(BlockGetter level, BlockPos pos) {
+        return level.getBlockState(pos.below()).getBlock() instanceof TrellisBlock;
+    }
+
+    public static boolean hasSegmentAbove(BlockGetter level, BlockPos pos) {
+        return level.getBlockState(pos.above()).getBlock() instanceof TrellisBlock;
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, BlockPos from, boolean moving) {
+        super.neighborChanged(state, level, pos, neighbor, from, moving);
+        if (!level.isClientSide() && from.equals(pos.above())) {
+            CropBlockEntity.resolve(level, pos).ifPresent(CropBlockEntity::clampToSpace);
+        }
     }
 
     @Nullable
@@ -146,6 +179,9 @@ public class TrellisBlock extends BaseEntityBlock {
 
     @Override
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (isSegment(level, pos)) {
+            return;
+        }
         if (level.getBlockEntity(pos) instanceof CropBlockEntity crop) {
             crop.randomTick(level, random);
         }
@@ -156,6 +192,16 @@ public class TrellisBlock extends BaseEntityBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {
+        // Another trellis on the top face stacks a segment (normal block placement).
+        if (stack.getItem() instanceof BlockItem bi && bi.getBlock() instanceof TrellisBlock && hit.getDirection() == Direction.UP) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        // Segments act on behalf of the plant rooted below.
+        if (isSegment(level, pos)) {
+            BlockPos base = CropBlockEntity.resolve(level, pos).map(BlockEntity::getBlockPos).orElse(pos);
+            return base.equals(pos) ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+                    : useItemOn(stack, level.getBlockState(base), level, base, player, hand, hit);
+        }
         if (!(level.getBlockEntity(pos) instanceof CropBlockEntity crop)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
@@ -172,7 +218,8 @@ public class TrellisBlock extends BaseEntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
         // Same-tier trellis on an empty frame makes a grafting frame.
-        if (stack.is(asItem()) && !state.getValue(CROSS) && !state.getValue(CLOCHE) && !crop.hasPlant()) {
+        if (stack.is(asItem()) && !state.getValue(CROSS) && !state.getValue(CLOCHE) && !crop.hasPlant()
+                && !hasSegmentAbove(level, pos)) {
             if (!level.isClientSide()) {
                 level.setBlock(pos, state.setValue(CROSS, true), UPDATE_ALL);
                 level.playSound(null, pos, SoundEvents.SCAFFOLDING_PLACE, SoundSource.BLOCKS, 1f, 1f);
@@ -194,6 +241,10 @@ public class TrellisBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (isSegment(level, pos)) {
+            BlockPos base = CropBlockEntity.resolve(level, pos).map(BlockEntity::getBlockPos).orElse(pos);
+            return base.equals(pos) ? InteractionResult.PASS : useWithoutItem(level.getBlockState(base), level, base, player, hit);
+        }
         if (!(level.getBlockEntity(pos) instanceof CropBlockEntity crop)) {
             return InteractionResult.PASS;
         }
@@ -260,6 +311,6 @@ public class TrellisBlock extends BaseEntityBlock {
 
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-        return level.getBlockEntity(pos) instanceof CropBlockEntity crop ? crop.comparatorSignal() : 0;
+        return CropBlockEntity.resolve(level, pos).map(CropBlockEntity::comparatorSignal).orElse(0);
     }
 }

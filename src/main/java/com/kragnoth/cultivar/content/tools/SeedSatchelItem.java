@@ -282,7 +282,7 @@ public class SeedSatchelItem extends Item {
         if (clicked.is(Blocks.COMPOSTER) && ctx.isSecondaryUseActive()) {
             return cullIntoComposter(ctx, clicked);
         }
-        if (!(level.getBlockEntity(ctx.getClickedPos()) instanceof CropBlockEntity crop) || crop.hasPlant()
+        if (!(CropBlockEntity.resolve(level, ctx.getClickedPos()).orElse(null) instanceof CropBlockEntity crop) || crop.hasPlant()
                 || level.getBlockState(ctx.getClickedPos()).getValue(TrellisBlock.CROSS)) {
             return InteractionResult.PASS;
         }

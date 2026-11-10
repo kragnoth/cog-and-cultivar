@@ -73,5 +73,6 @@
   "plant.minecraft.torchflower": "Torchflower",
   "plant.minecraft.pitcher_plant": "Pitcher Plant",
   "commands.cultivar.export.done": "Exported %s crops (%s not yet covered by a Cultivar plant) to %s",
-  "commands.cultivar.export.failed": "Export failed: %s"
+  "commands.cultivar.export.failed": "Export failed: %s",
+  "cultivar.info.needs_segments": "Needs %s more trellis stacked above"
 }

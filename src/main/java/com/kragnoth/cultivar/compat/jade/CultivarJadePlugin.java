@@ -38,7 +38,7 @@ public final class CultivarJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-            if (!(accessor.getBlockEntity() instanceof CropBlockEntity crop)) {
+            if (!(CropBlockEntity.resolve(accessor.getLevel(), accessor.getPosition()).orElse(null) instanceof CropBlockEntity crop)) {
                 return;
             }
             // Compact on purpose: the full readout lives in the Botanist's Loupe and Create goggles.

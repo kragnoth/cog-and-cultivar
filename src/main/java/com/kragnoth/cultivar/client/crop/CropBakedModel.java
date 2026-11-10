@@ -55,9 +55,11 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
 
     @Override
     public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData modelData) {
-        if (!(level.getBlockEntity(pos) instanceof CropBlockEntity crop)) {
+        // Segments of a stacked trellis draw their share of the plant rooted at the base.
+        if (!(CropBlockEntity.resolve(level, pos).orElse(null) instanceof CropBlockEntity crop)) {
             return modelData;
         }
+        int segment = pos.getY() - crop.getBlockPos().getY();
         ResourceLocation plantTex = null;
         PlantRender.Shape shape = PlantRender.Shape.HASH;
         boolean model = false;
@@ -67,12 +69,21 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
             if (plant.render().isPresent()) {
                 PlantRender render = plant.render().get();
                 model = render.usesModels();
-                plantTex = model ? render.modelFor(crop.stage(), plant.stages()) : render.textureFor(crop.stage(), plant.stages());
                 shape = render.shape();
+                if (plant.height() <= 1) {
+                    if (segment == 0) {
+                        plantTex = model ? render.modelFor(crop.stage(), plant.stages()) : render.textureFor(crop.stage(), plant.stages());
+                    }
+                } else {
+                    double fill = (crop.stage() + 1) * plant.height() / (double) plant.stages() - segment;
+                    if (fill > 0) {
+                        plantTex = render.forFill(Math.min(1.0, fill));
+                    }
+                }
             }
         }
         ResourceLocation weedTex = null;
-        if (crop.weed() != null) {
+        if (crop.weed() != null && segment == 0) {
             Weed weed = crop.weed().value();
             if (!weed.textures().isEmpty()) {
                 int i = Math.min(weed.textures().size() - 1, crop.weedStage() * weed.textures().size() / Math.max(1, weed.stages()));

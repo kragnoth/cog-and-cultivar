@@ -37,7 +37,8 @@ public record Plant(int stages,
                     List<GrowthCondition> requirements,
                     List<PlantModifier> modifiers,
                     Optional<HolderSet<Item>> seeds,
-                    Optional<PlantRender> render) {
+                    Optional<PlantRender> render,
+                    int height) {
     public static final Codec<Plant> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.intRange(1, 16).fieldOf("stages").forGetter(Plant::stages),
             Codec.intRange(0, 15).optionalFieldOf("after_harvest_stage", 0).forGetter(Plant::afterHarvestStage),
@@ -50,7 +51,8 @@ public record Plant(int stages,
             GrowthCondition.CODEC.listOf().optionalFieldOf("requirements", List.of()).forGetter(Plant::requirements),
             PlantModifier.CODEC.listOf().optionalFieldOf("modifiers", List.of()).forGetter(Plant::modifiers),
             RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("seeds").forGetter(Plant::seeds),
-            PlantRender.CODEC.optionalFieldOf("render").forGetter(Plant::render)
+            PlantRender.CODEC.optionalFieldOf("render").forGetter(Plant::render),
+            Codec.intRange(1, 4).optionalFieldOf("height", 1).forGetter(Plant::height)
     ).apply(i, Plant::new));
 
     public Plant {
@@ -58,6 +60,14 @@ public record Plant(int stages,
         clipProducts = List.copyOf(clipProducts);
         requirements = List.copyOf(requirements);
         modifiers = List.copyOf(modifiers);
+    }
+
+    /**
+     * Trellis segments the plant occupies after growing through {@code stage} (1 for normal plants).
+     * Tall plants fill their {@code height} evenly across their stages.
+     */
+    public int blocksAt(int stage) {
+        return height <= 1 ? 1 : (int) Math.ceil((stage + 1) * height / (double) stages);
     }
 
     public int matureStage() {

@@ -1,6 +1,6 @@
 {
   "stages": 6,
-  "after_harvest_stage": 2,
+  "after_harvest_stage": 1,
   "growth_chance": 0.75,
   "growth_bonus": 0.025,
   "spread_chance": 0.1,
@@ -34,5 +34,6 @@
       "cultivar:crop/cactus_stage2",
       "cultivar:crop/cactus_stage3"
     ]
-  }
+  },
+  "height": 3
 }

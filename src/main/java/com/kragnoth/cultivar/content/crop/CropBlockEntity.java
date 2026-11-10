@@ -1,5 +1,6 @@
 package com.kragnoth.cultivar.content.crop;
 
+import net.minecraft.world.level.BlockGetter;
 import com.kragnoth.cultivar.content.core.condition.Hydration;
 import com.kragnoth.cultivar.api.soil.SoilLevels;
 
@@ -155,6 +156,65 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
                 soil.map(Soil::acidity), soil.map(Soil::nutrients));
     }
 
+    // ---------------------------------------------------------------- tall crops (stacked trellis)
+
+    /** Tallest stack: a base plus three segments. */
+    public static final int MAX_STACK = 4;
+
+    /** An upper segment: a trellis standing on another trellis. It holds no plant of its own. */
+    public boolean isSegment() {
+        return level != null && level.getBlockState(worldPosition.below()).getBlock() instanceof TrellisBlock;
+    }
+
+    /** The crop rooted at the bottom of the stack {@code pos} belongs to (itself for a single trellis). */
+    public static Optional<CropBlockEntity> resolve(BlockGetter level, BlockPos pos) {
+        BlockPos p = pos;
+        for (int i = 1; i < MAX_STACK && level.getBlockState(p.below()).getBlock() instanceof TrellisBlock; i++) {
+            p = p.below();
+        }
+        return level.getBlockEntity(p) instanceof CropBlockEntity crop ? Optional.of(crop) : Optional.empty();
+    }
+
+    /** This trellis plus the plain trellis segments stacked on it, up to {@link #MAX_STACK}. */
+    public int segmentsAvailable() {
+        if (level == null) {
+            return 1;
+        }
+        int n = 1;
+        BlockPos p = worldPosition.above();
+        while (n < MAX_STACK && level.getBlockState(p).getBlock() instanceof TrellisBlock) {
+            n++;
+            p = p.above();
+        }
+        return n;
+    }
+
+    /** Segments the plant still needs to reach maturity, or 0 if it has room. */
+    public int segmentsMissing() {
+        if (genome == null) {
+            return 0;
+        }
+        Plant plant = genome.species().value();
+        return Math.max(0, plant.blocksAt(plant.matureStage()) - segmentsAvailable());
+    }
+
+    /** Shrinks the plant when a segment above it is removed. Server-side. */
+    public void clampToSpace() {
+        if (genome == null) {
+            return;
+        }
+        Plant plant = genome.species().value();
+        int s = stage;
+        int room = segmentsAvailable();
+        while (s > 0 && plant.blocksAt(s) > room) {
+            s--;
+        }
+        if (s != stage) {
+            stage = s;
+            changed();
+        }
+    }
+
     public Optional<Soil> soil() {
         if (level == null) {
             return Optional.empty();
@@ -168,7 +228,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     // ---------------------------------------------------------------- mutation
 
     public boolean plant(Genome newGenome) {
-        if (genome != null || isCross()) {
+        if (genome != null || isCross() || isSegment()) {
             return false;
         }
         genome = newGenome;
@@ -305,6 +365,9 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     // ---------------------------------------------------------------- ticking
 
     public void randomTick(ServerLevel level, RandomSource random) {
+        if (isSegment()) {
+            return; // upper segments are scaffolding for the plant rooted below
+        }
         InfluenceEffects fx = influence();
         if (tickWeeds(level, random, fx)) {
             return;
@@ -354,7 +417,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
             for (Direction dir : Direction.Plane.HORIZONTAL) {
                 BlockPos np = worldPosition.relative(dir);
                 if (level.isLoaded(np) && level.getBlockEntity(np) instanceof CropBlockEntity neighbour
-                        && neighbour.weed == null && random.nextBoolean()) {
+                        && neighbour.weed == null && !neighbour.isSegment() && random.nextBoolean()) {
                     neighbour.weed = weed;
                     neighbour.weedStage = 0;
                     neighbour.changed();
@@ -383,7 +446,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
                 }
             }
             case FERTILE -> {
-                if (stage < plant.matureStage()) {
+                if (stage < plant.matureStage() && plant.blocksAt(stage + 1) <= segmentsAvailable()) {
                     double chance = GrowthMath.growthChance(plant, stat(CoreModule.GROWTH.getKey()),
                             soil.get().growthModifier(), CultivarServerConfig.GROWTH_MULTIPLIER.get(), fx);
                     if (random.nextDouble() < chance) {
@@ -493,6 +556,11 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     private void rerenderOnClient() {
         if (level != null && level.isClientSide()) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
+            // Tall plants are drawn by the segments above too.
+            BlockPos p = worldPosition.above();
+            for (int i = 1; i < MAX_STACK && level.getBlockState(p).getBlock() instanceof TrellisBlock; i++, p = p.above()) {
+                level.sendBlockUpdated(p, level.getBlockState(p), level.getBlockState(p), Block.UPDATE_IMMEDIATE);
+            }
         }
     }
 

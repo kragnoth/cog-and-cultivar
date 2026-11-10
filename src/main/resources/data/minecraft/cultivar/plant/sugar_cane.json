@@ -1,5 +1,5 @@
 {
-  "stages": 4,
+  "stages": 6,
   "after_harvest_stage": 1,
   "growth_chance": 0.75,
   "growth_bonus": 0.025,
@@ -40,5 +40,6 @@
       "cultivar:crop/sugar_cane_stage2",
       "cultivar:crop/sugar_cane_stage3"
     ]
-  }
+  },
+  "height": 3
 }

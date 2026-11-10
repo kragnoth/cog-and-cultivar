@@ -46,6 +46,16 @@ public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation
         return pick(models, stage, stages);
     }
 
+    /**
+     * For one segment of a tall plant: {@code fill} is how much of this segment the plant occupies (0..1].
+     * A full segment uses the last entry; a partly grown one the entry matching its fill.
+     */
+    public ResourceLocation forFill(double fill) {
+        List<ResourceLocation> list = usesModels() ? models : textures;
+        int index = Math.min(list.size() - 1, Math.max(0, (int) Math.ceil(fill * list.size()) - 1));
+        return list.get(index);
+    }
+
     private static ResourceLocation pick(List<ResourceLocation> list, int stage, int stages) {
         int index = Math.min(list.size() - 1, stage * list.size() / Math.max(1, stages));
         return list.get(Math.max(0, index));

@@ -57,7 +57,7 @@ public final class SceneShooter {
     private static final int Y = -60;
     // Display pieces sit on z = -6, spaced 3 apart; close-up cameras look north (yaw 180) so +X is to the right.
     private static final int DZ = -6;
-    private static final List<Shot> SHOTS = List.of(
+    private static final List<Shot> ALL_SHOTS = List.of(
             new Shot("cloche_01_wheat_closeup", 0.5, Y + 1.0, DZ + 2.6, 180f, 12f),
             new Shot("cloche_02_empty_closeup", 3.5, Y + 1.0, DZ + 2.6, 180f, 12f),
             new Shot("cloche_03_iron_carrot_closeup", 6.5, Y + 1.0, DZ + 2.6, 180f, 12f),
@@ -72,7 +72,17 @@ public final class SceneShooter {
             new Shot("assay_02_goggles", 14.5, Y + 2.3, DZ + 3.0, 180f, 18f),
             new Shot("crops_01_row", 6.5, Y + 2.6, -16.5, 180f, 22f),
             new Shot("crops_02_close_left", 3.0, Y + 1.6, -17.8, 180f, 18f),
-            new Shot("crops_03_close_right", 10.0, Y + 1.6, -17.8, 180f, 18f));
+            new Shot("crops_03_close_right", 10.0, Y + 1.6, -17.8, 180f, 18f),
+            new Shot("tall_01_stacks", 3.5, Y + 2.8, -21.0, 180f, 12f));
+
+    /** CULTIVAR_SCENES=1 shoots everything; any other value shoots only names starting with it (e.g. "tall"). */
+    private static final List<Shot> SHOTS = selectShots();
+
+    private static List<Shot> selectShots() {
+        String filter = System.getenv("CULTIVAR_SCENES");
+        return filter == null || filter.equals("1") ? ALL_SHOTS
+                : ALL_SHOTS.stream().filter(s -> s.name().startsWith(filter)).toList();
+    }
 
     private static int tick = -1;
     private static boolean worldRequested;
@@ -236,12 +246,31 @@ public final class SceneShooter {
             crop(level, i, -20, iron, p, stages / 2);
         }
 
+        // Tall crops on stacked trellises: cane (mature, half-grown, on one trellis), bamboo, cactus.
+        stack(level, 0, -28, Blocks.MUD, 3, plant(level, "sugar_cane"), 5);
+        stack(level, 2, -28, Blocks.MUD, 3, plant(level, "sugar_cane"), 3);
+        stack(level, 3, -28, Blocks.MUD, 1, plant(level, "sugar_cane"), 5);
+        stack(level, 5, -28, Blocks.MUD, 4, plant(level, "bamboo"), 7);
+        stack(level, 7, -28, Blocks.SAND, 3, plant(level, "cactus"), 5);
+
         // A wider field for the establishing shot.
         for (int x = 0; x < 8; x++) {
             for (int z = 4; z < 8; z++) {
                 boolean cloche = (x + z) % 3 == 0;
                 crop(level, x, z, (x % 2 == 0 ? timber : iron).setValue(TrellisBlock.CLOCHE, cloche), x < 4 ? wheat : carrot, (x + z) % 8);
             }
+        }
+    }
+
+    private static void stack(ServerLevel level, int x, int z, Block soil, int height, Holder<Plant> plant, int stage) {
+        BlockPos base = new BlockPos(x, Y, z);
+        level.setBlock(base.below(), soil.defaultBlockState(), Block.UPDATE_ALL);
+        for (int i = 0; i < height; i++) {
+            level.setBlock(base.above(i), CropModule.TIMBER_TRELLIS.get().defaultBlockState(), Block.UPDATE_ALL);
+        }
+        if (level.getBlockEntity(base) instanceof CropBlockEntity crop) {
+            crop.plant(Genome.base(plant), stage);
+            crop.clampToSpace();
         }
     }
 

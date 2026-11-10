@@ -72,15 +72,10 @@ for i, (h, leaves) in enumerate(((10, 'small'), (14, 'small'), (16, 'large')), s
     stalk = box([7, 0, 7], [9, h, 9], "#stalk", side_uv=[0, 16 - h, 2, 16])
     model(f'bamboo_stage{i}', tex, [stalk] + plane_pair("#leaves", h - 9, h, [0, 0, 16, 9]))
 
-# Cactus: a real 6px column cut from the side texture; arms bud out at maturity.
 ctex = {"side": "minecraft:block/cactus_side", "top": "minecraft:block/cactus_top"}
-for i, h in enumerate((5, 9, 13, 15)):
+# Cactus is 3 tall on a stacked trellis; each full segment repeats the last model, so it stays a plain column.
+for i, h in enumerate((4, 8, 12, 16)):
     elems = [box([5, 0, 5], [11, h, 11], "#side", "#top", side_uv=[5, 16 - h, 11, 16], top_uv=[5, 5, 11, 11])]
-    if i == 3:
-        elems.append(box([2, 7, 7], [5, 10, 9], "#side", "#top", side_uv=[0, 6, 3, 9], top_uv=[5, 5, 8, 7]))
-        elems.append(box([2, 10, 7], [4, 13, 9], "#side", "#top", side_uv=[0, 3, 2, 6], top_uv=[5, 5, 7, 7]))
-        elems.append(box([11, 5, 7], [14, 8, 9], "#side", "#top", side_uv=[13, 8, 16, 11], top_uv=[5, 5, 8, 7]))
-        elems.append(box([12, 8, 7], [14, 12, 9], "#side", "#top", side_uv=[14, 4, 16, 8], top_uv=[5, 5, 7, 7]))
     model(f'cactus_stage{i}', ctex, elems)
 
 # Cocoa: vanilla's pod faces (from the vanilla UV layout), hanging under the top bar on its hook.

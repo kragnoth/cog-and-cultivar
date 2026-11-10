@@ -32,7 +32,7 @@ public final class LoupeOverlay {
             return;
         }
         if (!(mc.hitResult instanceof BlockHitResult hit) || hit.getType() != HitResult.Type.BLOCK
-                || !(mc.level.getBlockEntity(hit.getBlockPos()) instanceof CropBlockEntity crop)) {
+                || !(CropBlockEntity.resolve(mc.level, hit.getBlockPos()).orElse(null) instanceof CropBlockEntity crop)) {
             return;
         }
         Font font = mc.font;

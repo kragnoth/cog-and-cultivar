@@ -231,6 +231,11 @@ def cmd_scaffold(args):
             "products": products_for(crop),
             "requirements": PRESETS[preset],
         }
+        height = {"CactusBlock": 3, "SugarCaneBlock": 3, "BambooStalkBlock": 4, "KelpBlock": 4}.get(crop.get("kind"), 1)
+        if height > 1:
+            plant["height"] = height  # grows up a stacked trellis
+            plant["stages"] = height * 2
+            plant["after_harvest_stage"] = 1
         if not plant["products"]:
             plant["products"] = [{"item": crop["seed"], "min": 1, "max": 2}]
             note = (note + "; " if note else "") + "no loot found, product defaults to the seed item"
