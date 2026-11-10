@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/flintwort_stage0",
-      "cultivar:crop/flintwort_stage1",
-      "cultivar:crop/flintwort_stage2",
-      "cultivar:crop/flintwort_stage3"
+    "textures": [
+      "cultivar:block/flintwort_stage0",
+      "cultivar:block/flintwort_stage1",
+      "cultivar:block/flintwort_stage2",
+      "cultivar:block/flintwort_stage3"
     ],
     "shape": "cross"
   }

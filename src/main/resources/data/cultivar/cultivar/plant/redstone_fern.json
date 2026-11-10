@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/redstone_fern_stage0",
-      "cultivar:crop/redstone_fern_stage1",
-      "cultivar:crop/redstone_fern_stage2",
-      "cultivar:crop/redstone_fern_stage3"
+    "textures": [
+      "cultivar:block/redstone_fern_stage0",
+      "cultivar:block/redstone_fern_stage1",
+      "cultivar:block/redstone_fern_stage2",
+      "cultivar:block/redstone_fern_stage3"
     ],
     "shape": "cross"
   }

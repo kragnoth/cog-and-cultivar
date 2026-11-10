@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/woad_stage0",
-      "cultivar:crop/woad_stage1",
-      "cultivar:crop/woad_stage2",
-      "cultivar:crop/woad_stage3"
+    "textures": [
+      "cultivar:block/woad_stage0",
+      "cultivar:block/woad_stage1",
+      "cultivar:block/woad_stage2",
+      "cultivar:block/woad_stage3"
     ],
     "shape": "cross"
   }

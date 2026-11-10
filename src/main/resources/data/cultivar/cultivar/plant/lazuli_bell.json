@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/lazuli_bell_stage0",
-      "cultivar:crop/lazuli_bell_stage1",
-      "cultivar:crop/lazuli_bell_stage2",
-      "cultivar:crop/lazuli_bell_stage3"
+    "textures": [
+      "cultivar:block/lazuli_bell_stage0",
+      "cultivar:block/lazuli_bell_stage1",
+      "cultivar:block/lazuli_bell_stage2",
+      "cultivar:block/lazuli_bell_stage3"
     ],
     "shape": "cross"
   }

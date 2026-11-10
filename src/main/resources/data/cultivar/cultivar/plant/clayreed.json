@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/clayreed_stage0",
-      "cultivar:crop/clayreed_stage1",
-      "cultivar:crop/clayreed_stage2",
-      "cultivar:crop/clayreed_stage3"
+    "textures": [
+      "cultivar:block/clayreed_stage0",
+      "cultivar:block/clayreed_stage1",
+      "cultivar:block/clayreed_stage2",
+      "cultivar:block/clayreed_stage3"
     ],
     "shape": "cross"
   }

@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/glowcap_stage0",
-      "cultivar:crop/glowcap_stage1",
-      "cultivar:crop/glowcap_stage2",
-      "cultivar:crop/glowcap_stage3"
+    "textures": [
+      "cultivar:block/glowcap_stage0",
+      "cultivar:block/glowcap_stage1",
+      "cultivar:block/glowcap_stage2",
+      "cultivar:block/glowcap_stage3"
     ],
     "shape": "cross"
   }

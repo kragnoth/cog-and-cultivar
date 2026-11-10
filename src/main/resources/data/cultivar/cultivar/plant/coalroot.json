@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/coalroot_stage0",
-      "cultivar:crop/coalroot_stage1",
-      "cultivar:crop/coalroot_stage2",
-      "cultivar:crop/coalroot_stage3"
+    "textures": [
+      "cultivar:block/coalroot_stage0",
+      "cultivar:block/coalroot_stage1",
+      "cultivar:block/coalroot_stage2",
+      "cultivar:block/coalroot_stage3"
     ],
     "shape": "cross"
   }

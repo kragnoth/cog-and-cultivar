@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/slimecap_stage0",
-      "cultivar:crop/slimecap_stage1",
-      "cultivar:crop/slimecap_stage2",
-      "cultivar:crop/slimecap_stage3"
+    "textures": [
+      "cultivar:block/slimecap_stage0",
+      "cultivar:block/slimecap_stage1",
+      "cultivar:block/slimecap_stage2",
+      "cultivar:block/slimecap_stage3"
     ],
     "shape": "cross"
   }

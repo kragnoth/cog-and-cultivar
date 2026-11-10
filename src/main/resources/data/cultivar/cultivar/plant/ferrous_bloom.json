@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/ferrous_bloom_stage0",
-      "cultivar:crop/ferrous_bloom_stage1",
-      "cultivar:crop/ferrous_bloom_stage2",
-      "cultivar:crop/ferrous_bloom_stage3"
+    "textures": [
+      "cultivar:block/ferrous_bloom_stage0",
+      "cultivar:block/ferrous_bloom_stage1",
+      "cultivar:block/ferrous_bloom_stage2",
+      "cultivar:block/ferrous_bloom_stage3"
     ],
     "shape": "cross"
   }

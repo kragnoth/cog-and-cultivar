@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/rustwort_stage0",
-      "cultivar:crop/rustwort_stage1",
-      "cultivar:crop/rustwort_stage2",
-      "cultivar:crop/rustwort_stage3"
+    "textures": [
+      "cultivar:block/rustwort_stage0",
+      "cultivar:block/rustwort_stage1",
+      "cultivar:block/rustwort_stage2",
+      "cultivar:block/rustwort_stage3"
     ],
     "shape": "cross"
   }

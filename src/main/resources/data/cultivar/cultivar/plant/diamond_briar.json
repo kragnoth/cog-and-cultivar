@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/diamond_briar_stage0",
-      "cultivar:crop/diamond_briar_stage1",
-      "cultivar:crop/diamond_briar_stage2",
-      "cultivar:crop/diamond_briar_stage3"
+    "textures": [
+      "cultivar:block/diamond_briar_stage0",
+      "cultivar:block/diamond_briar_stage1",
+      "cultivar:block/diamond_briar_stage2",
+      "cultivar:block/diamond_briar_stage3"
     ],
     "shape": "cross"
   }

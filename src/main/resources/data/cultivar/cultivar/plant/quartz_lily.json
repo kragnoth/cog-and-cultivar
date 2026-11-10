@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/quartz_lily_stage0",
-      "cultivar:crop/quartz_lily_stage1",
-      "cultivar:crop/quartz_lily_stage2",
-      "cultivar:crop/quartz_lily_stage3"
+    "textures": [
+      "cultivar:block/quartz_lily_stage0",
+      "cultivar:block/quartz_lily_stage1",
+      "cultivar:block/quartz_lily_stage2",
+      "cultivar:block/quartz_lily_stage3"
     ],
     "shape": "cross"
   }
