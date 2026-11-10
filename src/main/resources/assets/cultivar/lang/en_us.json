@@ -71,5 +71,7 @@
   "plant.minecraft.brown_mushroom": "Brown Mushroom",
   "plant.minecraft.red_mushroom": "Red Mushroom",
   "plant.minecraft.torchflower": "Torchflower",
-  "plant.minecraft.pitcher_plant": "Pitcher Plant"
+  "plant.minecraft.pitcher_plant": "Pitcher Plant",
+  "commands.cultivar.export.done": "Exported %s crops (%s not yet covered by a Cultivar plant) to %s",
+  "commands.cultivar.export.failed": "Export failed: %s"
 }
