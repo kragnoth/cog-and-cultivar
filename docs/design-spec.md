@@ -209,6 +209,9 @@ Parents that can't grow in the child's habitat (e.g. potatoes in the dark) are b
 
 ---
 
+
+> **Phase 6 blight variants (data-only):** weeds follow habitats like mutations do: e.g. Bog Rot on flooded soil, Ash Blight on soul sand, Dry Rot on arid soil, alongside Rust Rot. Each is a `weed` JSON with pack-driven art.
+
 ### 2.7 Harvest & Drops
 
 - Right-click a mature crop: run `trials` (from Gain) × `plant.products` rolls. The plant returns to `growthStageAfterHarvest` (perennial behaviour).
@@ -393,7 +396,7 @@ Working names (placeholders; pick one):
   - Datapack-driven materials let pack makers add more.
 - **Art direction from Joe's references:** the iron, brass and steel tiers follow **wrought-iron garden trellises**: a slim arched top, vertical bars with collar rings, and C/S-scroll flourishes at the crown and base. At 16 px that means a two-pixel arch, two side rails and one scroll motif per face. Timber stays a simple lashed lattice. Planted crops grow *through* the bars, so the plant model renders inside the frame, not on top of it.
 - **Tall crops (Joe's request):** plants get an optional `height` (1–4 blocks). Clicking the top face of a trellis with another trellis auto-extends it upward, like Create's directional placement. The base trellis owns the genome and all logic; upper segments are lightweight extensions that render the plant's upper sections and forward interactions to the base. A tall plant can't pass a growth stage that needs a segment that isn't there. Sugarcane and cactus become `height: 3` plants.
-- **Wall Trellis:** a directional, flat-mounted trellis for climbers (vines, hops, Farmer's Delight tomatoes as compat). It uses the same stacking rules, and the plant renders as a single plane against the wall.
+- **Wall Trellis (optional, Phase 6):** a directional, flat-mounted trellis for climbers (vines, hops, Farmer's Delight tomatoes as compat). It uses the same stacking rules, and the plant renders as a single plane against the wall.
 - **Bell Cloche (new, early game):** a glass bell jar placed over a single planted trellis. Kitbash it from Excalibur `glass` with a brass knob. It acts as a one-crop greenhouse: season immunity, ×1.1 growth, +1 humidity step, and it blocks weed *spawning* (existing weeds still grow). It doesn't stack with a Conservatory. It is a crop-influence source with radius 0, so no new systems are needed. A cloche can be lifted off with an empty hand to harvest, or harvested in place by a Deployer.
 - **Grafting Frame** replaces the cross crop. Visual: two trellises clamped with a brass bracket; a small pressure dial shows "graft progress". Deployers holding a trellis can create one, which allows automated breeding grids.
 - **Regression stays** for hostile conditions. Add a **wilt visual** (desaturated overlay tint) so players can see why growth stopped.
@@ -457,7 +460,7 @@ This turns the strength-tolerance system from "find the right block" into an eng
   - **Temperature:** a new climate dimension. Heat sources inside raise the temperature class: Create **Blaze Burner** (KINDLED/SEETHING), **boiler-fed radiators** (steam pipe), and furnaces/campfires (weak). Plants may gain `temperature` requirements (COLD · COOL · TEMPERATE · WARM · HOT), which lets players grow tropical, nether or desert strains in a snow biome.
   - Humidity bonus when misted.
 - **Climate Gauge** (monitor): a brass panel with three needle dials (temperature, humidity, glass integrity). It is a **Display Link source** (outputs state, temperature and humidity) and gives a comparator output by state. Needles animate in the renderer with lerped angles.
-- **Worldgen:** "Derelict Conservatories" — broken iron-frame glasshouses with cracked glass (state GAPS), overgrown blight, and loot containing a Ledger, starter cultivars and a broken Assaying Engine.
+- **Worldgen (optional, Phase 6, last):** "Derelict Conservatories" — broken iron-frame glasshouses with cracked glass (state GAPS), overgrown blight, and loot containing a Ledger, starter cultivars and a broken Assaying Engine.
 
 ### 3.8 Fertilizers & Chemistry
 
@@ -489,6 +492,11 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 
 ### 3.11 Ore-blooms (Resource Crops)
 
+> **Cog & Cultivar (slimmed):** ore-blooms are plain plant JSON. They drop `create:crushed_raw_<metal>` directly at a low chance, so they feed Create's washing and ore-doubling chain with no new items. Mutations follow the same habitat logic as the rest of the tree (e.g. a copper bloom needs flooded soil, as copper oxidises in water). Art uses pack-driven `cultivar:crop/` models with metal-coloured textures. Pack makers add their own metals the same way. Ore Petals and Brassleaf gating are dropped (there is no brass trellis tier).
+
+The original AgriCraft-derived notes below are kept for reference.
+
+
 - Rename and re-skin the resource line: **Ferrous Bloom** (iron), **Verdigris Vine** (copper), **Brassleaf** (zinc — new, Create-specific), **Aurum Thistle** (gold), **Plumbago** (lead), **Lazuli Bell** (lapis), **Redstone Fern**, **Quartz Lily**, **Coalroot**, **Diamond Briar**, **Emerald Fern**, **Netherite Rose**.
 - **Output:** instead of nuggets, drop **Ore Petals** that **wash** (fan + water) into `create:crushed_raw_<metal>` at low yield, so ore-blooms slot into the existing Create ore chain. Note for implementation: Create's crushed tier has no per-material tag (only the umbrella `create:crushed_raw_materials`), so resolve outputs by direct item id with a config map and fall back to nuggets when the item is missing.
 - Mutation tree root: keep **Ferrous Bloom = melon × pumpkin** (Ferranium's role). Add a Create-specific branch: **Brassleaf = Verdigris Vine × Ferrous Bloom**, required for brass trellises, which ties breeding progress to the tech tree.
@@ -500,13 +508,19 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 - **Seed Satchel:** no enchant gate (the 1.18 enchant requirement was friction for little gain); instead the satchel needs a **brass dial upgrade** to enable sorting. Same capacity and sorter logic; the sorter dial is shown on the item model via an item property.
 - **Transplanting Spade / Pruning Shears:** the same function as trowel and clipper.
 
-### 3.13 Seed Vault (storage, rebuilt)
+### 3.13 Seed Vault (storage, rebuilt) — dropped
+
+> **Dropped:** seeds stack per genome, Create item vaults and the stock system store them, and the Phase 3 filter attributes (species, stat ≥ N, assayed) do the sorting.
+
 
 - **Card-Catalogue Cabinet** blocks, each with 8 drawers. Each drawer locks to a species and stores unlimited seeds keyed by genome (counts per unique genome).
 - Adjacent cabinets merge into one vault. A **Vault Desk** controller provides the GUI: filter by species, sort by stat, show assay data.
 - Exposes `IItemHandler` (paged virtual slots) so Create funnels, stock links and packagers can pull "best seed of species X".
 
-### 3.14 Livestock Trough (Animal genes, re-framed)
+### 3.14 Livestock Trough (Animal genes, re-framed) — dropped
+
+> **Dropped:** a second gene system plus a block, to automate animal breeding that Create deployers already handle.
+
 
 - Keep fodder genes (cow, pig, sheep, chicken, rabbit…) on crops.
 - A **Livestock Trough** accepts harvested fodder and, if the crop's genome carries that animal's gene, breeds nearby animals on a cooldown. This is more controllable than mobs wandering into fields, and it is Create-feedable.
@@ -542,7 +556,7 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 
 **Feedback:** a pollen particle drifts over influenced crops (client-config toggleable); the Botanist's Loupe and goggles list active influences ("Pollinated: Beehive 83 %").
 
-**Steampunk upgrade (Phase 6): Brass Apiary.** A Create-powered hive. Its strength scales with RPM instead of honey (`cultivar:kinetic_speed` scaling type), it has radius 7, and it outputs honey as a fluid through pipes, so automated farms don't have to trade honey against pollination. Its effects are the same as a full beehive's: the upgrade buys reliability and reach, not more power.
+**Steampunk upgrade (Phase 6, kept): Brass Apiary.** A Create-powered hive. Its strength scales with RPM instead of honey (`cultivar:kinetic_speed` scaling type), it has radius 7, and it outputs honey as a fluid through pipes, so automated farms don't have to trade honey against pollination. Its effects are the same as a full beehive's: the upgrade buys reliability and reach, not more power.
 
 **Vanilla note:** vanilla bees' crop-growing behaviour only targets vanilla crop blocks, so it won't touch Cultivar crops. The influence system replaces it on purpose.
 
@@ -675,7 +689,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **3 — Create farming** ✅ | Harvester override, deployer actions, item attributes (stat filters), comparator/Display Link, **cull loop: Millstone seeds → Seed Meal → fertilizer** | Fully automated plant–harvest–sort loop |
 | **4 — Water** ✅ | One block: the **Sprinkler** (1000 mB water tank, runs only while it has water, 1 mB per N ticks; adds random ticks + occasional BonemealEvent pulses to growables in a 9×9 area, moistens farmland; fed by any NeoForge fluid-capability pipe: Create, Pipez, Modern Dynamics). Cisterns/drip lines/troughs dropped as unnecessary | Sprinkler field fed by Create pipes |
 | **5 — Climate** ❌ dropped | Temperature added no gameplay; soils, the Sprinkler and the Bell Cloche already cover climate control. Left to addons via the API (see ARCHITECTURE.md "Extending from an addon") | — |
-| **6 — Content** | Ore-blooms → crushed ore, Brassleaf gating, Seed Vault, Livestock Trough, **Brass Apiary**, blight variants, Derelict Conservatories | Pack-ready |
+| **6 — Content** (slimmed) | **Ore-blooms** (data-only, drop `create:crushed_raw_*`), **habitat blight variants** (data-only), **Brass Apiary** (one block). Optional: Derelict Conservatories, Wall Trellis. Dropped: Seed Vault, Livestock Trough/fodder genes, Ore Petals, Brassleaf gating | Pack-ready |
 | **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
 | **7 — Polish** | Excalibur-based asset pass, sounds, Ponder scenes, JEI/EMI categories, Jade | Release |
 
