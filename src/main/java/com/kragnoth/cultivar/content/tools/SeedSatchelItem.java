@@ -53,13 +53,19 @@ import java.util.Optional;
 public class SeedSatchelItem extends Item {
     public static final int CAPACITY = 64;
 
-    public record Entry(Genome genome, int count) {
+    /** One stored genome; {@code assayed} keeps the seed's assay status so it comes back out the same. */
+    public record Entry(Genome genome, int count, boolean assayed) {
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Genome.CODEC.fieldOf("genome").forGetter(Entry::genome),
-                Codec.intRange(1, CAPACITY).fieldOf("count").forGetter(Entry::count)
+                Codec.intRange(1, CAPACITY).fieldOf("count").forGetter(Entry::count),
+                Codec.BOOL.optionalFieldOf("assayed", false).forGetter(Entry::assayed)
         ).apply(i, Entry::new));
         public static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
-                Genome.STREAM_CODEC, Entry::genome, ByteBufCodecs.VAR_INT, Entry::count, Entry::new);
+                Genome.STREAM_CODEC, Entry::genome, ByteBufCodecs.VAR_INT, Entry::count, ByteBufCodecs.BOOL, Entry::assayed, Entry::new);
+
+        ItemStack toStack() {
+            return CultivarSeedItem.of(genome, assayed);
+        }
     }
 
     public record Contents(List<Entry> entries) {
@@ -104,33 +110,39 @@ public class SeedSatchelItem extends Item {
         if (genome == null) {
             return 0;
         }
+        boolean assayed = seeds.has(CoreModule.ASSAYED.get());
         Contents c = contents(satchel);
         if (c.species().isPresent() && !c.species().get().species().is(genome.species())) {
             return 0;
         }
-        int room = CAPACITY - c.total();
-        int moved = Math.min(room, seeds.getCount());
+        int moved = Math.min(CAPACITY - c.total(), seeds.getCount());
         if (moved <= 0) {
             return 0;
         }
         List<Entry> list = new ArrayList<>(c.entries());
         boolean merged = false;
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).genome().equals(genome)) {
-                list.set(i, new Entry(genome, list.get(i).count() + moved));
+            Entry e = list.get(i);
+            if (e.genome().equals(genome) && e.assayed() == assayed) {
+                list.set(i, new Entry(genome, e.count() + moved, assayed));
                 merged = true;
                 break;
             }
         }
         if (!merged) {
-            list.add(new Entry(genome, moved));
+            list.add(new Entry(genome, moved, assayed));
         }
         satchel.set(ToolsModule.SATCHEL_CONTENTS.get(), new Contents(list));
         return moved;
     }
 
-    /** Removes one seed, chosen by the dial (best for its stat) or oldest first without one. */
-    public static Optional<Genome> takeOne(ItemStack satchel) {
+    /** Dial value of an entry; unassayed seeds rank below every assayed one (their stats are unknown). */
+    private static int rank(Entry e, Dial dial, Genetics.Expression expr) {
+        return e.assayed() ? Genetics.expressed(e.genome(), dial.stat(), expr) : Integer.MIN_VALUE;
+    }
+
+    /** Removes one seed, chosen by the dial (best assayed seed for its stat) or oldest first without one. */
+    public static Optional<ItemStack> takeOne(ItemStack satchel) {
         Contents c = contents(satchel);
         if (c.entries().isEmpty()) {
             return Optional.empty();
@@ -140,51 +152,43 @@ public class SeedSatchelItem extends Item {
         if (dial != null) {
             Genetics.Expression expr = Genetics.current();
             List<Entry> entries = c.entries();
-            index = entries.indexOf(entries.stream()
-                    .max(Comparator.comparingInt(e -> Genetics.expressed(e.genome(), dial.stat(), expr))).orElseThrow());
+            index = entries.indexOf(entries.stream().max(Comparator.comparingInt(e -> rank(e, dial, expr))).orElseThrow());
         }
-        List<Entry> list = new ArrayList<>(c.entries());
-        Entry e = list.get(index);
-        if (e.count() > 1) {
-            list.set(index, new Entry(e.genome(), e.count() - 1));
-        } else {
-            list.remove(index);
-        }
-        satchel.set(ToolsModule.SATCHEL_CONTENTS.get(), new Contents(list));
-        return Optional.of(e.genome());
+        return Optional.of(removeOne(satchel, c, index).toStack());
     }
 
     /** Seeds within this many points of the best (on the dial's stat) are keepers and never culled. */
     public static final int KEEP_WITHIN = 2;
 
     /**
-     * Removes the single worst seed that is not a keeper, or empty if everything left is a keeper or the
-     * satchel has no dial. Keepers are seeds whose dialled stat is within {@link #KEEP_WITHIN} of the best.
+     * Removes the single worst assayed seed that is not a keeper, or empty if none qualifies or there is no dial.
+     * Keepers are within {@link #KEEP_WITHIN} of the best assayed seed. Unassayed seeds are never culled.
      */
-    public static Optional<Genome> cullOne(ItemStack satchel) {
+    public static Optional<ItemStack> cullOne(ItemStack satchel) {
         Dial dial = satchel.get(ToolsModule.SATCHEL_DIAL.get());
         Contents c = contents(satchel);
         if (dial == null || c.entries().isEmpty()) {
             return Optional.empty();
         }
         Genetics.Expression expr = Genetics.current();
-        int best = c.entries().stream().mapToInt(e -> Genetics.expressed(e.genome(), dial.stat(), expr)).max().orElse(0);
-        Optional<Entry> worst = c.entries().stream()
-                .filter(e -> Genetics.expressed(e.genome(), dial.stat(), expr) < best - KEEP_WITHIN)
-                .min(Comparator.comparingInt(e -> Genetics.expressed(e.genome(), dial.stat(), expr)));
-        if (worst.isEmpty()) {
-            return Optional.empty();
-        }
+        List<Entry> assayed = c.entries().stream().filter(Entry::assayed).toList();
+        int best = assayed.stream().mapToInt(e -> rank(e, dial, expr)).max().orElse(Integer.MIN_VALUE);
+        Optional<Entry> worst = assayed.stream()
+                .filter(e -> rank(e, dial, expr) < best - KEEP_WITHIN)
+                .min(Comparator.comparingInt(e -> rank(e, dial, expr)));
+        return worst.map(w -> removeOne(satchel, c, c.entries().indexOf(w)).toStack());
+    }
+
+    private static Entry removeOne(ItemStack satchel, Contents c, int index) {
         List<Entry> list = new ArrayList<>(c.entries());
-        int index = list.indexOf(worst.get());
         Entry e = list.get(index);
         if (e.count() > 1) {
-            list.set(index, new Entry(e.genome(), e.count() - 1));
+            list.set(index, new Entry(e.genome(), e.count() - 1, e.assayed()));
         } else {
             list.remove(index);
         }
         satchel.set(ToolsModule.SATCHEL_CONTENTS.get(), new Contents(list));
-        return Optional.of(e.genome());
+        return e;
     }
 
     /** Satchel on the cursor, clicked onto a slot: right-click stores that slot's seeds, or drops one into an empty slot. */
@@ -195,7 +199,7 @@ public class SeedSatchelItem extends Item {
         }
         ItemStack other = slot.getItem();
         if (other.isEmpty()) {
-            takeOne(satchel).ifPresent(g -> slot.safeInsert(CultivarSeedItem.of(g)));
+            takeOne(satchel).ifPresent(slot::safeInsert);
             return true;
         }
         if (other.has(CoreModule.GENOME.get())) {
@@ -217,7 +221,7 @@ public class SeedSatchelItem extends Item {
             return false;
         }
         if (other.isEmpty()) {
-            takeOne(satchel).ifPresent(g -> cursor.set(CultivarSeedItem.of(g)));
+            takeOne(satchel).ifPresent(cursor::set);
             return true;
         }
         if (other.is(ToolsModule.BRASS_DIAL.get()) && !satchel.has(ToolsModule.SATCHEL_DIAL.get())) {
@@ -286,11 +290,11 @@ public class SeedSatchelItem extends Item {
             return InteractionResult.SUCCESS;
         }
         ItemStack satchel = ctx.getItemInHand();
-        Optional<Genome> seed = takeOne(satchel);
+        Optional<ItemStack> seed = takeOne(satchel);
         if (seed.isEmpty()) {
             return InteractionResult.PASS;
         }
-        crop.plant(seed.get());
+        crop.plant(seed.get().get(CoreModule.GENOME.get()));
         level.playSound(null, ctx.getClickedPos(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1f, 1f);
         return InteractionResult.CONSUME;
     }
@@ -306,11 +310,11 @@ public class SeedSatchelItem extends Item {
         BlockState state = composter;
         int culled = 0;
         while (state.getValue(ComposterBlock.LEVEL) < ComposterBlock.READY - 1) {
-            Optional<Genome> worst = cullOne(ctx.getItemInHand());
+            Optional<ItemStack> worst = cullOne(ctx.getItemInHand());
             if (worst.isEmpty()) {
                 break;
             }
-            state = ComposterBlock.insertItem(ctx.getPlayer(), state, level, CultivarSeedItem.of(worst.get()), ctx.getClickedPos());
+            state = ComposterBlock.insertItem(ctx.getPlayer(), state, level, worst.get(), ctx.getClickedPos());
             culled++;
         }
         if (ctx.getPlayer() != null) {

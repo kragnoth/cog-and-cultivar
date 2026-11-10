@@ -8,6 +8,8 @@ import com.kragnoth.cultivar.content.core.condition.CoreConditions;
 import com.kragnoth.cultivar.content.core.influence.CoreInfluence;
 import com.kragnoth.cultivar.core.module.CultivarModule;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Unit;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -35,6 +37,10 @@ public final class CoreModule implements CultivarModule {
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Genome>> GENOME =
             COMPONENTS.registerComponentType("genome", b -> b.persistent(Genome.CODEC).networkSynchronized(Genome.STREAM_CODEC));
+
+    /** Present on seed items whose stats have been revealed by an Assaying Engine. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> ASSAYED =
+            COMPONENTS.registerComponentType("assayed", b -> b.persistent(Unit.CODEC).networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.cultivar"))
