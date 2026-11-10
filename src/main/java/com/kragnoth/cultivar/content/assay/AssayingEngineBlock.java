@@ -91,6 +91,18 @@ public class AssayingEngineBlock extends KineticBlock implements IBE<AssayingEng
         });
     }
 
+    /** Comparator: how full the assayed-seed output is (0-15), so a contraption can wait for a batch. */
+    @Override
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof AssayingEngineBlockEntity be
+                ? net.neoforged.neoforge.items.ItemHandlerHelper.calcRedstoneFromInventory(be.inventory) : 0;
+    }
+
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock())) {

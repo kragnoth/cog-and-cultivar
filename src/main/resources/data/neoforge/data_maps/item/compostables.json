@@ -1,1 +1,10 @@
-{ "values": { "cultivar:seed": { "chance": 0.3 } } }
+{
+  "values": {
+    "cultivar:seed": {
+      "chance": 0.3
+    },
+    "cultivar:seed_meal": {
+      "chance": 0.5
+    }
+  }
+}

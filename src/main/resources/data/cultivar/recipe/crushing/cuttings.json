@@ -1,0 +1,18 @@
+{
+  "type": "create:crushing",
+  "ingredients": [
+    {
+      "item": "cultivar:cutting"
+    }
+  ],
+  "processing_time": 80,
+  "results": [
+    {
+      "id": "cultivar:seed_meal"
+    },
+    {
+      "id": "cultivar:seed_meal",
+      "chance": 0.5
+    }
+  ]
+}

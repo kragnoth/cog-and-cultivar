@@ -93,5 +93,18 @@
   "item.cultivar.cutting.hint": "Plant on an empty trellis: %s%% chance to take (Strength)",
   "item.cultivar.cutting.failed": "The cutting didn't take...",
   "cultivar.info.hardy": "Hardy: grows on any soil",
-  "stat.cultivar.vigour": "Vigour"
+  "stat.cultivar.vigour": "Vigour",
+  "item.cultivar.seed_meal": "Seed Meal",
+  "create.item_attributes.cultivar_species": "is %1$s",
+  "create.item_attributes.cultivar_species.inverted": "is not %1$s",
+  "create.item_attributes.cultivar_stat_at_least": "has %1$s of at least %2$s",
+  "create.item_attributes.cultivar_stat_at_least.inverted": "has %1$s below %2$s",
+  "create.item_attributes.cultivar_assayed": "is assayed",
+  "create.item_attributes.cultivar_assayed.inverted": "is not assayed",
+  "cultivar.display_source.crop_status": "Crop Status",
+  "cultivar.display_source.ledger_progress": "Ledger Progress",
+  "cultivar.display.crop.empty": "Empty trellis",
+  "cultivar.display.crop.ready": "%s: ready",
+  "cultivar.display.crop.growing": "%s %s%%",
+  "cultivar.display.ledger": "Ledger %s/%s species"
 }

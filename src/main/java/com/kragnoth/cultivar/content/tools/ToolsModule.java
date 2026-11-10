@@ -42,6 +42,8 @@ public final class ToolsModule implements CultivarModule {
             SeedSatchelItem::new, new Item.Properties().stacksTo(1));
     public static final DeferredItem<Item> BRASS_DIAL = ITEMS.registerSimpleItem("brass_dial");
     /** Held in either hand, shows the crop readout (client overlay). Create goggles show the same readout. */
+    /** Milled seeds (Millstone/Crushing Wheels): the end of the cull loop, used as a fertilizer. */
+    public static final DeferredItem<Item> SEED_MEAL = ITEMS.registerItem("seed_meal", Item::new, new Item.Properties());
     public static final DeferredItem<CuttingItem> CUTTING = ITEMS.registerItem("cutting",
             CuttingItem::new, new Item.Properties());
     public static final DeferredItem<Item> BOTANISTS_LOUPE = ITEMS.registerItem("botanists_loupe",
