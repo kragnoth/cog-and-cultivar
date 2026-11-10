@@ -23,6 +23,8 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.EnumValue<Genetics.Expression> STAT_EXPRESSION;
     public static final ModConfigSpec.BooleanValue CLONE_MUTATIONS;
     public static final ModConfigSpec.BooleanValue REQUIRE_ASSAY;
+    public static final ModConfigSpec.DoubleValue SATCHEL_SEED_BASE;
+    public static final ModConfigSpec.DoubleValue SATCHEL_SEED_PER_VIGOUR;
     public static final ModConfigSpec.BooleanValue INFLUENCE_ENABLED;
     public static final ModConfigSpec.DoubleValue MAX_MUTATION_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue MIN_WEED_MULTIPLIER;
@@ -47,6 +49,10 @@ public final class CultivarServerConfig {
         REQUIRE_ASSAY = b.comment("Seed item tooltips hide stats until the seed is assayed (Assaying Engine).",
                         "The Loupe and goggles always read crops in the field.")
                 .define("requireAssay", true);
+        SATCHEL_SEED_BASE = b.comment("Harvesting a mature plant with the Seed Satchel (hand or Deployer): base chance of a seed.",
+                        "Chance = base + perVigour * Vigour. Harvesters, hands and shears never give seeds.")
+                .defineInRange("satchelSeedBase", 0.25, 0.0, 1.0);
+        SATCHEL_SEED_PER_VIGOUR = b.defineInRange("satchelSeedPerVigour", 0.05, 0.0, 1.0);
         b.pop();
 
         b.push("influence");

@@ -107,4 +107,39 @@ public final class ToolTests {
         h.assertTrue(com.kragnoth.cultivar.content.tools.CuttingItem.takeChance(new Genome(wheat, stats)) == 1.0, "strong cuttings always take");
         h.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void satchelHarvestsSeedsByVigour(GameTestHelper h) {
+        var wheat = h.getLevel().registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.PLANT)
+                .getHolderOrThrow(net.minecraft.resources.ResourceKey.create(com.kragnoth.cultivar.api.CultivarRegistries.PLANT,
+                        net.minecraft.resources.ResourceLocation.withDefaultNamespace("wheat")));
+        BlockPos pos = new BlockPos(1, 2, 1);
+        h.setBlock(pos.below(), net.minecraft.world.level.block.Blocks.FARMLAND);
+        h.setBlock(pos, com.kragnoth.cultivar.content.crop.CropModule.TIMBER_TRELLIS.get());
+        var crop = (com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(pos);
+        var stats = new java.util.HashMap<>(Genome.base(wheat).stats());
+        stats.put(CoreModule.VIGOUR.getKey(), new com.kragnoth.cultivar.api.genetics.AllelePair(10, 10));
+        Genome strong = new Genome(wheat, stats);
+        h.assertTrue(Math.abs(SeedSatchelItem.seedChance(strong) - 0.75) < 1e-9, "vigour 10 gives 75%");
+        h.assertTrue(Math.abs(SeedSatchelItem.seedChance(Genome.base(wheat)) - 0.30) < 1e-9, "vigour 1 gives 30%");
+
+        ItemStack satchel = new ItemStack(ToolsModule.SEED_SATCHEL.get());
+        var random = net.minecraft.util.RandomSource.create(5L);
+        int seeds = 0, produce = 0;
+        java.util.List<ItemStack> drops = new java.util.ArrayList<>();
+        for (int i = 0; i < 400; i++) {
+            crop.uproot();
+            crop.plant(strong, wheat.value().matureStage());
+            if (SeedSatchelItem.gatherSeeds(crop, random, drops::add, s -> s.copyWithCount(s.getCount() - SeedSatchelItem.insert(satchel, s)))) {
+                seeds++;
+            }
+            h.assertTrue(!crop.isMature(), "a satchel harvest resets the plant like any harvest");
+        }
+        produce = drops.stream().filter(s -> s.is(net.minecraft.world.item.Items.WHEAT)).mapToInt(ItemStack::getCount).sum();
+        h.assertTrue(seeds > 260 && seeds < 340, "about 75% of harvests give a seed, got " + seeds);
+        h.assertTrue(produce > 0, "produce still drops");
+        h.assertTrue(satchel.get(ToolsModule.SATCHEL_CONTENTS.get()).total() == Math.min(seeds, SeedSatchelItem.CAPACITY),
+                "seeds go into the satchel until it's full");
+        h.succeed();
+    }
 }
