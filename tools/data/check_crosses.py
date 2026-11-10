@@ -42,10 +42,15 @@ def soil_states():
 SOILS = soil_states()
 
 
+SOIL_DEFAULTS = {"cultivar:humidity": ("equal", 0.15), "cultivar:acidity": ("equal", 0.2),
+                 "cultivar:nutrients": ("at_least", 0.1)}  # the mod's codec defaults
+
+
 def window(cond):
     i = SCALES[cond["type"]].index(cond["value"])
-    widen = int(cond.get("tolerance", 0) * STRENGTH)
-    cmp = cond.get("comparison", "equal")
+    default_cmp, default_tol = SOIL_DEFAULTS[cond["type"]]
+    widen = int(cond.get("tolerance", default_tol) * STRENGTH)
+    cmp = cond.get("comparison", default_cmp)
     lo = -99 if cmp == "at_most" else i - widen
     hi = 99 if cmp == "at_least" else i + widen
     return cond["type"], lo, hi
@@ -56,7 +61,7 @@ def light_range(conds):
     for c in conds:
         if c["type"] == "cultivar:light":
             widen = int(c.get("tolerance", 0.5) * STRENGTH)
-            lo, hi = max(lo, c["min"] - widen), min(hi, c["max"] + widen)
+            lo, hi = max(lo, c.get("min", 10) - widen), min(hi, c.get("max", 15) + widen)
     return (lo, hi) if lo <= hi else None
 
 

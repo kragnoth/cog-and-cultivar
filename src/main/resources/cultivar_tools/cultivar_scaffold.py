@@ -43,6 +43,10 @@ PRESETS = {
         {"type": "cultivar:light", "min": 12, "max": 15, "tolerance": 0.5},
         {"type": "cultivar:humidity", "value": "dry", "comparison": "at_most", "tolerance": 0.15},
     ],
+    "aquatic": [
+        {"type": "cultivar:light", "min": 6, "max": 15, "tolerance": 0.5},
+        {"type": "cultivar:humidity", "value": "watery", "comparison": "at_least", "tolerance": 0.15},
+    ],
     "wild": [
         {"type": "cultivar:light", "min": 8, "max": 15, "tolerance": 0.5},
         {"type": "cultivar:humidity", "value": "damp", "comparison": "at_least", "tolerance": 0.15},
@@ -66,7 +70,9 @@ def preset_for(crop):
         return "arid"
     if on:
         return "wild"
-    return {"CactusBlock": "arid"}.get(crop.get("kind"), "farmland")
+    # No soil list (they grow on themselves): guess from the block kind.
+    return {"CactusBlock": "arid", "KelpBlock": "aquatic", "WeepingVinesBlock": "nether", "TwistingVinesBlock": "nether",
+            "GrowingPlantHeadBlock": "wild", "CaveVinesBlock": "dark"}.get(crop.get("kind"), "farmland")
 
 
 # ----------------------------------------------------------------------------- textures from jars / packs
@@ -172,13 +178,16 @@ def render_for(assets, crop):
 
 # ----------------------------------------------------------------------------- scaffold
 def plant_id(crop):
-    """Plants are named after the crop, not its block: wheat_seeds -> wheat, cocoa_beans -> cocoa, potato -> potato."""
-    ns, _ = split_id(crop["id"])
+    """Plants are named after the crop, not its block: wheat_seeds -> wheat, cocoa_beans -> cocoa, potato -> potato.
+    A generic seed name (immersiveengineering:seed) falls back to the block's name (hemp)."""
+    ns, block = split_id(crop["id"])
     _, seed = split_id(crop["seed"])
-    for suffix in ("_seeds", "_seed", "_beans", "_pod"):
+    for suffix in ("_seeds", "_seed", "_beans", "_pod", "_kernels", "_slice", "_fruit", "_root"):
         if seed.endswith(suffix) and len(seed) > len(suffix):
             seed = seed[: -len(suffix)]
             break
+    if seed in ("seed", "seeds"):
+        seed = block
     return f"{ns}:{seed}"
 
 
@@ -323,6 +332,10 @@ def load_pack(pack):
 # Breedability: parents and the grafting frame are adjacent, so they share light (neighbouring blocks differ by at
 # most 1); each plant has its own soil, shifted by heat (-1), water (+1) and a Bell Cloche (+1). Checked at base
 # stats (Strength 1), so a warning means a fresh seed can't do it; bred-up Strength may still manage.
+# Defaults match the mod's codecs: /cultivar export leaves out any field at its default value.
+LIGHT_DEFAULTS = {"min": 10, "max": 15, "tolerance": 0.5}
+SOIL_DEFAULTS = {"cultivar:humidity": ("equal", 0.15), "cultivar:acidity": ("equal", 0.2),
+                 "cultivar:nutrients": ("at_least", 0.1)}
 HUMIDITY = ["arid", "dry", "damp", "wet", "watery", "flooded"]
 SCALES = {"cultivar:humidity": (0, HUMIDITY),
           "cultivar:acidity": (1, ["highly_acidic", "acidic", "slightly_acidic", "neutral", "slightly_alkaline",
@@ -345,8 +358,9 @@ def light_range(conds):
     lo, hi = 0, 15
     for c in conds:
         if c.get("type") == "cultivar:light":
-            widen = int(c.get("tolerance", 0.5))
-            lo, hi = max(lo, c.get("min", 0) - widen), min(hi, c.get("max", 15) + widen)
+            widen = int(c.get("tolerance", LIGHT_DEFAULTS["tolerance"]))
+            lo = max(lo, c.get("min", LIGHT_DEFAULTS["min"]) - widen)
+            hi = min(hi, c.get("max", LIGHT_DEFAULTS["max"]) + widen)
     return (lo, hi) if lo <= hi else None
 
 
@@ -356,7 +370,9 @@ def soil_fits(states, *cond_lists):
         for c in conds:
             if c.get("type") in SCALES:
                 slot, scale = SCALES[c["type"]]
-                i, widen, cmp = scale.index(c["value"]), int(c.get("tolerance", 0)), c.get("comparison", "equal")
+                default_cmp, default_tol = SOIL_DEFAULTS[c["type"]]
+                i, widen = scale.index(c["value"]), int(c.get("tolerance", default_tol))
+                cmp = c.get("comparison", default_cmp)
                 windows.append((slot, -99 if cmp == "at_most" else i - widen, 99 if cmp == "at_least" else i + widen))
     return any(all(lo <= st[slot] <= hi for slot, lo, hi in windows) for st in states)
 
