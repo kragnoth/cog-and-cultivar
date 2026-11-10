@@ -1,0 +1,1 @@
+{ "type": "minecraft:crafting_shaped", "category": "equipment", "pattern": [" B ", "G G", "GGG"], "key": { "B": { "item": "create:brass_nugget" }, "G": { "item": "minecraft:glass" } }, "result": { "id": "cultivar:bell_cloche", "count": 1 } }

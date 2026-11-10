@@ -15,5 +15,16 @@
   "plant.minecraft.potato": "Potato",
   "plant.minecraft.beetroot": "Beetroot",
   "weed.cultivar.rust_rot": "Rust-rot",
-  "block.cultivar.bell_cloche": "Bell Cloche"
+  "block.cultivar.bell_cloche": "Bell Cloche",
+  "item.cultivar.transplanting_spade": "Transplanting Spade",
+  "item.cultivar.transplanting_spade.holding": "Holding: %s",
+  "item.cultivar.pruning_shears": "Pruning Shears",
+  "item.cultivar.timber_tiller": "Timber Hand Tiller",
+  "item.cultivar.iron_tiller": "Iron Hand Tiller",
+  "item.cultivar.seed_satchel": "Seed Satchel",
+  "item.cultivar.seed_satchel.empty": "Empty",
+  "item.cultivar.seed_satchel.sorting": "Sorting by: %s",
+  "item.cultivar.brass_dial": "Brass Dial",
+  "config.jade.plugin_cultivar.crop": "Cultivar crops",
+  "item.cultivar.seed_satchel.culled": "Composted %s culled seeds"
 }

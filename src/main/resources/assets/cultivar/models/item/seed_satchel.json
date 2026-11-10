@@ -1,0 +1,2 @@
+{ "parent": "minecraft:item/generated", "textures": { "layer0": "cultivar:item/seed_satchel" },
+  "overrides": [ { "predicate": { "cultivar:dial": 1 }, "model": "cultivar:item/seed_satchel_dial" } ] }
