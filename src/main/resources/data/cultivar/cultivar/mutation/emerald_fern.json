@@ -1,6 +1,6 @@
 {
-  "parent_a": "cultivar:lazuli_bell",
-  "parent_b": "cultivar:aurum_thistle",
+  "parent_a": "cultivar:aurum_thistle",
+  "parent_b": "cultivar:woad",
   "child": "cultivar:emerald_fern",
   "chance": 0.1,
   "conditions": [

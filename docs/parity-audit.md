@@ -108,3 +108,5 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   plants, Cutting subtype, `/cultivar knowledge` commands. Still open from item 5: Assaying Engine, fertilizer and
   soil categories; bed and Sprinkler info pages.
 - 2026-11-10: Bell Cloche +1 humidity; heat sources (`#cultivar:soil_heaters`) dry soil one step; coarse dirt soil.
+- 2026-11-10: every cross breedable on plain trellises at base stats (shared-light rule, twilight band);
+  `tools/data/check_crosses.py` runs in CI.

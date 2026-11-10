@@ -15,18 +15,18 @@
     {
       "type": "cultivar:light",
       "min": 0,
-      "max": 4,
-      "tolerance": 0.5
+      "max": 15,
+      "tolerance": 0
     },
     {
       "type": "cultivar:humidity",
-      "value": "damp",
-      "comparison": "at_least",
+      "value": "dry",
+      "comparison": "at_most",
       "tolerance": 0.15
     },
     {
       "type": "cultivar:nutrients",
-      "value": "high",
+      "value": "low",
       "comparison": "at_least",
       "tolerance": 0.1
     }

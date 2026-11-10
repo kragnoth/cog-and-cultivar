@@ -33,7 +33,7 @@
     },
     {
       "type": "cultivar:acidity",
-      "value": "acidic",
+      "value": "slightly_acidic",
       "comparison": "at_most",
       "tolerance": 0.25
     }

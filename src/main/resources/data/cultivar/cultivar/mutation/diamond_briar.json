@@ -1,13 +1,13 @@
 {
   "parent_a": "cultivar:emerald_fern",
-  "parent_b": "cultivar:shardbloom",
+  "parent_b": "cultivar:quartz_lily",
   "child": "cultivar:diamond_briar",
   "chance": 0.05,
   "conditions": [
     {
-      "type": "cultivar:light",
-      "min": 0,
-      "max": 3,
+      "type": "cultivar:humidity",
+      "value": "arid",
+      "comparison": "equal",
       "tolerance": 0
     }
   ]
