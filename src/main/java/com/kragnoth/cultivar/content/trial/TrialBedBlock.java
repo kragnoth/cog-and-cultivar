@@ -17,8 +17,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-/** Trial Bed. Right-click with seeds or a Ledger to load it; empty hand takes the Ledger back. */
-public class TrialBedBlock extends BaseEntityBlock {
+/** Trial Bed. Right-click with seeds or a Ledger to load it; empty hand takes the Ledger back. It sets up its own trellis. */
+public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.cultivar.api.soil.SoilHost {
     public static final MapCodec<TrialBedBlock> CODEC = simpleCodec(TrialBedBlock::new);
 
     public TrialBedBlock(Properties properties) {
@@ -43,6 +43,17 @@ public class TrialBedBlock extends BaseEntityBlock {
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide() ? null : createTickerHelper(type, TrialModule.TRIAL_BED_BE.get(), (l, p, s, be) -> be.serverTick());
+    }
+
+    /** Acts as farmland (so crops find a soil) and is ideal: no requirements, weeds or mutation habitats. */
+    @Override
+    public @Nullable BlockState hostedSoil(net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return net.minecraft.world.level.block.Blocks.FARMLAND.defaultBlockState();
+    }
+
+    @Override
+    public boolean isIdeal(net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return true;
     }
 
     @Override

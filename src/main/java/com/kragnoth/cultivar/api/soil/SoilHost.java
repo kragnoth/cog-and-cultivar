@@ -18,4 +18,12 @@ public interface SoilHost {
     default boolean suppliesWater(BlockGetter level, BlockPos pos) {
         return false;
     }
+
+    /**
+     * An ideal host (the Trial Bed): the crop above ignores its growth requirements and weeds, and mutation habitat
+     * conditions don't apply, so crosses can be tested anywhere.
+     */
+    default boolean isIdeal(BlockGetter level, BlockPos pos) {
+        return false;
+    }
 }

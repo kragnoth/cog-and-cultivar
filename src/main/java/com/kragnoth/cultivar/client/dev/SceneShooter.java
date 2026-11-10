@@ -78,7 +78,8 @@ public final class SceneShooter {
             new Shot("ruin_02_inside", 28.5, Y + 1.6, -7.2, 0f, 8f),
             new Shot("ruin_03_lean_to", 41.0, Y + 4.0, -6.5, 0f, 28f),
             new Shot("sprinkler_01", 54.2, Y + 2.6, 3.6, 155f, 24f),
-            new Shot("bed_01_row", 66.5, Y + 3.0, 4.5, 150f, 26f));
+            new Shot("bed_01_row", 66.5, Y + 3.0, 4.5, 150f, 26f),
+            new Shot("trial_01_plot", 74.0, Y + 4.5, 7.5, 160f, 32f));
 
     /** CULTIVAR_SCENES=1 shoots everything; any other value shoots only names starting with it (e.g. "tall"). */
     private static final List<Shot> SHOTS = selectShots();
@@ -290,6 +291,33 @@ public final class SceneShooter {
                     Holder<Plant> p = plant(level, bedCrops[i]);
                     c.plant(Genome.base(p), p.value().matureStage());
                     c.clampToSpace();
+                }
+            }
+        }
+
+        // A 5x5 trial plot, stocked and fast-forwarded so its checkerboard of crops and frames is grown in.
+        java.util.List<com.kragnoth.cultivar.content.trial.TrialBedBlockEntity> trial = new java.util.ArrayList<>();
+        for (int dx = 0; dx < 5; dx++) {
+            for (int dz = 0; dz < 5; dz++) {
+                BlockPos tp = new BlockPos(70 + dx, Y, dz);
+                level.setBlock(tp, com.kragnoth.cultivar.content.trial.TrialModule.TRIAL_BED.get().defaultBlockState(), Block.UPDATE_ALL);
+                if (level.getBlockEntity(tp) instanceof com.kragnoth.cultivar.content.trial.TrialBedBlockEntity tb) {
+                    trial.add(tb);
+                }
+            }
+        }
+        net.minecraft.world.item.Item[] stock = {net.minecraft.world.item.Items.WHEAT_SEEDS, net.minecraft.world.item.Items.CARROT,
+                net.minecraft.world.item.Items.POTATO, net.minecraft.world.item.Items.BEETROOT_SEEDS, net.minecraft.world.item.Items.SWEET_BERRIES};
+        for (int i = 0; i < stock.length; i++) {
+            trial.get(i).inventory.setStackInSlot(0, new net.minecraft.world.item.ItemStack(stock[i], 64));
+        }
+        var rng = level.random;
+        for (int cycle = 0; cycle < 300; cycle++) {
+            for (var tb : trial) {
+                tb.work(level, rng);
+                BlockPos up = tb.getBlockPos().above();
+                if (cycle % 2 == 0) {
+                    level.getBlockState(up).randomTick(level, up, rng);
                 }
             }
         }

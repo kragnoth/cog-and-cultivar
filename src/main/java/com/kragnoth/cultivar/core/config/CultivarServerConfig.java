@@ -28,6 +28,7 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.DoubleValue TRIAL_CHANCE;
     public static final ModConfigSpec.IntValue TRIAL_FULL_SIZE;
     public static final ModConfigSpec.BooleanValue TRIAL_CONSUMES_SEEDS;
+    public static final ModConfigSpec.IntValue TRIAL_HOLD_CYCLES;
     public static final ModConfigSpec.IntValue SPRINKLER_RADIUS;
     public static final ModConfigSpec.IntValue SPRINKLER_INTERVAL;
     public static final ModConfigSpec.IntValue SPRINKLER_ATTEMPTS;
@@ -80,12 +81,15 @@ public final class CultivarServerConfig {
         b.push("trial_bed");
         TRIAL_INTERVAL_MINUTES = b.comment("Minutes between a trial plot's discovery rolls.")
                 .defineInRange("intervalMinutes", 5, 1, 1440);
-        TRIAL_CHANCE = b.comment("Chance per roll to discover an untested mutation, for a full-size plot.")
+        TRIAL_CHANCE = b.comment("Bonus: chance per roll to discover an untested mutation outright, for a full-size plot.",
+                        "Trial plots also discover mutations for real by growing and crossing their seeds.")
                 .defineInRange("chance", 0.05, 0.0, 1.0);
         TRIAL_FULL_SIZE = b.comment("Beds for the full chance (81 = a 9x9). Smaller plots scale the chance down.")
                 .defineInRange("fullSize", 81, 1, 128);
-        TRIAL_CONSUMES_SEEDS = b.comment("Whether a discovery spends one seed of each parent.")
+        TRIAL_CONSUMES_SEEDS = b.comment("Whether a bonus-roll discovery spends one seed of each parent.")
                 .define("consumesSeeds", true);
+        TRIAL_HOLD_CYCLES = b.comment("Half-second cycles a mature producer stays (to parent crosses) before rotating to another species.")
+                .defineInRange("holdCycles", 120, 1, 100_000);
         b.pop();
 
         b.push("sprinkler");
