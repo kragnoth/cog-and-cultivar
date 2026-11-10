@@ -334,9 +334,14 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         if (!isMature() || level == null) {
             return false;
         }
-        rollProducts(drops, level.random);
         Plant plant = genome.species().value();
-        stage = Math.min(plant.afterHarvestStage(), plant.matureStage());
+        int after = Math.min(plant.afterHarvestStage(), plant.matureStage());
+        // Tall plants yield per segment cut (3-tall cane back to 1 = 2 harvests), like cutting vanilla cane.
+        int segmentsCut = Math.max(1, plant.blocksAt(stage) - plant.blocksAt(after));
+        for (int i = 0; i < segmentsCut; i++) {
+            rollProducts(drops, level.random);
+        }
+        stage = after;
         changed();
         return true;
     }
