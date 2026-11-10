@@ -405,7 +405,7 @@ Working names (placeholders; pick one):
 ### 3.3 Genome & Stats (kept, with additions)
 
 Keep the 6 stats and the diploid model. Re-skin the presentation:
-- **Assay Card** item: a punch card whose hole pattern encodes the genome. The card texture is generated per stat (a column of 10 holes per stat, punched up to the value). It is an analysis record, separate from the seed.
+- ~~**Assay Card**~~ *(dropped: assaying reveals the seed itself)*. Originally a punch card whose hole pattern encodes the genome. The card texture is generated per stat (a column of 10 holes per stat, punched up to the value). It is an analysis record, separate from the seed.
 - Optional **7th stat, "Hardiness"** (pack-toggle): tolerance to pollution and blight, for Steamlands-style wasteland play. Inert unless a pollution provider is installed. Registered through the static stat registry like any addon gene.
 - Config option for **classic vs hardcore** stat inheritance (§2.5).
 - **Fix:** make the mutativity math match its intended 25/50/25 design, or document the real curve in-game (the Ledger's genetics page).
@@ -413,7 +413,7 @@ Keep the 6 stats and the diploid model. Re-skin the presentation:
 ### 3.4 Assaying Engine (Seed Analyzer)
 
 - **Block:** a kinetic machine. A brass housing with a spinning drum, a magnifying lens on an arm, and a card punch on the side.
-- **Function:** insert a seed and give it RPM. Assaying takes `T = base / (|RPM| / 32)` ticks, clamped. Output is the seed back plus an **Assay Card** (consumes paper). If a Ledger is in the side slot, the species is recorded.
+- **Function:** insert a seed and give it RPM. Assaying takes `T = base / (|RPM| / 32)` ticks, clamped. Output is the seed back, assayed. If a Ledger is in the side slot, the species is recorded. *(The Assay Card output was dropped.)*
 - **Stress impact:** low (2–4 SU/RPM). It is an early Create tutorial machine.
 - **Goggle info:** current species, progress, stress.
 - **Visual:** the drum spins with the shaft (a Create partial model rotated in the renderer), the lens arm bobs, and the card punch clacks (sound) when done.
@@ -684,7 +684,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 |---|---|---|
 | **0 — Foundation** ✅ | Module system, registries (static + datapack), genome component, crop-influence API, server config, versioned network, ServerWorkQueue, datagen, sidedness guard, dedicated-server CI tests | CI green on a dedicated server |
 | **1 — Core** | Trellis, crop BE, Bell Cloche, datapack plant/soil/mutation content, growth tick, breeding, weeds/blight, harvest, **influence lookup + beehive pollination (§3.15)** | Breed a vanilla mutation chain; stats inherit as specified; a full hive measurably raises mutation rate |
-| **2 — Tools & info** | Spade, Shears, Tiller, Satchel, Loupe (+ goggle merge), Ledger, Assaying Engine (kinetic), Assay Card | Full manual breeding loop with diegetic info |
+| **2 — Tools & info** | Spade, Shears, Tiller, Satchel, Loupe (+ goggle merge), Ledger, Assaying Engine (kinetic) (Assay Card dropped) | Full manual breeding loop with diegetic info |
 | **2.5 — Tall crops** ✅ | Plant `height`, auto-stacking trellis segments, sugarcane/cactus/bamboo data (Wall Trellis deferred to Phase 6 content) | A 3-high sugarcane grows on a stacked trellis |
 | **3 — Create farming** ✅ | Harvester override, deployer actions, item attributes (stat filters), comparator/Display Link, **cull loop: Millstone seeds → Seed Meal → fertilizer** | Fully automated plant–harvest–sort loop |
 | **4 — Water** ✅ | One block: the **Sprinkler** (1000 mB water tank, runs only while it has water, 1 mB per N ticks; adds random ticks + occasional BonemealEvent pulses to growables in a 9×9 area, moistens farmland; fed by any NeoForge fluid-capability pipe: Create, Pipez, Modern Dynamics). Cisterns/drip lines/troughs dropped as unnecessary | Sprinkler field fed by Create pipes |

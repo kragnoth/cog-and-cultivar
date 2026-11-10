@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -28,16 +27,15 @@ import java.util.List;
  * 256 RPM well under a second. Clients get the inventory and progress for goggles via Create's sendData.
  */
 public class AssayingEngineBlockEntity extends KineticBlockEntity {
-    public static final int SEED_IN = 0, PAPER = 1, LEDGER = 2, SEED_OUT = 3, CARD_OUT = 4;
+    public static final int SEED_IN = 0, LEDGER = 1, SEED_OUT = 2;
     public static final float WORK = 100f;
 
-    public final ItemStackHandler inventory = new ItemStackHandler(5) {
+    public final ItemStackHandler inventory = new ItemStackHandler(3) {
         @Override
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
             return switch (slot) {
                 case SEED_IN -> stack.has(CoreModule.GENOME.get())
                         && (stack.getItem() instanceof CultivarSeedItem || stack.getItem() instanceof com.kragnoth.cultivar.content.tools.CuttingItem);
-                case PAPER -> stack.is(Items.PAPER);
                 case LEDGER -> stack.getItem() instanceof LedgerItem;
                 default -> true;
             };
@@ -45,7 +43,7 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
 
         @Override
         public int getSlotLimit(int slot) {
-            return slot == LEDGER || slot == CARD_OUT ? 1 : 64;
+            return slot == LEDGER ? 1 : 64;
         }
 
         @Override
@@ -58,7 +56,7 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
     public final IItemHandler automation = new IItemHandler() {
         @Override
         public int getSlots() {
-            return 5;
+            return 3;
         }
 
         @Override
@@ -143,10 +141,6 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
         Genome genome = out.get(CoreModule.GENOME.get());
         inventory.extractItem(SEED_IN, 1, false);
         inventory.insertItem(SEED_OUT, out, false);
-        if (!inventory.getStackInSlot(PAPER).isEmpty() && inventory.getStackInSlot(CARD_OUT).isEmpty()) {
-            inventory.extractItem(PAPER, 1, false);
-            inventory.setStackInSlot(CARD_OUT, AssayCardItem.of(genome));
-        }
         ItemStack ledger = inventory.getStackInSlot(LEDGER);
         if (!ledger.isEmpty() && genome != null) {
             genome.species().unwrapKey().ifPresent(key -> LedgerItem.record(ledger, key));
