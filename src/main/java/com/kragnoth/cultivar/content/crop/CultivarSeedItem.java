@@ -34,8 +34,11 @@ public class CultivarSeedItem extends Item {
     }
 
     public static Component plantName(Genome genome) {
-        ResourceLocation id = genome.species().unwrapKey().map(k -> k.location())
-                .orElse(ResourceLocation.withDefaultNamespace("unknown"));
+        return plantName(genome.species().unwrapKey().map(k -> k.location())
+                .orElse(ResourceLocation.withDefaultNamespace("unknown")));
+    }
+
+    public static Component plantName(ResourceLocation id) {
         String fallback = Character.toUpperCase(id.getPath().charAt(0)) + id.getPath().substring(1).replace('_', ' ');
         return Component.translatableWithFallback("plant." + id.getNamespace() + "." + id.getPath(), fallback);
     }
