@@ -106,5 +106,6 @@
   "cultivar.display.crop.empty": "Empty trellis",
   "cultivar.display.crop.ready": "%s: ready",
   "cultivar.display.crop.growing": "%s %s%%",
-  "cultivar.display.ledger": "Ledger %s/%s species"
+  "cultivar.display.ledger": "Ledger %s/%s species",
+  "block.cultivar.sprinkler": "Sprinkler"
 }
