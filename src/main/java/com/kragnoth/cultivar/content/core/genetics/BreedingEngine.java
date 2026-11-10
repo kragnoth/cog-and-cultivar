@@ -54,7 +54,11 @@ public final class BreedingEngine {
         return Optional.of(combine(parents.get(0), parents.get(1), mutations, conditionsMet, settings, random));
     }
 
-    /** Sorted by Vigour (high first); each passes with chance (Vigour + pollination bonus) / max. */
+    /**
+     * Sorted by Vigour (high first); each passes with chance {@code 0.5 + 0.5 * v / max} where v is Vigour plus the
+     * pollination bonus: 55 % at Vigour 1, 100 % at 10. A fresh pair crosses within minutes; Vigour speeds it up
+     * without the 1 %-at-start wall of a linear v / max.
+     */
     static List<Genome> selectParents(List<Genome> neighbours, Settings settings, RandomSource random) {
         ResourceKey<Stat> vigour = CoreModule.VIGOUR.getKey();
         int max = Genetics.max(vigour);
@@ -64,7 +68,7 @@ public final class BreedingEngine {
         for (Genome genome : sorted) {
             int effective = Math.min(max, Genetics.expressed(genome, vigour, settings.expression())
                     + settings.influence().fertilityBonus());
-            if (random.nextInt(max) < effective) {
+            if (random.nextDouble() < 0.5 + 0.5 * effective / max) {
                 passed.add(genome);
                 if (passed.size() == 2) {
                     break;
@@ -132,16 +136,18 @@ public final class BreedingEngine {
     }
 
     /**
-     * Stat drift: with chance {@code m/max} the allele moves one step; it moves up with chance
-     * {@code floor((max + m) / 2) / max}, otherwise down. m=1 gives 10 % drift, 50/50; m=10 gives always up.
+     * Stat drift. With chance {@code 0.25 + 0.2 * m / max} (27 % at mutativity 1, 45 % at 10) the allele moves one
+     * step. It moves up with chance {@code 0.75 - 0.05 * (allele - 1) + 0.2 * (m - 1) / max}, clamped to 20-90 %:
+     * low stats climb easily, the last steps to the top are the hard ones, and Vigour helps without snowballing.
+     * Breeding a line to all-max takes about a day of play on one frame (fewer hours with several).
      */
     public static int drift(ResourceKey<Stat> stat, int allele, int mutativity, RandomSource random) {
         int max = Genetics.max(stat);
-        int m = Math.min(max, mutativity);
-        if (random.nextInt(max) >= m) {
+        int m = Math.max(0, Math.min(max, mutativity));
+        if (random.nextDouble() >= 0.25 + 0.2 * m / max) {
             return allele;
         }
-        int delta = random.nextInt(max) < (max + m) / 2 ? 1 : -1;
-        return Genetics.clamp(stat, allele + delta);
+        double up = Math.clamp(0.75 - 0.05 * (allele - 1) + 0.2 * (m - 1) / max, 0.2, 0.9);
+        return Genetics.clamp(stat, allele + (random.nextDouble() < up ? 1 : -1));
     }
 }
