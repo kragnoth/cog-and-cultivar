@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
  * only crop outputs, unless any bed in the plot has a redstone signal: then the plot strips down (cloche, then
  * trellis, back into stock; plants banked as seeds) and every slot can be pulled (dump mode). Pipes and funnels see the whole connected plot (see {@link BedNetwork}).
  */
-public class PlanterBedBlock extends BaseEntityBlock implements SoilHost {
+public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.simibubi.create.content.equipment.wrench.IWrenchable {
     public static final MapCodec<PlanterBedBlock> CODEC = simpleCodec(PlanterBedBlock::new);
 
     public PlanterBedBlock(Properties properties) {
@@ -192,5 +192,11 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost {
             bed.dropContents();
         }
         super.onRemove(state, level, pos, newState, moving);
+    }
+
+    /** Beds don't rotate; sneak-wrench picks them up (contents drop). */
+    @Override
+    public InteractionResult onWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
+        return InteractionResult.PASS;
     }
 }

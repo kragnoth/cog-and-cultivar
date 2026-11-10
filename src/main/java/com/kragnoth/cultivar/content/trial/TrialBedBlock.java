@@ -18,7 +18,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 /** Trial Bed. Right-click with seeds or a Ledger to load it; empty hand takes the Ledger back. It sets up its own trellis. */
-public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.cultivar.api.soil.SoilHost {
+public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.cultivar.api.soil.SoilHost, com.simibubi.create.content.equipment.wrench.IWrenchable {
     public static final MapCodec<TrialBedBlock> CODEC = simpleCodec(TrialBedBlock::new);
 
     public TrialBedBlock(Properties properties) {
@@ -89,10 +89,34 @@ public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.culti
     }
 
     @Override
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof TrialBedBlockEntity bed ? bed.comparatorSignal() : 0;
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, net.minecraft.world.level.block.Block neighbor, BlockPos from, boolean moving) {
+        super.neighborChanged(state, level, pos, neighbor, from, moving);
+        if (level.getBlockEntity(pos) instanceof TrialBedBlockEntity bed) {
+            bed.invalidatePower();
+        }
+    }
+
+    @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof TrialBedBlockEntity bed) {
             bed.dropContents();
         }
         super.onRemove(state, level, pos, newState, moving);
+    }
+
+    /** Beds don't rotate; sneak-wrench picks them up (contents drop). */
+    @Override
+    public InteractionResult onWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
+        return InteractionResult.PASS;
     }
 }

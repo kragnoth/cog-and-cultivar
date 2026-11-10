@@ -66,6 +66,32 @@ public final class CultivarDisplaySources {
         }
     });
 
+    public static final DeferredHolder<DisplaySource, DisplaySource> PLOT = SOURCES.register("plot_status", () -> new SingleLineDisplaySource() {
+        @Override
+        protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
+            return context.getSourceBlockEntity() instanceof com.kragnoth.cultivar.content.bed.PlanterBedBlockEntity bed
+                    ? bed.statusLine().copy() : EMPTY_LINE;
+        }
+
+        @Override
+        protected boolean allowsLabeling(DisplayLinkContext context) {
+            return true;
+        }
+    });
+
+    public static final DeferredHolder<DisplaySource, DisplaySource> TRIAL = SOURCES.register("trial_status", () -> new SingleLineDisplaySource() {
+        @Override
+        protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
+            return context.getSourceBlockEntity() instanceof com.kragnoth.cultivar.content.trial.TrialBedBlockEntity bed
+                    ? bed.statusLine().copy() : EMPTY_LINE;
+        }
+
+        @Override
+        protected boolean allowsLabeling(DisplayLinkContext context) {
+            return true;
+        }
+    });
+
     private CultivarDisplaySources() {}
 
     static MutableComponent cropLine(CropBlockEntity crop) {
@@ -86,5 +112,7 @@ public final class CultivarDisplaySources {
         DisplaySource.BY_BLOCK.add(CropModule.TIMBER_TRELLIS.get(), CROP.get());
         DisplaySource.BY_BLOCK.add(CropModule.IRON_TRELLIS.get(), CROP.get());
         DisplaySource.BY_BLOCK.add(AssayModule.ENGINE.get(), LEDGER.get());
+        DisplaySource.BY_BLOCK.add(com.kragnoth.cultivar.content.bed.PlanterBedModule.BED.get(), PLOT.get());
+        DisplaySource.BY_BLOCK.add(com.kragnoth.cultivar.content.trial.TrialModule.TRIAL_BED.get(), TRIAL.get());
     }
 }

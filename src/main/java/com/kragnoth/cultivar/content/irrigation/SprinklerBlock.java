@@ -36,7 +36,7 @@ import java.util.Map;
  * own textures, so it matches the pack and any Create resource pack. While it has water it adds random ticks and occasional bone-meal pulses to growables
  * around it and keeps farmland moist. See {@link SprinklerBlockEntity}.
  */
-public class SprinklerBlock extends BaseEntityBlock {
+public class SprinklerBlock extends BaseEntityBlock implements com.simibubi.create.content.equipment.wrench.IWrenchable {
     public static final MapCodec<SprinklerBlock> CODEC = simpleCodec(SprinklerBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
@@ -110,6 +110,18 @@ public class SprinklerBlock extends BaseEntityBlock {
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide() ? null : createTickerHelper(type, IrrigationModule.SPRINKLER_BE.get(),
                 (l, p, s, be) -> be.serverTick());
+    }
+
+    /** Comparator: how full the water tank is. */
+    @Override
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof SprinklerBlockEntity be
+                ? (int) Math.ceil(be.tank.getFluidAmount() * 15.0 / SprinklerBlockEntity.CAPACITY) : 0;
     }
 
     /** Spray particles while active (client only; driven by the synced ACTIVE state). */

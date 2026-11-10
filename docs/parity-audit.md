@@ -85,3 +85,15 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 8. **Phase 6 content:** ore-blooms, blight variants, Brass Apiary.
 9. **Phase 7:** Ponder scenes for every block, sounds, art pass.
 10. **In-game verification:** deployer actions with spade, shears, satchel and cutting; Pipez and Modern Dynamics feeding the Sprinkler and beds.
+
+## Progress
+
+- 2026-11-10: items 1–3 done (#36):
+  - Create item descriptions on every block and item (Assaying Engine also shows stress).
+  - Sprinkler: goggles, comparator, redstone off, wrench.
+  - Planter Bed: Display Link (plot status), wrench pick-up.
+  - Trial Bed: comparator (Ledger completeness), Display Link (trial status), redstone pause and seed dump, wrench pick-up.
+  - Trellis tool tags.
+
+  The Assaying Engine deliberately has no redstone pause: Create's kinetic processors are stopped with a clutch or
+  gearshift instead. The Assay Card was removed (#35).

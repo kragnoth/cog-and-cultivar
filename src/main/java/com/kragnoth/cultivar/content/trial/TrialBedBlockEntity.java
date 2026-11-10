@@ -75,7 +75,7 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
     };
 
-    /** Automation: seeds and a Ledger go in; only the Ledger comes out. */
+    /** Automation: seeds and a Ledger go in; the Ledger comes out, and with redstone (dump mode) the seeds too. */
     public final IItemHandler automation = new IItemHandler() {
         @Override
         public int getSlots() {
@@ -94,7 +94,7 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
         @Override
         public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return slot == LEDGER ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
+            return slot == LEDGER || isPlotPowered() ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
         }
 
         @Override
@@ -153,6 +153,54 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
             }
         }
         return out;
+    }
+
+    private boolean plotPowered;
+    private long poweredTick = Long.MIN_VALUE;
+
+    /** Redstone on any trial bed pauses the plot and opens its seed stock to pipes. */
+    public boolean isPlotPowered() {
+        long now = level == null ? 0 : level.getGameTime();
+        if (poweredTick != now) {
+            boolean powered = false;
+            for (TrialBedBlockEntity bed : plot()) {
+                if (bed.level != null && bed.level.hasNeighborSignal(bed.worldPosition)) {
+                    powered = true;
+                    break;
+                }
+            }
+            for (TrialBedBlockEntity bed : plot()) {
+                bed.plotPowered = powered;
+                bed.poweredTick = now;
+            }
+        }
+        return plotPowered;
+    }
+
+    void invalidatePower() {
+        for (TrialBedBlockEntity bed : plot()) {
+            bed.poweredTick = Long.MIN_VALUE;
+        }
+    }
+
+    /** Comparator: how much of the plant registry the plot's Ledger has recorded. */
+    public int comparatorSignal() {
+        ItemStack ledger = ledger();
+        if (ledger == null || level == null) {
+            return 0;
+        }
+        int total = level.registryAccess().registryOrThrow(CultivarRegistries.PLANT).size();
+        return total == 0 ? 0 : (int) Math.ceil(LedgerItem.data(ledger).researched().size() * 15.0 / total);
+    }
+
+    /** One line for Display Links: Ledger progress and crosses left to test. */
+    public Component statusLine() {
+        ItemStack ledger = ledger();
+        if (ledger == null || level == null) {
+            return Component.translatable("cultivar.trial.no_ledger");
+        }
+        int total = level.registryAccess().registryOrThrow(CultivarRegistries.PLANT).size();
+        return Component.translatable("cultivar.display.trial", LedgerItem.data(ledger).researched().size(), total, untested().size());
     }
 
     private boolean isLeader() {
@@ -225,6 +273,9 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
         if (needsSync && server.getGameTime() % 20 == (worldPosition.asLong() & 15)) {
             needsSync = false;
             server.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        }
+        if (isPlotPowered()) {
+            return; // redstone: the plot pauses and its seeds can be pulled out
         }
         if (--cooldown <= 0) {
             cooldown = 10;

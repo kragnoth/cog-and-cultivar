@@ -615,6 +615,27 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         }
     }
 
+    /** One line for Display Links: best stocked seed and output fullness. */
+    public Component statusLine() {
+        Genome best = null;
+        int used = 0, outs = 0;
+        for (PlanterBedBlockEntity bed : cachedNetwork()) {
+            for (int i = SEEDS; i < SEEDS + SEED_SLOTS; i++) {
+                Genome g = level == null ? null : TrellisBlock.genomeFor(bed.inventory.getStackInSlot(i), level).orElse(null);
+                if (g != null && (best == null || SeedQuality.score(g) > SeedQuality.score(best))) {
+                    best = g;
+                }
+            }
+            for (int i = OUT_START; i < SLOTS; i++) {
+                outs++;
+                used += bed.inventory.getStackInSlot(i).isEmpty() ? 0 : 1;
+            }
+        }
+        return best == null ? Component.translatable("cultivar.display.plot.empty", used, outs)
+                : Component.translatable("cultivar.display.plot", CultivarSeedItem.plantName(best),
+                String.format("%.0f", SeedQuality.score(best)), used, outs);
+    }
+
     /** Plot-wide comparator: how full the plot's outputs are. */
     public int plotComparator() {
         int used = 0, total = 0;

@@ -35,7 +35,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
  * Blocks in {@code #cultivar:sprinkler_ignored} (grass, nylium: bone-mealing them carpets the area) are skipped.
  * Area: ±radius horizontally; 5 blocks below when hanging (nozzle down), else 2 below to 1 above.
  */
-public class SprinklerBlockEntity extends BlockEntity {
+public class SprinklerBlockEntity extends BlockEntity implements com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation {
     public static final int CAPACITY = 1000;
     public static final TagKey<Block> GROWABLES = TagKey.create(Registries.BLOCK, Cultivar.id("sprinkler_growables"));
     public static final TagKey<Block> IGNORED = TagKey.create(Registries.BLOCK, Cultivar.id("sprinkler_ignored"));
@@ -45,6 +45,7 @@ public class SprinklerBlockEntity extends BlockEntity {
         @Override
         protected void onContentsChanged() {
             setChanged();
+            needsSync = true;
         }
 
         @Override
@@ -60,6 +61,7 @@ public class SprinklerBlockEntity extends BlockEntity {
 
     private int cooldown;
     private int ticksSinceDrain;
+    private boolean needsSync;
 
     public SprinklerBlockEntity(BlockPos pos, BlockState state) {
         super(IrrigationModule.SPRINKLER_BE.get(), pos, state);
@@ -69,7 +71,12 @@ public class SprinklerBlockEntity extends BlockEntity {
         if (!(level instanceof ServerLevel server)) {
             return;
         }
-        boolean active = !tank.isEmpty();
+        if (needsSync && server.getGameTime() % 20 == (worldPosition.asLong() & 15)) {
+            needsSync = false;
+            server.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        }
+        // A redstone signal switches it off (no spraying, no water use).
+        boolean active = !tank.isEmpty() && !server.hasNeighborSignal(worldPosition);
         BlockState state = getBlockState();
         if (state.getValue(SprinklerBlock.ACTIVE) != active) {
             server.setBlock(worldPosition, state.setValue(SprinklerBlock.ACTIVE, active), Block.UPDATE_CLIENTS);
@@ -133,6 +140,31 @@ public class SprinklerBlockEntity extends BlockEntity {
         return b instanceof BonemealableBlock || b instanceof BushBlock || b instanceof SugarCaneBlock || b instanceof CactusBlock
                 || b instanceof ChorusFlowerBlock || b instanceof GrowingPlantBlock || b instanceof VineBlock
                 || b instanceof TrellisBlock || state.is(GROWABLES);
+    }
+
+    @Override
+    public net.minecraft.nbt.CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
+        return tag;
+    }
+
+    @Override
+    public @org.jetbrains.annotations.Nullable net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public boolean addToGoggleTooltip(java.util.List<net.minecraft.network.chat.Component> tooltip, boolean isPlayerSneaking) {
+        var gray = net.minecraft.ChatFormatting.GRAY;
+        tooltip.add(net.minecraft.network.chat.Component.translatable("block.cultivar.sprinkler").withStyle(net.minecraft.ChatFormatting.GOLD));
+        tooltip.add(net.minecraft.network.chat.Component.translatable("cultivar.sprinkler.water", tank.getFluidAmount(), CAPACITY).withStyle(gray));
+        boolean powered = level != null && level.hasNeighborSignal(worldPosition);
+        tooltip.add(net.minecraft.network.chat.Component.translatable(powered ? "cultivar.sprinkler.off"
+                : getBlockState().getValue(SprinklerBlock.ACTIVE) ? "cultivar.sprinkler.running" : "cultivar.sprinkler.dry").withStyle(gray));
+        int r = CultivarServerConfig.SPRINKLER_RADIUS.get();
+        tooltip.add(net.minecraft.network.chat.Component.translatable("cultivar.sprinkler.area", 2 * r + 1, 2 * r + 1).withStyle(gray));
+        return true;
     }
 
     @Override
