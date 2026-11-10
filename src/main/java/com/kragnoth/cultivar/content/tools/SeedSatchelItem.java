@@ -1,5 +1,7 @@
 package com.kragnoth.cultivar.content.tools;
 
+import net.minecraft.world.level.block.Block;
+import net.minecraft.core.BlockPos;
 import com.kragnoth.cultivar.api.CultivarRegistries;
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.genetics.Stat;
@@ -103,6 +105,36 @@ public class SeedSatchelItem extends Item {
     }
 
     // ---------------------------------------------------------------- store / take
+
+    /** Seed chance for a satchel harvest: base + perVigour * Vigour (server config). */
+    public static double seedChance(Genome genome) {
+        int vigour = Genetics.expressed(genome, CoreModule.VIGOUR.getKey(), Genetics.current());
+        double base = CultivarServerConfig.SPEC.isLoaded() ? CultivarServerConfig.SATCHEL_SEED_BASE.get() : 0.25;
+        double per = CultivarServerConfig.SPEC.isLoaded() ? CultivarServerConfig.SATCHEL_SEED_PER_VIGOUR.get() : 0.05;
+        return Math.min(1.0, base + per * vigour);
+    }
+
+    /**
+     * Harvests a mature crop for the satchel: produce goes to {@code drops}; with {@link #seedChance} one unassayed
+     * seed with the plant's exact genome goes through {@code bag}, which returns whatever didn't fit (dropped too).
+     * Returns whether a seed was produced.
+     */
+    public static boolean gatherSeeds(CropBlockEntity crop, net.minecraft.util.RandomSource random,
+                                      java.util.function.Consumer<ItemStack> drops,
+                                      java.util.function.UnaryOperator<ItemStack> bag) {
+        Genome genome = crop.genome();
+        if (genome == null || !crop.harvest(drops)) {
+            return false;
+        }
+        if (random.nextDouble() >= seedChance(genome)) {
+            return false;
+        }
+        ItemStack rest = bag.apply(CultivarSeedItem.of(genome));
+        if (!rest.isEmpty()) {
+            drops.accept(rest);
+        }
+        return true;
+    }
 
     /** Inserts as many of {@code seeds} as fit; returns how many were taken. */
     public static int insert(ItemStack satchel, ItemStack seeds) {
@@ -282,8 +314,22 @@ public class SeedSatchelItem extends Item {
         if (clicked.is(Blocks.COMPOSTER) && ctx.isSecondaryUseActive()) {
             return cullIntoComposter(ctx, clicked);
         }
-        if (!(CropBlockEntity.resolve(level, ctx.getClickedPos()).orElse(null) instanceof CropBlockEntity crop) || crop.hasPlant()
-                || level.getBlockState(ctx.getClickedPos()).getValue(TrellisBlock.CROSS)) {
+        if (!(CropBlockEntity.resolve(level, ctx.getClickedPos()).orElse(null) instanceof CropBlockEntity crop)) {
+            return InteractionResult.PASS;
+        }
+        // On a mature plant: harvest it and gather seed. Players bag the seed; Deployers drop it for funnels.
+        if (crop.isMature()) {
+            if (!level.isClientSide()) {
+                BlockPos at = crop.getBlockPos();
+                boolean deployer = ctx.getPlayer() instanceof net.neoforged.neoforge.common.util.FakePlayer || ctx.getPlayer() == null;
+                ItemStack satchel = ctx.getItemInHand();
+                gatherSeeds(crop, level.random, drop -> Block.popResource(level, at, drop),
+                        seed -> deployer ? seed : seed.copyWithCount(seed.getCount() - insert(satchel, seed)));
+                level.playSound(null, at, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1f, 1f);
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
+        if (crop.hasPlant() || level.getBlockState(ctx.getClickedPos()).getValue(TrellisBlock.CROSS)) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide()) {

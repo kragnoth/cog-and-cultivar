@@ -16,12 +16,15 @@ public final class CultivarHarvesting {
 
     /**
      * @return true if the position is a Cultivar crop (handled here, so Create must not break it);
-     *         mature crops are harvested in place and keep their genome.
+     *         mature crops are harvested in place and keep their genome. Produce only: seeds come from the
+     *         Seed Satchel (by hand or on a Deployer), so harvester lines don't flood storage.
      */
     public static boolean tryHarvest(MovementContext context, BlockPos pos, BiConsumer<MovementContext, ItemStack> drop) {
-        if (!(context.world.getBlockEntity(pos) instanceof CropBlockEntity crop)) {
+        if (!(context.world.getBlockEntity(pos) instanceof CropBlockEntity)) {
             return false;
         }
+        // A harvester passing a tall crop's upper segment harvests the plant rooted at the base.
+        CropBlockEntity crop = CropBlockEntity.resolve(context.world, pos).orElseThrow();
         crop.harvest(stack -> drop.accept(context, stack));
         return true;
     }
