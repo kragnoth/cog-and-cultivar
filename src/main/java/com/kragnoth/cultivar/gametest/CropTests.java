@@ -114,4 +114,23 @@ public final class CropTests {
         h.assertTrue(crop.stage() == 1, "and to one block");
         h.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void tallHarvestYieldsPerSegmentCut(GameTestHelper h) {
+        var cane = h.getLevel().registryAccess().registryOrThrow(CultivarRegistries.PLANT)
+                .getHolderOrThrow(ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.withDefaultNamespace("sugar_cane")));
+        BlockPos base = new BlockPos(1, 2, 1);
+        h.setBlock(base.below(), Blocks.MUD);
+        h.setBlock(base, CropModule.TIMBER_TRELLIS.get());
+        h.setBlock(base.above(), CropModule.TIMBER_TRELLIS.get());
+        h.setBlock(base.above(2), CropModule.TIMBER_TRELLIS.get());
+        CropBlockEntity crop = (CropBlockEntity) h.getBlockEntity(base);
+        crop.plant(Genome.base(cane), cane.value().matureStage());
+        java.util.List<net.minecraft.world.item.ItemStack> drops = new java.util.ArrayList<>();
+        h.assertTrue(crop.harvest(drops::add), "mature cane harvests");
+        // Gain 1 = one roll per segment; 3 tall back to 1 = two segments cut.
+        h.assertTrue(drops.size() == 2, "two segments cut give two rolls, got " + drops.size());
+        h.assertTrue(cane.value().blocksAt(crop.stage()) == 1, "cane drops back to one block");
+        h.succeed();
+    }
 }
