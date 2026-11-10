@@ -98,10 +98,19 @@ print('ok')
 
 # ---- Bell Cloche (1d): Excalibur glass frame with brass rim, plus a brass knob
 BRASS = [(0x84, 0x51, 0x25, 255), (0xab, 0x75, 0x31, 255), (0xc4, 0x94, 0x3d, 255), (0xd6, 0xb0, 0x55, 255), (0xdf, 0xbe, 0x5e, 255), (0xf4, 0xdf, 0x8d, 255)]
-glass = Image.open(f'{EXC}/block/glass.png').convert('RGBA')
-cloche = glass.copy()
+# Cloche glass: own texture (Excalibur glass is nearly fully clear, so the bell vanished in-game).
+# Faint green-grey tint, Excalibur glass's edge pixels kept, two diagonal highlight streaks. Rendered translucent.
+exc_glass = Image.open(f'{EXC}/block/glass.png').convert('RGBA')
+cloche = Image.new('RGBA', (16, 16), (200, 222, 214, 46))
 for x in range(16):
-    cloche.putpixel((x, 15), BRASS[1]); cloche.putpixel((x, 14), BRASS[3])   # brass rim at the base
+    for y in range(16):
+        p = exc_glass.getpixel((x, y))
+        if p[3] > 200:
+            cloche.putpixel((x, y), (p[0], p[1], p[2], 150))
+for i in range(16):
+    for x, y in ((i, 15 - i), (i + 3, 15 - i)):
+        if 0 <= x < 16 and 2 <= y < 14:
+            cloche.putpixel((x, y), (245, 250, 248, 110))
 cloche.save(f'{OUT}/block/bell_cloche.png')
 knob = canvas()
 for x in range(16):
