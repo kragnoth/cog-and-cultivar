@@ -67,6 +67,25 @@ Records gain new fields **only** as `optionalFieldOf(..., default)`, so existing
 - Growth requirements are cached per crop and invalidated by neighbour or soil change.
 - Client-only polish (particles, animations) never adds server work.
 
+## Extending from an addon
+
+Everything below is public API (`com.kragnoth.cultivar.api`) and needs no changes to this mod. The dropped
+Phase 5 (temperature) is the worked example.
+
+- **New growth condition** (e.g. temperature): register a `GrowthConditionType` in
+  `CultivarRegistries.GROWTH_CONDITION_TYPE` with a `MapCodec` for your condition. `GrowthCondition.test` gets a
+  `GrowthContext` (level, crop pos, soil) and the plant's Strength, so a temperature condition can read
+  `level.getBiome(pos).value().getBaseTemperature()` and the height. Plants and mutations then use it from JSON
+  (`{"type": "youraddon:temperature", ...}`) in `requirements` or mutation `conditions`. Return `true` from
+  `isSoilProperty()` only if Hardy plants should ignore it.
+- **New nearby source** (heaters, chillers, fans): `crop_influence` is a datapack registry, so a new source is a
+  JSON file naming its blocks, radius and effects. If you need a new strength curve, register an
+  `InfluenceScalingType`. For a brand-new kind of effect, use your own condition: it can scan for its source
+  blocks around `GrowthContext.pos()`, since conditions run on the crop's random tick, which is cheap.
+- **New stats**: register a `Stat` in `CultivarRegistries.STAT`. Genomes carry any registered stat, and the
+  breeding engine, assay cards, satchel dial and Create filters pick it up automatically.
+- **Plants, soils, mutations, weeds, fertilizers**: datapack JSON only. See docs/PACKMAKERS.md.
+
 ## Tests
 
 - `gametest/` holds dedicated-server game tests. Use the `cultivar:empty` template or add structure files under `data/cultivar/structure/`.
