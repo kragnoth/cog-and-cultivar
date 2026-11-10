@@ -53,63 +53,7 @@ public final class BedNetwork {
 
     /** Item view over the whole plot: slots are each bed's automation slots, end to end. */
     public static IItemHandler items(PlanterBedBlockEntity origin) {
-        return new IItemHandler() {
-            private List<PlanterBedBlockEntity> beds() {
-                return origin.cachedNetwork();
-            }
-
-            private IItemHandler at(int slot, int[] local) {
-                for (PlanterBedBlockEntity bed : beds()) {
-                    int n = bed.automation.getSlots();
-                    if (slot < n) {
-                        local[0] = slot;
-                        return bed.automation;
-                    }
-                    slot -= n;
-                }
-                return null;
-            }
-
-            @Override
-            public int getSlots() {
-                return beds().size() * PlanterBedBlockEntity.SLOTS;
-            }
-
-            @Override
-            public @NotNull ItemStack getStackInSlot(int slot) {
-                int[] l = new int[1];
-                IItemHandler h = at(slot, l);
-                return h == null ? ItemStack.EMPTY : h.getStackInSlot(l[0]);
-            }
-
-            @Override
-            public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-                int[] l = new int[1];
-                IItemHandler h = at(slot, l);
-                return h == null ? stack : h.insertItem(l[0], stack, simulate);
-            }
-
-            @Override
-            public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-                int[] l = new int[1];
-                IItemHandler h = at(slot, l);
-                return h == null ? ItemStack.EMPTY : h.extractItem(l[0], amount, simulate);
-            }
-
-            @Override
-            public int getSlotLimit(int slot) {
-                int[] l = new int[1];
-                IItemHandler h = at(slot, l);
-                return h == null ? 0 : h.getSlotLimit(l[0]);
-            }
-
-            @Override
-            public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-                int[] l = new int[1];
-                IItemHandler h = at(slot, l);
-                return h != null && h.isItemValid(l[0], stack);
-            }
-        };
+        return new PlotItemHandler(() -> origin.cachedNetwork().stream().map(b -> (IItemHandler) b.automation).toList());
     }
 
     /** Water view over the whole plot: fills each bed's tank in turn; never drains. */

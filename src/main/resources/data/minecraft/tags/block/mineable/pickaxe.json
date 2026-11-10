@@ -2,6 +2,7 @@
   "values": [
     "cultivar:assaying_engine",
     "cultivar:sprinkler",
-    "cultivar:planter_bed"
+    "cultivar:planter_bed",
+    "cultivar:trial_bed"
   ]
 }

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "S S",
+    "SCS"
+  ],
+  "key": {
+    "S": {
+      "item": "create:brass_sheet"
+    },
+    "C": {
+      "item": "create:brass_casing"
+    }
+  },
+  "result": {
+    "id": "cultivar:trial_bed",
+    "count": 2
+  }
+}

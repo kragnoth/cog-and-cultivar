@@ -66,6 +66,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         @Override
         protected void onContentsChanged(int slot) {
             setChanged();
+            needsSync = true;
         }
     };
 
@@ -109,11 +110,14 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         @Override
         protected void onContentsChanged() {
             setChanged();
+            needsSync = true;
             syncWaterIfChanged();
         }
     };
 
     private @Nullable BlockState soil;
+    /** Inventory/tank changed: send clients (goggles) an update, at most once a second. */
+    private boolean needsSync;
     private boolean syncedWater;
     private int cooldown;
     private int ticksSinceDrain;
@@ -204,6 +208,10 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
     void serverTick() {
         if (!(level instanceof ServerLevel server)) {
             return;
+        }
+        if (needsSync && server.getGameTime() % 20 == (worldPosition.asLong() & 15)) {
+            needsSync = false;
+            server.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
         boolean watered = !tank.isEmpty();
         if (watered && ++ticksSinceDrain >= CultivarServerConfig.BED_TICKS_PER_MB.get()) {
@@ -545,11 +553,24 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         readClient(tag, registries);
     }
 
-    private void readClient(CompoundTag tag, HolderLookup.Provider registries) {
+    /** Returns whether anything that affects rendering (soil, water presence) changed. */
+    private boolean readClient(CompoundTag tag, HolderLookup.Provider registries) {
+        BlockState oldSoil = soil;
+        boolean oldWater = syncedWater;
         soil = tag.contains("Soil") ? NbtUtils.readBlockState(registries.lookupOrThrow(Registries.BLOCK), tag.getCompound("Soil")) : null;
         if (tag.contains("Water")) {
             syncedWater = tag.getBoolean("Water");
         }
+        if (level != null && level.isClientSide()) {
+            if (tag.contains("Inventory")) {
+                inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
+            }
+            if (tag.contains("Tank")) {
+                tank.readFromNBT(registries, tag.getCompound("Tank"));
+            }
+            breeding = tag.getBoolean("Breeding");
+        }
+        return !java.util.Objects.equals(oldSoil, soil) || oldWater != syncedWater;
     }
 
     @Override
@@ -559,13 +580,18 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
             tag.put("Soil", NbtUtils.writeBlockState(soil));
         }
         tag.putBoolean("Water", !tank.isEmpty());
+        // For goggles: stock and water are shown client-side.
+        tag.put("Inventory", inventory.serializeNBT(registries));
+        tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
+        tag.putBoolean("Breeding", breeding);
         return tag;
     }
 
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        readClient(tag, registries);
-        rerender();
+        if (readClient(tag, registries)) {
+            rerender();
+        }
     }
 
     @Override
@@ -575,8 +601,9 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
 
     @Override
     public void onDataPacket(net.minecraft.network.Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
-        readClient(pkt.getTag(), registries);
-        rerender();
+        if (readClient(pkt.getTag(), registries)) {
+            rerender(); // only soil/water change the look; stock updates don't rebuild the chunk
+        }
     }
 
     private void rerender() {
