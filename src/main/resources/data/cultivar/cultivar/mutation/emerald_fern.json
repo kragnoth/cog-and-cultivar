@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:lazuli_bell",
+  "parent_b": "cultivar:aurum_thistle",
+  "child": "cultivar:emerald_fern",
+  "chance": 0.1,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 13,
+      "max": 15,
+      "tolerance": 0
+    }
+  ]
+}

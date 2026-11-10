@@ -63,7 +63,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 
 ## Planned content still open
 
-- Phase 6: ore-blooms (data-only), habitat blight variants (data-only), Brass Apiary (one block).
+- Phase 6: ~~ore-blooms~~ (done), habitat blight variants (data-only), Brass Apiary (one block).
 - Optional: Wall Trellis.
 - Phase 7: Ponder, JEI categories, sounds, final art pass.
 
@@ -84,7 +84,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
    - Info pages for beds and the Sprinkler.
 6. **Bell Cloche +1 humidity** (spec gap), or remove it from the spec.
 7. **Advancements:** a short progression from first trellis to the first mutation, the Assaying Engine, a Planter Bed plot and a full Ledger.
-8. **Phase 6 content:** ore-blooms, blight variants, Brass Apiary.
+8. **Phase 6 content:** ~~ore-blooms~~ (done), blight variants, Brass Apiary.
 9. **Phase 7:** Ponder scenes for every block, sounds, art pass.
 10. **In-game verification:** deployer actions with spade, shears, satchel and cutting; Pipez and Modern Dynamics feeding the Sprinkler and beds.
 
@@ -99,3 +99,5 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 
   The Assaying Engine deliberately has no redstone pause: Create's kinetic processors are stopped with a clutch or
   gearshift instead. The Assay Card was removed (#35).
+- 2026-11-10: ore-blooms: 10 data-only resource crops dropping Create crushed ores, coal, redstone, lapis, quartz,
+  emerald and diamond, bred from the vanilla tree under habitat conditions.

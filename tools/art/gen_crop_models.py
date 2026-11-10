@@ -102,4 +102,24 @@ for kind in ('brown_mushroom', 'red_mushroom'):
 model('pitcher_plant_stage0', {"pod": "minecraft:item/pitcher_pod"}, plane_pair("#pod", 0, 8, [0, 0, 16, 16], half=3.6))
 model('pitcher_plant_stage1', {"plant": "minecraft:item/pitcher_plant"}, rise("#plant", 9))
 model('pitcher_plant_stage2', {"plant": "minecraft:item/pitcher_plant"}, rise("#plant", 16))
+# Ore-blooms: a flower rises in three steps; when ripe, two small buds of the ore's block sit at its foot.
+ORE_BLOOMS = {
+    'coalroot': ('minecraft:block/dead_bush', 'minecraft:block/coal_block'),
+    'ferrous_bloom': ('minecraft:block/azure_bluet', 'minecraft:block/raw_iron_block'),
+    'verdigris_vine': ('minecraft:block/twisting_vines_plant', 'minecraft:block/raw_copper_block'),
+    'brassleaf': ('minecraft:block/oxeye_daisy', 'create:block/raw_zinc_block'),
+    'aurum_thistle': ('minecraft:block/dandelion', 'minecraft:block/raw_gold_block'),
+    'redstone_fern': ('minecraft:block/poppy', 'minecraft:block/redstone_block'),
+    'lazuli_bell': ('minecraft:block/cornflower', 'minecraft:block/lapis_block'),
+    'quartz_lily': ('minecraft:block/white_tulip', 'minecraft:block/quartz_block_side'),
+    'emerald_fern': ('minecraft:block/allium', 'minecraft:block/emerald_block'),
+    'diamond_briar': ('minecraft:block/blue_orchid', 'minecraft:block/diamond_block'),
+}
+for kind, (flower, ore) in ORE_BLOOMS.items():
+    for i, rows in enumerate((6, 11, 16)):
+        model(f'{kind}_stage{i}', {"flower": flower}, rise("#flower", rows))
+    buds = [box([9.5, 0, 9.5], [13.5, 4, 13.5], "#ore", "#ore", side_uv=[0, 0, 4, 4], top_uv=[0, 0, 4, 4]),
+            box([3, 0, 2.5], [6, 3, 5.5], "#ore", "#ore", side_uv=[6, 6, 9, 9], top_uv=[6, 6, 9, 9])]
+    model(f'{kind}_stage3', {"flower": flower, "ore": ore}, rise("#flower", 16) + buds)
+
 print('crop models ok')

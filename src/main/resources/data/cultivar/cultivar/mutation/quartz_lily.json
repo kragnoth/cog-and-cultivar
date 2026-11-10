@@ -1,0 +1,20 @@
+{
+  "parent_a": "cultivar:aurum_thistle",
+  "parent_b": "minecraft:nether_wart",
+  "child": "cultivar:quartz_lily",
+  "chance": 0.15,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "equal",
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_alkaline",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

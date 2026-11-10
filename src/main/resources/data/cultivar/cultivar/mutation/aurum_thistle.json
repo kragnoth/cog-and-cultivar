@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:brassleaf",
+  "parent_b": "minecraft:cactus",
+  "child": "cultivar:aurum_thistle",
+  "chance": 0.15,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "arid",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

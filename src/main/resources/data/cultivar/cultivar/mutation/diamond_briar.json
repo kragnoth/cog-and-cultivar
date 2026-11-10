@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:emerald_fern",
+  "parent_b": "cultivar:redstone_fern",
+  "child": "cultivar:diamond_briar",
+  "chance": 0.05,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 3,
+      "tolerance": 0
+    }
+  ]
+}

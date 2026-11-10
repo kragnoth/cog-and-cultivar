@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:potato",
+  "parent_b": "minecraft:brown_mushroom",
+  "child": "cultivar:coalroot",
+  "chance": 0.3,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 7,
+      "tolerance": 0
+    }
+  ]
+}

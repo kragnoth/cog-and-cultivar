@@ -1,0 +1,95 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "minecraft:block/dead_bush",
+    "flower": "minecraft:block/dead_bush"
+  },
+  "elements": [
+    {
+      "from": [
+        0.7999999999999998,
+        0,
+        8
+      ],
+      "to": [
+        15.2,
+        6,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            10,
+            16,
+            16
+          ],
+          "texture": "#flower"
+        },
+        "south": {
+          "uv": [
+            0,
+            10,
+            16,
+            16
+          ],
+          "texture": "#flower"
+        }
+      }
+    },
+    {
+      "from": [
+        0.7999999999999998,
+        0,
+        8
+      ],
+      "to": [
+        15.2,
+        6,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            10,
+            16,
+            16
+          ],
+          "texture": "#flower"
+        },
+        "south": {
+          "uv": [
+            0,
+            10,
+            16,
+            16
+          ],
+          "texture": "#flower"
+        }
+      }
+    }
+  ]
+}
