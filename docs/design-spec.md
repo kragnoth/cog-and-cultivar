@@ -674,7 +674,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **2.5 — Tall crops** ✅ | Plant `height`, auto-stacking trellis segments, sugarcane/cactus/bamboo data (Wall Trellis deferred to Phase 6 content) | A 3-high sugarcane grows on a stacked trellis |
 | **3 — Create farming** ✅ | Harvester override, deployer actions, item attributes (stat filters), comparator/Display Link, **cull loop: Millstone seeds → Seed Meal → fertilizer** | Fully automated plant–harvest–sort loop |
 | **4 — Water** ✅ | One block: the **Sprinkler** (1000 mB water tank, runs only while it has water, 1 mB per N ticks; adds random ticks + occasional BonemealEvent pulses to growables in a 9×9 area, moistens farmland; fed by any NeoForge fluid-capability pipe: Create, Pipez, Modern Dynamics). Cisterns/drip lines/troughs dropped as unnecessary | Sprinkler field fed by Create pipes |
-| **5 — Climate** | Soil conditioning attachment, Mist Nozzle, Conservatory + Climate Gauge, temperature requirement | Grow a HOT-requirement strain in a snow biome |
+| **5 — Climate** ❌ dropped | Temperature added no gameplay; soils, the Sprinkler and the Bell Cloche already cover climate control. Left to addons via the API (see ARCHITECTURE.md "Extending from an addon") | — |
 | **6 — Content** | Ore-blooms → crushed ore, Brassleaf gating, Seed Vault, Livestock Trough, **Brass Apiary**, blight variants, Derelict Conservatories | Pack-ready |
 | **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
 | **7 — Polish** | Excalibur-based asset pass, sounds, Ponder scenes, JEI/EMI categories, Jade | Release |
