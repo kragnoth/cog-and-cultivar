@@ -236,5 +236,12 @@
   "cultivar.display_source.trial_status": "Trial Status",
   "cultivar.display.plot": "Best %s (q %s), outputs %s/%s",
   "cultivar.display.plot.empty": "No seed stock, outputs %s/%s",
-  "cultivar.display.trial": "Ledger %s/%s, %s to test"
+  "cultivar.display.trial": "Ledger %s/%s, %s to test",
+  "jei.cultivar.mutation": "Crossbreeding",
+  "jei.cultivar.mutation.anywhere": "Any habitat",
+  "jei.cultivar.bred_info": "Found by crossbreeding two plants in the right habitat. Its cross shows here once you know it and both parents: record them in a Botanical Ledger.",
+  "commands.cultivar.knowledge.granted": "Taught %s species to %s player(s)",
+  "commands.cultivar.knowledge.revoked": "Removed %s species from %s player(s)",
+  "commands.cultivar.knowledge.list": "%s knows %s of %s species:",
+  "commands.cultivar.knowledge.unknown": "Unknown plant: %s"
 }

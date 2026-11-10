@@ -37,6 +37,7 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.EnumValue<Genetics.Expression> STAT_EXPRESSION;
     public static final ModConfigSpec.BooleanValue CLONE_MUTATIONS;
     public static final ModConfigSpec.BooleanValue REQUIRE_ASSAY;
+    public static final ModConfigSpec.BooleanValue REVEAL_ALL_MUTATIONS;
     public static final ModConfigSpec.DoubleValue SATCHEL_SEED_BASE;
     public static final ModConfigSpec.DoubleValue SATCHEL_SEED_PER_VIGOUR;
     public static final ModConfigSpec.BooleanValue INFLUENCE_ENABLED;
@@ -67,6 +68,9 @@ public final class CultivarServerConfig {
                         "Chance = base + perVigour * Vigour. Harvesters, hands and shears never give seeds.")
                 .defineInRange("satchelSeedBase", 0.25, 0.0, 1.0);
         SATCHEL_SEED_PER_VIGOUR = b.defineInRange("satchelSeedPerVigour", 0.05, 0.0, 1.0);
+        REVEAL_ALL_MUTATIONS = b.comment("Show every cross in JEI and the Ledger, known or not (creative or guide-style packs).",
+                        "Off: a cross appears once its child is in the player's knowledge (read from a Botanical Ledger).")
+                .define("revealAllMutations", false);
         b.pop();
 
         b.push("influence");

@@ -97,5 +97,10 @@ shipped files under `data/minecraft/cultivar/` in the mod jar.
   flooded.
 - **Resource crops** are ordinary plants: copy one of `data/cultivar/cultivar/plant/ferrous_bloom.json`, point its product
   at your metal's crushed ore (or nugget) and add a mutation. Give it a `chance` below 1 to keep yields modest.
+- **Knowledge** belongs to each player and is filled from Botanical Ledgers. JEI's Crossbreeding category only
+  shows a cross once the player knows the child and both parents. Op commands, handy for testing or quest rewards:
+  `/cultivar knowledge grant <players> all|<plant>`, `/cultivar knowledge revoke <players> all|<plant>`,
+  `/cultivar knowledge list <player>`. Set `genetics.revealAllMutations = true` in `cultivar-server.toml` to show
+  every cross in JEI and the Ledger.
 - **Overriding art:** a resource pack can re-skin any crop by overriding the textures it names, or the
   `cultivar:crop/...` model.
