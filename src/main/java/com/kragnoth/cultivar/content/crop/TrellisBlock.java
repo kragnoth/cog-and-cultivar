@@ -293,11 +293,14 @@ public class TrellisBlock extends BaseEntityBlock {
         return InteractionResult.PASS;
     }
 
-    /** Genome from a cultivar seed, or a base genome for a vanilla/modded seed listed by some plant. */
+    /**
+     * Genome from a cultivar seed, or a base genome for a vanilla/modded seed listed by some plant. Other items that
+     * carry a genome (Cuttings, Assay Cards) are not seeds: cuttings plant through their own take roll.
+     */
     public static Optional<Genome> genomeFor(ItemStack stack, Level level) {
         Genome existing = stack.get(CoreModule.GENOME.get());
         if (existing != null) {
-            return Optional.of(existing);
+            return stack.getItem() instanceof CultivarSeedItem ? Optional.of(existing) : Optional.empty();
         }
         if (stack.isEmpty()) {
             return Optional.empty();
