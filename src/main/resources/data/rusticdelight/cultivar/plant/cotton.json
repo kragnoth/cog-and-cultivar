@@ -1,0 +1,49 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "rusticdelight"
+    }
+  ],
+  "stages": 4,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "rusticdelight:cotton_seeds",
+  "products": [
+    {
+      "item": "rusticdelight:cotton_boll",
+      "min": 1,
+      "max": 3
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 13,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "medium",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "textures": [
+      "rusticdelight:block/cotton_stage0",
+      "rusticdelight:block/cotton_stage1",
+      "rusticdelight:block/cotton_stage2",
+      "rusticdelight:block/cotton_stage3"
+    ],
+    "shape": "hash"
+  }
+}

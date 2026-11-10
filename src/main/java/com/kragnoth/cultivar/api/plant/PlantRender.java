@@ -19,18 +19,23 @@ import java.util.Locale;
  * active resource pack still supplies the pixels; a pack can also override the model itself. Faces with
  * {@code tintindex} 0 take the stem colour and 1 the biome grass colour, but only when the pack's texture is
  * greyscale (as vanilla's are); pre-coloured pack textures are left untinted.
+ *
+ * <p>{@code top} (optional, same kind as the main list) is used for the topmost segment of a tall plant,
+ * e.g. rice stalks below and panicles on top.
  */
-public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation> models, Shape shape) {
+public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation> models, Shape shape, List<ResourceLocation> top) {
     public static final Codec<PlantRender> CODEC = RecordCodecBuilder.<PlantRender>create(i -> i.group(
             ResourceLocation.CODEC.listOf().optionalFieldOf("textures", List.of()).forGetter(PlantRender::textures),
             ResourceLocation.CODEC.listOf().optionalFieldOf("models", List.of()).forGetter(PlantRender::models),
-            Shape.CODEC.optionalFieldOf("shape", Shape.HASH).forGetter(PlantRender::shape)
+            Shape.CODEC.optionalFieldOf("shape", Shape.HASH).forGetter(PlantRender::shape),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("top", List.of()).forGetter(PlantRender::top)
     ).apply(i, PlantRender::new)).validate(r -> r.textures().isEmpty() && r.models().isEmpty()
             ? DataResult.error(() -> "render needs \"textures\" or \"models\"") : DataResult.success(r));
 
     public PlantRender {
         textures = List.copyOf(textures);
         models = List.copyOf(models);
+        top = List.copyOf(top);
     }
 
     /** Models win over textures. Model ids are {@code <ns>:crop/<name>} under {@code assets/<ns>/models/crop/}. */
@@ -51,7 +56,15 @@ public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation
      * A full segment uses the last entry; a partly grown one the entry matching its fill.
      */
     public ResourceLocation forFill(double fill) {
-        List<ResourceLocation> list = usesModels() ? models : textures;
+        return forFill(usesModels() ? models : textures, fill);
+    }
+
+    /** Like {@link #forFill(double)} for the topmost segment of a tall plant, using {@code top} when given. */
+    public ResourceLocation forTopFill(double fill) {
+        return forFill(top.isEmpty() ? (usesModels() ? models : textures) : top, fill);
+    }
+
+    private static ResourceLocation forFill(List<ResourceLocation> list, double fill) {
         int index = Math.min(list.size() - 1, Math.max(0, (int) Math.ceil(fill * list.size()) - 1));
         return list.get(index);
     }

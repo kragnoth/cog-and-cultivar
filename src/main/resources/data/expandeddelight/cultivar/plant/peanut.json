@@ -1,0 +1,53 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "expandeddelight"
+    }
+  ],
+  "stages": 8,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "expandeddelight:peanut",
+  "products": [
+    {
+      "item": "expandeddelight:peanut",
+      "min": 1,
+      "max": 3
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 12,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "medium",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "textures": [
+      "expandeddelight:block/peanut_crop_stage0",
+      "expandeddelight:block/peanut_crop_stage1",
+      "expandeddelight:block/peanut_crop_stage2",
+      "expandeddelight:block/peanut_crop_stage3",
+      "expandeddelight:block/peanut_crop_stage4",
+      "expandeddelight:block/peanut_crop_stage5",
+      "expandeddelight:block/peanut_crop_stage6",
+      "expandeddelight:block/peanut_crop_stage7"
+    ],
+    "shape": "hash"
+  }
+}

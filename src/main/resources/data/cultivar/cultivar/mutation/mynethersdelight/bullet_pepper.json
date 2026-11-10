@@ -1,0 +1,30 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mynethersdelight"
+    }
+  ],
+  "parent_a": "minecraft:nether_wart",
+  "parent_b": "farmersdelight:tomato",
+  "child": "mynethersdelight:bullet_pepper",
+  "chance": 0.2,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "equal",
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_alkaline",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

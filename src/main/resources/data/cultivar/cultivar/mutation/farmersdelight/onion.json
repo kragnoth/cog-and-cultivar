@@ -1,0 +1,12 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    }
+  ],
+  "parent_a": "minecraft:carrot",
+  "parent_b": "minecraft:potato",
+  "child": "farmersdelight:onion",
+  "chance": 0.4
+}

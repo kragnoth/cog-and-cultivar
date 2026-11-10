@@ -189,6 +189,8 @@ Vanilla soil defaults (1.21 datagen): farmland WET/SLIGHTLY_ACIDIC/HIGH ×1.0; s
 | Torchflower | Glow Berries × Pumpkin | light ≥ 14, 10 % |
 | Pitcher Plant | Torchflower × Sugar Cane | flooded, 10 % |
 
+**Farmer's Delight family (optional, loads only with each mod):** Onion = Carrot × Potato; Cabbage = Beetroot × Onion (damp, light 9–14); Tomato = Sweet Berries × Potato (nightshades, light ≥ 13, 2 tall); Rice = Wheat × Sugar Cane (flooded, 2 tall); Asparagus = Onion × Bamboo (wet); Sweet Potato = Potato × Sugar Cane (light ≥ 12); Chili Pepper = Tomato × Cactus (light ≥ 14); Peanut = Potato × Cocoa (light ≥ 12, damp); Cranberries = Sweet Berries × Sugar Cane (flooded bog); Cotton = Wheat × Cactus (light ≥ 13); Bell Pepper = Tomato × Pumpkin (light ≥ 12); Pale Bell Pepper = Bell Pepper × Cotton; Dark Bell Pepper = Bell Pepper × Sweet Berries (acidic: anthocyanins); Coffee = Cocoa × Sweet Berries (shade, wet); Bullet Pepper = Nether Wart × Tomato and Powdery Cane = Bamboo × Nether Wart (soul sand). Rich Soil / Rich Soil Farmland are very-high-nutrient soils. FD knives clip crops (tag `cultivar:clippers`).
+
 Parents that can't grow in the child's habitat (e.g. potatoes in the dark) are bred for strength or moved in mature with the Transplanting Spade. Crop visuals for crops without a plain crop texture are block models under `models/crop/` that crop vanilla textures by UV, so any resource pack re-skins them.
 
 

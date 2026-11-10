@@ -1,0 +1,12 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "rusticdelight"
+    }
+  ],
+  "parent_a": "rusticdelight:bell_pepper",
+  "parent_b": "rusticdelight:cotton",
+  "child": "rusticdelight:pale_bell_pepper",
+  "chance": 0.25
+}

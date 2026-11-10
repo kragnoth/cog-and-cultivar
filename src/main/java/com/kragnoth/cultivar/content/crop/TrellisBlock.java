@@ -69,6 +69,8 @@ public class TrellisBlock extends BaseEntityBlock {
     ).apply(i, TrellisBlock::new));
 
     /** Items that act on crops through their own {@code useOn} instead of the trellis's interactions. */
+    /** Extra clipping tools (Farmer's Delight knives via c:tools/knife). Shears clip through their own item code. */
+    public static final TagKey<Item> CLIPPERS = TagKey.create(Registries.ITEM, Cultivar.id("clippers"));
     public static final TagKey<Item> CROP_TOOLS = TagKey.create(Registries.ITEM, Cultivar.id("crop_tools"));
 
     private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 14, 14);
@@ -213,6 +215,14 @@ public class TrellisBlock extends BaseEntityBlock {
         if (stack.is(ItemTags.HOES) && crop.hasWeed()) {
             if (!level.isClientSide()) {
                 crop.clearWeeds(drop -> popResource(level, pos, drop));
+                stack.hurtAndBreak(1, player, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide());
+        }
+        // Knives (and anything else tagged cultivar:clippers) clip like Pruning Shears.
+        if (stack.is(CLIPPERS) && crop.hasPlant()) {
+            if (!level.isClientSide() && crop.clip(drop -> popResource(level, pos, drop))) {
+                level.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundSource.BLOCKS, 1f, 1.2f);
                 stack.hurtAndBreak(1, player, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());

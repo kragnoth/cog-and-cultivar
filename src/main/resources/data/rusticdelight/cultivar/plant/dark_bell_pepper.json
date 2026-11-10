@@ -1,0 +1,72 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "rusticdelight"
+    }
+  ],
+  "stages": 8,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "rusticdelight:dark_bell_pepper_seeds",
+  "products": [
+    {
+      "item": "rusticdelight:bell_pepper_black",
+      "min": 1,
+      "max": 1,
+      "chance": 0.55
+    },
+    {
+      "item": "rusticdelight:bell_pepper_purple",
+      "min": 1,
+      "max": 1,
+      "chance": 0.35
+    },
+    {
+      "item": "rusticdelight:bell_pepper_blue",
+      "min": 1,
+      "max": 1,
+      "chance": 0.3
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 12,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "comparison": "equal",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "high",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_acidic",
+      "comparison": "at_most",
+      "tolerance": 0.2
+    }
+  ],
+  "render": {
+    "textures": [
+      "rusticdelight:block/dark_bell_peppers_stage0",
+      "rusticdelight:block/dark_bell_peppers_stage1",
+      "rusticdelight:block/dark_bell_peppers_stage2",
+      "rusticdelight:block/dark_bell_peppers_stage3",
+      "rusticdelight:block/dark_bell_peppers_stage4",
+      "rusticdelight:block/dark_bell_peppers_stage5",
+      "rusticdelight:block/dark_bell_peppers_stage6",
+      "rusticdelight:block/dark_bell_peppers_stage7"
+    ],
+    "shape": "hash"
+  }
+}

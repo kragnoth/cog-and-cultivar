@@ -209,8 +209,10 @@ def cmd_scaffold(args):
     assets = Assets(args.assets) if args.assets else None
     out = args.out
     write_json(os.path.join(out, "pack.mcmeta"), {"pack": {"pack_format": PACK_FORMAT, "description": "Cultivar plants scaffolded by cultivar_scaffold.py"}})
-    plan_rows, report = [], []
-    for crop in sorted(export["crops"], key=lambda c: c["id"]):
+    plan_rows, report, seen = [], [], {}
+    # Several blocks can be stages of one crop (budding/grown tomatoes, rice/panicles): prefer real crops with yields.
+    ordered = sorted(export["crops"], key=lambda c: (c.get("kind") != "CropBlock", not c.get("yields"), c["id"]))
+    for crop in ordered:
         if crop.get("covered_by") and not args.include_covered:
             continue
         if args.mod and crop["mod"] not in args.mod:
@@ -219,6 +221,10 @@ def cmd_scaffold(args):
             report.append(f"SKIP {crop['id']}: no seed item")
             continue
         pid = plant_id(crop)
+        if pid in seen:
+            report.append(f"MERGE {crop['id']} into {pid} (already scaffolded from {seen[pid]}); check its stages/height by hand")
+            continue
+        seen[pid] = crop["id"]
         ns, path = split_id(pid)
         preset = preset_for(crop)
         render, note = render_for(assets, crop)
@@ -241,6 +247,9 @@ def cmd_scaffold(args):
             note = (note + "; " if note else "") + "no loot found, product defaults to the seed item"
         if render:
             plant["render"] = render
+        if crop["mod"] != "minecraft":
+            # Only load when the crop's mod is present, so the datapack is safe in any pack.
+            plant = {"neoforge:conditions": [{"type": "neoforge:mod_loaded", "modid": crop["mod"]}], **plant}
         write_json(os.path.join(out, "data", ns, "cultivar", "plant", f"{path}.json"), plant)
         plan_rows.append({"child": pid, "parent_a": "", "parent_b": "", "chance": "0.25",
                           "light_min": "", "light_max": "", "humidity": "", "comparison": "", "acidity": "", "nutrients": "",
@@ -277,6 +286,9 @@ def cmd_mutations(args):
                 if v:
                     conditions.append({"type": f"cultivar:{kind}", "value": v, "comparison": cmp, "tolerance": 0})
             mutation = {"parent_a": a, "parent_b": b, "child": child, "chance": float(row.get("chance") or 0.25)}
+            mods = sorted({split_id(x)[0] for x in (a, b, child)} - {"minecraft", "cultivar"})
+            if mods:
+                mutation = {"neoforge:conditions": [{"type": "neoforge:mod_loaded", "modid": m} for m in mods], **mutation}
             if conditions:
                 mutation["conditions"] = conditions
             ns, path = split_id(child)

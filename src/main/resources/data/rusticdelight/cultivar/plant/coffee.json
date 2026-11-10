@@ -1,0 +1,52 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "rusticdelight"
+    }
+  ],
+  "stages": 6,
+  "after_harvest_stage": 3,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "rusticdelight:coffee_beans",
+  "products": [
+    {
+      "item": "rusticdelight:coffee_beans",
+      "min": 2,
+      "max": 4
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 6,
+      "max": 12,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "medium",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "textures": [
+      "rusticdelight:block/coffee_stage0",
+      "rusticdelight:block/coffee_stage1",
+      "rusticdelight:block/coffee_stage2",
+      "rusticdelight:block/coffee_stage3",
+      "rusticdelight:block/coffee_stage4",
+      "rusticdelight:block/coffee_stage5"
+    ],
+    "shape": "hash"
+  }
+}

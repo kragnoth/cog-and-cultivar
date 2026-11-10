@@ -77,7 +77,8 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
                 } else {
                     double fill = (crop.stage() + 1) * plant.height() / (double) plant.stages() - segment;
                     if (fill > 0) {
-                        plantTex = render.forFill(Math.min(1.0, fill));
+                        boolean top = segment == plant.height() - 1;
+                        plantTex = top ? render.forTopFill(Math.min(1.0, fill)) : render.forFill(Math.min(1.0, fill));
                     }
                 }
             }

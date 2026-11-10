@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "expandeddelight"
+    }
+  ],
+  "parent_a": "farmersdelight:onion",
+  "parent_b": "minecraft:bamboo",
+  "child": "expandeddelight:asparagus",
+  "chance": 0.3,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "comparison": "at_least",
+      "tolerance": 0
+    }
+  ]
+}

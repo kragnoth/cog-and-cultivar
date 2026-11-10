@@ -1,0 +1,26 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    }
+  ],
+  "parent_a": "minecraft:beetroot",
+  "parent_b": "farmersdelight:onion",
+  "child": "farmersdelight:cabbage",
+  "chance": 0.35,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "at_least",
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:light",
+      "min": 9,
+      "max": 14,
+      "tolerance": 0
+    }
+  ]
+}

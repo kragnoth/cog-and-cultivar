@@ -1,0 +1,13 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    }
+  ],
+  "blocks": "farmersdelight:rich_soil_farmland",
+  "humidity": "wet",
+  "acidity": "slightly_acidic",
+  "nutrients": "very_high",
+  "growth_modifier": 1.25
+}

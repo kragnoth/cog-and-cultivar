@@ -78,6 +78,11 @@ The check reports:
 - the roots of your tree (plants players must find rather than breed)
 - crops that still have no plant
 
+## Optional mods
+
+Generated plant and mutation files for modded crops carry `neoforge:conditions` (`neoforge:mod_loaded`), so one
+datapack works whether or not those mods are installed. Cog & Cultivar's own Farmer's Delight data does the same.
+
 ## 5. Install
 
 Copy `cultivar_scaffold/` into `<world>/datapacks/` (or a global-datapack mod's folder) and run `/reload`.

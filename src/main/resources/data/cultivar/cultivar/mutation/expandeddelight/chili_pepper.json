@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "expandeddelight"
+    }
+  ],
+  "parent_a": "farmersdelight:tomato",
+  "parent_b": "minecraft:cactus",
+  "child": "expandeddelight:chili_pepper",
+  "chance": 0.25,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 14,
+      "max": 15,
+      "tolerance": 0
+    }
+  ]
+}
