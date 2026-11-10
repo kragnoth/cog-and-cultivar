@@ -46,7 +46,7 @@ public class CultivarSeedItem extends Item {
         if (genome == null) {
             return;
         }
-        var expression = Genetics.Expression.MAX; // display only; gameplay uses server config
+        var expression = Genetics.current();
         CoreModule.STATS.getEntries().forEach(stat -> tooltip.add(Component.translatable(
                 "stat.cultivar." + stat.getId().getPath()).append(": " + Genetics.expressed(genome, stat.getKey(), expression))
                 .withStyle(ChatFormatting.GRAY)));

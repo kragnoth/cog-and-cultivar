@@ -26,5 +26,11 @@
   "item.cultivar.brass_dial": "Brass Dial",
   "config.jade.plugin_cultivar.crop": "Cultivar crops",
   "item.cultivar.seed_satchel.culled": "Composted %s culled seeds",
-  "item.cultivar.bell_cloche": "Bell Cloche"
+  "item.cultivar.bell_cloche": "Bell Cloche",
+  "item.cultivar.botanists_loupe": "Botanist's Loupe",
+  "cultivar.info.empty": "Empty trellis",
+  "cultivar.info.no_soil": "No usable soil below",
+  "cultivar.info.soil": "Soil: %s, %s, %s nutrients",
+  "influence.cultivar.beehive": "Pollinated (beehive)",
+  "influence.cultivar.bell_cloche": "Under cloche"
 }

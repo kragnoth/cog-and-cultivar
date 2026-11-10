@@ -138,7 +138,7 @@ public class SeedSatchelItem extends Item {
         Dial dial = satchel.get(ToolsModule.SATCHEL_DIAL.get());
         int index = 0;
         if (dial != null) {
-            Genetics.Expression expr = Genetics.Expression.MAX;
+            Genetics.Expression expr = Genetics.current();
             List<Entry> entries = c.entries();
             index = entries.indexOf(entries.stream()
                     .max(Comparator.comparingInt(e -> Genetics.expressed(e.genome(), dial.stat(), expr))).orElseThrow());
@@ -167,7 +167,7 @@ public class SeedSatchelItem extends Item {
         if (dial == null || c.entries().isEmpty()) {
             return Optional.empty();
         }
-        Genetics.Expression expr = Genetics.Expression.MAX;
+        Genetics.Expression expr = Genetics.current();
         int best = c.entries().stream().mapToInt(e -> Genetics.expressed(e.genome(), dial.stat(), expr)).max().orElse(0);
         Optional<Entry> worst = c.entries().stream()
                 .filter(e -> Genetics.expressed(e.genome(), dial.stat(), expr) < best - KEEP_WITHIN)

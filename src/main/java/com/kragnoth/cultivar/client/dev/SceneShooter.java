@@ -19,7 +19,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import com.kragnoth.cultivar.content.tools.ToolsModule;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
@@ -57,7 +60,9 @@ public final class SceneShooter {
             new Shot("cloche_03_iron_carrot_closeup", 6.5, Y + 1.0, DZ + 2.6, 180f, 12f),
             new Shot("cloche_04_with_vs_without", 11.0, Y + 1.4, DZ + 3.4, 180f, 15f),
             new Shot("cloche_05_high_angle", 0.5, Y + 2.8, DZ + 2.2, 180f, 45f),
-            new Shot("cloche_06_field", 3.5, Y + 4.5, 12.0, 180f, 28f));
+            new Shot("cloche_06_field", 3.5, Y + 4.5, 12.0, 180f, 28f),
+            // Loupe overlay: iron + cloche potato at (4, Y, 2), also in range of the beehive at (7, Y, 2).
+            new Shot("loupe_01_overlay", 4.5, Y + 1.4, 4.6, 180f, 20f));
 
     private static int tick = -1;
     private static boolean worldRequested;
@@ -112,7 +117,13 @@ public final class SceneShooter {
             if (tick == base) {
                 server.execute(() -> {
                     ServerPlayer p = server.getPlayerList().getPlayers().getFirst();
-                    p.setGameMode(GameType.SPECTATOR);
+                    boolean loupe = shot.name().startsWith("loupe");
+                    p.setGameMode(loupe ? GameType.CREATIVE : GameType.SPECTATOR);
+                    if (loupe) {
+                        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ToolsModule.BOTANISTS_LOUPE.get()));
+                        p.getAbilities().flying = true;
+                        p.onUpdateAbilities();
+                    }
                     p.teleportTo(server.overworld(), shot.x(), shot.y() - p.getEyeHeight(), shot.z(), shot.yaw(), shot.pitch()); // shot.y is eye height
                 });
             }
@@ -123,6 +134,9 @@ public final class SceneShooter {
                 mc.player.setYHeadRot(shot.yaw());
                 mc.player.yRotO = shot.yaw();
                 mc.player.xRotO = shot.pitch();
+            }
+            if (tick == base + 75) {
+                mc.options.hideGui = !shot.name().startsWith("loupe");
             }
             if (tick == base + 80) {
                 Screenshot.grab(mc.gameDirectory, shot.name() + ".png", mc.getMainRenderTarget(),

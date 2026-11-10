@@ -41,6 +41,9 @@ public final class ToolsModule implements CultivarModule {
     public static final DeferredItem<SeedSatchelItem> SEED_SATCHEL = ITEMS.registerItem("seed_satchel",
             SeedSatchelItem::new, new Item.Properties().stacksTo(1));
     public static final DeferredItem<Item> BRASS_DIAL = ITEMS.registerSimpleItem("brass_dial");
+    /** Held in either hand, shows the crop readout (client overlay). Create goggles show the same readout. */
+    public static final DeferredItem<Item> BOTANISTS_LOUPE = ITEMS.registerItem("botanists_loupe",
+            Item::new, new Item.Properties().stacksTo(1));
 
     @Override
     public String id() {
