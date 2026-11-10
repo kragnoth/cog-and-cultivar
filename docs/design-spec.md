@@ -672,7 +672,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **1 — Core** | Trellis, crop BE, Bell Cloche, datapack plant/soil/mutation content, growth tick, breeding, weeds/blight, harvest, **influence lookup + beehive pollination (§3.15)** | Breed a vanilla mutation chain; stats inherit as specified; a full hive measurably raises mutation rate |
 | **2 — Tools & info** | Spade, Shears, Tiller, Satchel, Loupe (+ goggle merge), Ledger, Assaying Engine (kinetic), Assay Card | Full manual breeding loop with diegetic info |
 | **2.5 — Tall crops** ✅ | Plant `height`, auto-stacking trellis segments, sugarcane/cactus/bamboo data (Wall Trellis deferred to Phase 6 content) | A 3-high sugarcane grows on a stacked trellis |
-| **3 — Create farming** | Harvester override, deployer actions, item attributes (stat filters), comparator/Display Link, **cull loop: Millstone seeds → Seed Meal → fertilizer** | Fully automated plant–harvest–sort loop |
+| **3 — Create farming** ✅ | Harvester override, deployer actions, item attributes (stat filters), comparator/Display Link, **cull loop: Millstone seeds → Seed Meal → fertilizer** | Fully automated plant–harvest–sort loop |
 | **4 — Water** | Cistern, Rotary Sprinkler, Drip Line, troughs + gates (graph), fertigation fluids | Sprinkler field fed by Create pipes |
 | **5 — Climate** | Soil conditioning attachment, Mist Nozzle, Conservatory + Climate Gauge, temperature requirement | Grow a HOT-requirement strain in a snow biome |
 | **6 — Content** | Ore-blooms → crushed ore, Brassleaf gating, Seed Vault, Livestock Trough, **Brass Apiary**, blight variants, Derelict Conservatories | Pack-ready |

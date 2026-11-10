@@ -1,0 +1,18 @@
+{
+  "type": "create:milling",
+  "ingredients": [
+    {
+      "item": "cultivar:cutting"
+    }
+  ],
+  "processing_time": 60,
+  "results": [
+    {
+      "id": "cultivar:seed_meal"
+    },
+    {
+      "id": "cultivar:seed_meal",
+      "chance": 0.25
+    }
+  ]
+}

@@ -2,6 +2,8 @@ package com.kragnoth.cultivar.compat.create;
 
 import com.kragnoth.cultivar.core.module.CultivarModule;
 import net.neoforged.fml.ModList;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 
 /**
  * Create integration. Create is a hard dependency today, but this module follows the optional-compat
@@ -13,6 +15,11 @@ public final class CreateModule implements CultivarModule {
     @Override
     public String id() {
         return "create";
+    }
+
+    @Override
+    public void onConstruct(IEventBus modBus, ModContainer container) {
+        CreateContent.register(modBus);
     }
 
     @Override

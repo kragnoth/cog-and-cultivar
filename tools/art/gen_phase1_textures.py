@@ -215,3 +215,15 @@ for x in (6, 7):
     cut.putpixel((x, 13), BRASS[2])
 cut.save(f'{OUT}/item/cutting.png')
 print('cutting ok')
+
+# ---- Seed Meal: Excalibur bone meal re-toned to a warm husk brown
+meal = Image.open(f'{EXC}/item/bone_meal.png').convert('RGBA').resize((16, 16), Image.NEAREST)
+px = meal.load()
+for y in range(16):
+    for x in range(16):
+        r, g, b, a = px[x, y]
+        if a:
+            lum = (r + g + b) / 765
+            px[x, y] = (int(90 + 120 * lum), int(62 + 95 * lum), int(30 + 55 * lum), a)
+meal.save(f'{OUT}/item/seed_meal.png')
+print('seed meal ok')
