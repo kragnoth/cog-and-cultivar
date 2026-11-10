@@ -539,7 +539,7 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 >
 > **Breedable by design:** parents and the frame share light (adjacent blocks differ by at most 1), so every cross has a light level both parents and the child tolerate. Crops grow at light ≥ 9 and mushrooms at ≤ 12 (vanilla's own rules), which leaves a twilight band (9–11) for crop × mushroom crosses. `tools/data/check_crosses.py` verifies every shipped cross in CI.
 >
-> Blooms grow slowly (growth chance 0.5) and mostly want dim (light ≤ 10), damp, medium-nutrient soil. Exceptions: Verdigris wants watery soil, Aurum (poor, dry soil) and Emerald want bright light, Quartz shares Nether Wart's soil, and Diamond Briar grows only in scorched (dry or arid) ground at any light. They have no seed item: seeds come from the Seed Satchel only. The models are a vanilla flower cross with two small buds of the ore's block at its foot when ripe.
+> Blooms grow slowly (growth chance 0.5) and mostly want dim (light ≤ 10), damp, medium-nutrient soil. Exceptions: Verdigris wants watery soil, Aurum (poor, dry soil) and Emerald want bright light, Quartz shares Nether Wart's soil, and Diamond Briar grows only in scorched (dry or arid) ground at any light. They have no seed item: seeds come from the Seed Satchel only. Art: each bloom is kitbashed from its own Excalibur plant by `tools/art/gen_bloom_textures.py`; flowers keep their foliage and take the product's colours on the petals, other plants are recoloured whole and show the product as nuggets or gems when ripe. Young stages are green buds.
 
 The original AgriCraft-derived notes below are kept for reference.
 

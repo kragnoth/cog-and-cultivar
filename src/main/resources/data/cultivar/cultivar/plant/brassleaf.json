@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/brassleaf_stage0",
-      "cultivar:crop/brassleaf_stage1",
-      "cultivar:crop/brassleaf_stage2",
-      "cultivar:crop/brassleaf_stage3"
+    "textures": [
+      "cultivar:block/brassleaf_stage0",
+      "cultivar:block/brassleaf_stage1",
+      "cultivar:block/brassleaf_stage2",
+      "cultivar:block/brassleaf_stage3"
     ],
     "shape": "cross"
   }

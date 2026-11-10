@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/silkweed_stage0",
-      "cultivar:crop/silkweed_stage1",
-      "cultivar:crop/silkweed_stage2",
-      "cultivar:crop/silkweed_stage3"
+    "textures": [
+      "cultivar:block/silkweed_stage0",
+      "cultivar:block/silkweed_stage1",
+      "cultivar:block/silkweed_stage2",
+      "cultivar:block/silkweed_stage3"
     ],
     "shape": "cross"
   }

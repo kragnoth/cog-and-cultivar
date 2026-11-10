@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/aurum_thistle_stage0",
-      "cultivar:crop/aurum_thistle_stage1",
-      "cultivar:crop/aurum_thistle_stage2",
-      "cultivar:crop/aurum_thistle_stage3"
+    "textures": [
+      "cultivar:block/aurum_thistle_stage0",
+      "cultivar:block/aurum_thistle_stage1",
+      "cultivar:block/aurum_thistle_stage2",
+      "cultivar:block/aurum_thistle_stage3"
     ],
     "shape": "cross"
   }

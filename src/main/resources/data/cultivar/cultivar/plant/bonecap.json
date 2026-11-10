@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/bonecap_stage0",
-      "cultivar:crop/bonecap_stage1",
-      "cultivar:crop/bonecap_stage2",
-      "cultivar:crop/bonecap_stage3"
+    "textures": [
+      "cultivar:block/bonecap_stage0",
+      "cultivar:block/bonecap_stage1",
+      "cultivar:block/bonecap_stage2",
+      "cultivar:block/bonecap_stage3"
     ],
     "shape": "cross"
   }

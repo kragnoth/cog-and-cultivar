@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/brimstone_puff_stage0",
-      "cultivar:crop/brimstone_puff_stage1",
-      "cultivar:crop/brimstone_puff_stage2",
-      "cultivar:crop/brimstone_puff_stage3"
+    "textures": [
+      "cultivar:block/brimstone_puff_stage0",
+      "cultivar:block/brimstone_puff_stage1",
+      "cultivar:block/brimstone_puff_stage2",
+      "cultivar:block/brimstone_puff_stage3"
     ],
     "shape": "cross"
   }

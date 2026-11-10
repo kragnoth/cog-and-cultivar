@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/inkcap_stage0",
-      "cultivar:crop/inkcap_stage1",
-      "cultivar:crop/inkcap_stage2",
-      "cultivar:crop/inkcap_stage3"
+    "textures": [
+      "cultivar:block/inkcap_stage0",
+      "cultivar:block/inkcap_stage1",
+      "cultivar:block/inkcap_stage2",
+      "cultivar:block/inkcap_stage3"
     ],
     "shape": "cross"
   }

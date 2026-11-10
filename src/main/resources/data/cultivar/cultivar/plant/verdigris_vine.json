@@ -32,11 +32,11 @@
     }
   ],
   "render": {
-    "models": [
-      "cultivar:crop/verdigris_vine_stage0",
-      "cultivar:crop/verdigris_vine_stage1",
-      "cultivar:crop/verdigris_vine_stage2",
-      "cultivar:crop/verdigris_vine_stage3"
+    "textures": [
+      "cultivar:block/verdigris_vine_stage0",
+      "cultivar:block/verdigris_vine_stage1",
+      "cultivar:block/verdigris_vine_stage2",
+      "cultivar:block/verdigris_vine_stage3"
     ],
     "shape": "cross"
   }
