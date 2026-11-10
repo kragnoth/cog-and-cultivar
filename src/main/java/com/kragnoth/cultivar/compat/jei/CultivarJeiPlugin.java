@@ -34,6 +34,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
             }
 
             @Override
+            @SuppressWarnings("deprecation") // still abstract in JEI 19.21; required until JEI drops it
             public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
                 Object data = getSubtypeData(stack, context);
                 return data == null ? "" : data.toString();
