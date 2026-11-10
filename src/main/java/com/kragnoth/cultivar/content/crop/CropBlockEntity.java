@@ -412,7 +412,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         if (!CultivarServerConfig.WEEDS_ENABLED.get()) {
             return false;
         }
-        ResourceKey<Stat> resistance = CoreModule.RESISTANCE.getKey();
+        ResourceKey<Stat> resistance = CoreModule.STRENGTH.getKey(); // Strength also resists weeds
         double chance = GrowthMath.weedChance(genome != null, stat(resistance), Genetics.max(resistance), fx);
         if (random.nextDouble() >= chance) {
             return false;

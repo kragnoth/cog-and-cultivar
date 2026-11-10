@@ -88,9 +88,9 @@ Each entry has three parts: **Does**, **How** and **1.21.1 rebuild**.
 | **Gain** | Harvest rolls: `trials = floor((gain + 3) / 3)`, so gain 1→1, 3→2, 6→3, 9–10→4 | blue |
 | **Growth** | Adds to the growth chance (see §2.3) | green |
 | **Strength** | Widens environmental tolerance windows (see §2.4); at max strength, season requirements are ignored | red |
-| **Resistance** | Lowers the chance that a tick goes to weeds (see §2.6) | yellow |
-| **Fertility** | Chance this crop is chosen as a parent; parents are sorted by it | orange |
-| **Mutativity** | Chance that a stat allele drifts ±1 when inherited | cyan |
+| **Vigour** | Breeding power: chance to be chosen as a parent (parents sorted by it) and the chance/direction a stat allele drifts ±1 when inherited (AgriCraft's Fertility + Mutativity) | cyan |
+
+> **Cog & Cultivar uses four stats:** Gain, Growth, Strength and Vigour. Strength also takes over AgriCraft's Resistance (weed suppression) and, at 10, makes a plant **Hardy**: it ignores soil humidity, acidity and nutrients. Strength also sets the chance a Cutting takes.
 
 - **Dominance:** for stat genes, the higher value is dominant.
 - **Expressed value** comes from config `Stat calculation logic`: `max` (default), `min` or `mean` of the two alleles.

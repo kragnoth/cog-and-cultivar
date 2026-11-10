@@ -7,9 +7,6 @@
   "stat.cultivar.gain": "Gain",
   "stat.cultivar.growth": "Growth",
   "stat.cultivar.strength": "Strength",
-  "stat.cultivar.resistance": "Resistance",
-  "stat.cultivar.fertility": "Fertility",
-  "stat.cultivar.mutativity": "Mutativity",
   "plant.minecraft.wheat": "Wheat",
   "plant.minecraft.carrot": "Carrot",
   "plant.minecraft.potato": "Potato",
@@ -95,5 +92,6 @@
   "item.cultivar.cutting.of": "%s Cutting",
   "item.cultivar.cutting.hint": "Plant on an empty trellis: %s%% chance to take (Strength)",
   "item.cultivar.cutting.failed": "The cutting didn't take...",
-  "cultivar.info.hardy": "Hardy: grows on any soil"
+  "cultivar.info.hardy": "Hardy: grows on any soil",
+  "stat.cultivar.vigour": "Vigour"
 }

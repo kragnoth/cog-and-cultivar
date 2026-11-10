@@ -54,15 +54,15 @@ public final class BreedingEngine {
         return Optional.of(combine(parents.get(0), parents.get(1), mutations, conditionsMet, settings, random));
     }
 
-    /** Sorted by fertility (high first); each passes with chance (fertility + pollination bonus) / max. */
+    /** Sorted by Vigour (high first); each passes with chance (Vigour + pollination bonus) / max. */
     static List<Genome> selectParents(List<Genome> neighbours, Settings settings, RandomSource random) {
-        ResourceKey<Stat> fertility = CoreModule.FERTILITY.getKey();
-        int max = Genetics.max(fertility);
+        ResourceKey<Stat> vigour = CoreModule.VIGOUR.getKey();
+        int max = Genetics.max(vigour);
         List<Genome> sorted = new ArrayList<>(neighbours);
-        sorted.sort(Comparator.comparingInt((Genome g) -> Genetics.expressed(g, fertility, settings.expression())).reversed());
+        sorted.sort(Comparator.comparingInt((Genome g) -> Genetics.expressed(g, vigour, settings.expression())).reversed());
         List<Genome> passed = new ArrayList<>(2);
         for (Genome genome : sorted) {
-            int effective = Math.min(max, Genetics.expressed(genome, fertility, settings.expression())
+            int effective = Math.min(max, Genetics.expressed(genome, vigour, settings.expression())
                     + settings.influence().fertilityBonus());
             if (random.nextInt(max) < effective) {
                 passed.add(genome);
@@ -127,7 +127,7 @@ public final class BreedingEngine {
     }
 
     static int mutativity(Genome parent, Settings settings) {
-        return Genetics.expressed(parent, CoreModule.MUTATIVITY.getKey(), settings.expression())
+        return Genetics.expressed(parent, CoreModule.VIGOUR.getKey(), settings.expression())
                 + settings.influence().mutativityBonus();
     }
 
@@ -135,7 +135,7 @@ public final class BreedingEngine {
      * Stat drift: with chance {@code m/max} the allele moves one step; it moves up with chance
      * {@code floor((max + m) / 2) / max}, otherwise down. m=1 gives 10 % drift, 50/50; m=10 gives always up.
      */
-    static int drift(ResourceKey<Stat> stat, int allele, int mutativity, RandomSource random) {
+    public static int drift(ResourceKey<Stat> stat, int allele, int mutativity, RandomSource random) {
         int max = Genetics.max(stat);
         int m = Math.min(max, mutativity);
         if (random.nextInt(max) >= m) {
