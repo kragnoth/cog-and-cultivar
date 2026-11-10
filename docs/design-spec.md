@@ -473,7 +473,7 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 ### 3.12 Ledger, Loupe, Satchel, Spade, Shears
 
 - **Botanical Ledger:** keep all journal pages; restyle as a ledger with tab dividers. Add a **"Breeding Notebook"** page that logs observed mutations (only shown once triggered) — progressive discovery like AgriCraft's progressive JEI. Display Link source: "species researched x / y".
-- **Botanist's Loupe:** hand item, plus an anvil/smithing merge into the **Engineer's Goggles** (adds a goggle line for crops and soil). The overlay shows the **gear-spindle genome** and soil dials.
+- **Botanist's Loupe:** hand item showing a HUD readout beside the crosshair: species, growth, stat bars in stat colours, soil, active influences, blight. **Create's Engineer's Goggles show the same readout natively** (the crop block entity implements Create's goggle interface), so no merge recipe is needed. Jade stays a compact one-liner. A gear-spindle genome display is a possible later polish.
 - **Seed Satchel:** no enchant gate (the 1.18 enchant requirement was friction for little gain); instead the satchel needs a **brass dial upgrade** to enable sorting. Same capacity and sorter logic; the sorter dial is shown on the item model via an item property.
 - **Transplanting Spade / Pruning Shears:** the same function as trowel and clipper.
 

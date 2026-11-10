@@ -4,6 +4,7 @@ import com.kragnoth.cultivar.api.CultivarRegistries;
 import com.kragnoth.cultivar.api.genetics.AllelePair;
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.genetics.Stat;
+import com.kragnoth.cultivar.core.config.CultivarServerConfig;
 import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringRepresentable;
@@ -32,6 +33,19 @@ public final class Genetics {
         public String getSerializedName() {
             return name().toLowerCase(Locale.ROOT);
         }
+    }
+
+    /**
+     * The server-configured expression. SERVER configs are synced to clients on join, so both sides agree
+     * (important: satchel sorting runs on both sides during inventory clicks). Falls back to MAX before
+     * configs are loaded (e.g. tooltips on the title screen).
+     */
+    public static Expression current() {
+        return CultivarServerConfig.SPEC.isLoaded() ? CultivarServerConfig.STAT_EXPRESSION.get() : Expression.MAX;
+    }
+
+    public static int expressed(Genome genome, ResourceKey<Stat> stat) {
+        return expressed(genome, stat, current());
     }
 
     public static int expressed(Genome genome, ResourceKey<Stat> stat, Expression expression) {

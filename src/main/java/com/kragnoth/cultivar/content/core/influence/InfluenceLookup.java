@@ -4,7 +4,10 @@ import com.kragnoth.cultivar.api.CultivarRegistries;
 import com.kragnoth.cultivar.api.influence.CropInfluence;
 import com.kragnoth.cultivar.api.influence.InfluenceEffects;
 import com.kragnoth.cultivar.core.config.CultivarServerConfig;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
@@ -30,21 +33,39 @@ public final class InfluenceLookup {
 
     private InfluenceLookup() {}
 
+    /** One influence entry acting on a crop, and how strongly (0..1). Synced to clients for display. */
+    public record Active(ResourceKey<CropInfluence> id, float strength) {
+        public static final Codec<Active> CODEC = RecordCodecBuilder.create(i -> i.group(
+                ResourceKey.codec(CultivarRegistries.CROP_INFLUENCE).fieldOf("id").forGetter(Active::id),
+                Codec.FLOAT.fieldOf("strength").forGetter(Active::strength)
+        ).apply(i, Active::new));
+    }
+
+    public record Result(InfluenceEffects effects, List<Active> active) {
+        public static final Result NONE = new Result(InfluenceEffects.NONE, List.of());
+    }
+
     public static InfluenceEffects compute(ServerLevel level, BlockPos crop) {
+        return computeDetailed(level, crop).effects();
+    }
+
+    public static Result computeDetailed(ServerLevel level, BlockPos crop) {
         if (!CultivarServerConfig.INFLUENCE_ENABLED.get()) {
-            return InfluenceEffects.NONE;
+            return Result.NONE;
         }
         List<InfluenceEffects> found = new ArrayList<>();
-        for (CropInfluence entry : level.registryAccess().registryOrThrow(CultivarRegistries.CROP_INFLUENCE)) {
-            double best = strongest(level, crop, entry);
+        List<Active> active = new ArrayList<>();
+        level.registryAccess().registryOrThrow(CultivarRegistries.CROP_INFLUENCE).holders().forEach(holder -> {
+            double best = strongest(level, crop, holder.value());
             if (best > 0) {
-                found.add(entry.effects().scaled(best));
+                found.add(holder.value().effects().scaled(best));
+                active.add(new Active(holder.key(), (float) best));
             }
-        }
+        });
         if (found.isEmpty()) {
-            return InfluenceEffects.NONE;
+            return Result.NONE;
         }
-        return InfluenceMath.combine(found, InfluenceMath.configuredCaps());
+        return new Result(InfluenceMath.combine(found, InfluenceMath.configuredCaps()), List.copyOf(active));
     }
 
     private static double strongest(ServerLevel level, BlockPos crop, CropInfluence entry) {
@@ -56,7 +77,7 @@ public final class InfluenceLookup {
         var records = pois.getInSquare(type -> true, crop, r, PoiManager.Occupancy.ANY).toList();
         for (var record : records) {
             BlockPos pos = record.getPos();
-            if (Math.abs(pos.getY() - crop.getY()) > h) {
+            if (Math.abs(pos.getY() - crop.getY()) > h || !level.isLoaded(pos)) {
                 continue;
             }
             BlockState state = level.getBlockState(pos);

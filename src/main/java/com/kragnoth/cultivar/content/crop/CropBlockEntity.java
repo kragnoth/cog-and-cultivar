@@ -1,6 +1,8 @@
 package com.kragnoth.cultivar.content.crop;
 
 import com.kragnoth.cultivar.Cultivar;
+import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
+import net.minecraft.network.chat.Component;
 import com.kragnoth.cultivar.api.CultivarRegistries;
 import com.kragnoth.cultivar.api.condition.GrowthCondition;
 import com.kragnoth.cultivar.api.condition.GrowthContext;
@@ -49,7 +51,7 @@ import java.util.function.Consumer;
  * State and rules for one trellis: the planted genome, its growth stage and any weed.
  * Logic runs only from {@link #randomTick} and player interaction; there is no ticker.
  */
-public class CropBlockEntity extends BlockEntity {
+public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformation {
     @Nullable
     private Genome genome;
     private int stage;
@@ -99,12 +101,14 @@ public class CropBlockEntity extends BlockEntity {
 
     private int stat(ResourceKey<Stat> stat) {
         return genome == null ? Genetics.min(stat)
-                : Genetics.expressed(genome, stat, CultivarServerConfig.STAT_EXPRESSION.get());
+                : Genetics.expressed(genome, stat);
     }
 
     @Nullable
     private InfluenceEffects cachedInfluence;
     private long influenceExpiry;
+    /** Which influences are active here; synced so Loupe, goggles and Jade can show them. */
+    private List<InfluenceLookup.Active> activeInfluences = List.of();
 
     /**
      * Combined crop influence here (beehives, cloches...). Recomputed at most about once a minute per crop,
@@ -116,18 +120,28 @@ public class CropBlockEntity extends BlockEntity {
         }
         long now = serverLevel.getGameTime();
         if (cachedInfluence == null || now >= influenceExpiry) {
-            cachedInfluence = InfluenceLookup.compute(serverLevel, worldPosition);
+            InfluenceLookup.Result result = InfluenceLookup.computeDetailed(serverLevel, worldPosition);
+            cachedInfluence = result.effects();
             influenceExpiry = now + 1200 + serverLevel.random.nextInt(200);
+            if (!result.active().equals(activeInfluences)) {
+                activeInfluences = result.active();
+                changed();
+            }
         }
         return cachedInfluence;
     }
 
-    /** Forces the next {@link #influence()} call to recompute (e.g. a cloche was placed or removed). */
+    /** Recomputes influence now (e.g. a cloche was fitted or removed) so displays update immediately. */
     public void invalidateInfluence() {
         cachedInfluence = null;
+        influence();
     }
 
-    private Optional<Soil> soil() {
+    public List<InfluenceLookup.Active> activeInfluences() {
+        return activeInfluences;
+    }
+
+    public Optional<Soil> soil() {
         if (level == null) {
             return Optional.empty();
         }
@@ -146,6 +160,9 @@ public class CropBlockEntity extends BlockEntity {
         genome = newGenome;
         stage = 0;
         changed();
+        if (level instanceof ServerLevel) {
+            invalidateInfluence(); // compute now so the Loupe/goggles show influences right away
+        }
         return true;
     }
 
@@ -321,7 +338,8 @@ public class CropBlockEntity extends BlockEntity {
         }
         if (w.aggressive()) {
             for (Direction dir : Direction.Plane.HORIZONTAL) {
-                if (level.getBlockEntity(worldPosition.relative(dir)) instanceof CropBlockEntity neighbour
+                BlockPos np = worldPosition.relative(dir);
+                if (level.isLoaded(np) && level.getBlockEntity(np) instanceof CropBlockEntity neighbour
                         && neighbour.weed == null && random.nextBoolean()) {
                     neighbour.weed = weed;
                     neighbour.weedStage = 0;
@@ -367,7 +385,8 @@ public class CropBlockEntity extends BlockEntity {
     private void tickBreeding(ServerLevel level, RandomSource random, InfluenceEffects fx) {
         List<Genome> parents = new ArrayList<>(4);
         for (Direction dir : Direction.Plane.HORIZONTAL) {
-            if (level.getBlockEntity(worldPosition.relative(dir)) instanceof CropBlockEntity n && n.isMature() && n.weed == null) {
+            BlockPos np = worldPosition.relative(dir);
+            if (level.isLoaded(np) && level.getBlockEntity(np) instanceof CropBlockEntity n && n.isMature() && n.weed == null) {
                 parents.add(n.genome);
             }
         }
@@ -409,6 +428,10 @@ public class CropBlockEntity extends BlockEntity {
         if (genome != null) {
             Genome.CODEC.encodeStart(ops, genome).resultOrPartial(Cultivar.LOGGER::error).ifPresent(t -> tag.put("genome", t));
         }
+        if (!activeInfluences.isEmpty()) {
+            InfluenceLookup.Active.CODEC.listOf().encodeStart(ops, activeInfluences)
+                    .resultOrPartial(Cultivar.LOGGER::error).ifPresent(t -> tag.put("influences", t));
+        }
         if (weed != null) {
             RegistryFixedCodec.create(CultivarRegistries.WEED).encodeStart(ops, weed)
                     .resultOrPartial(Cultivar.LOGGER::error).ifPresent(t -> tag.put("weed", t));
@@ -429,6 +452,9 @@ public class CropBlockEntity extends BlockEntity {
                 ? RegistryFixedCodec.create(CultivarRegistries.WEED).parse(ops, tag.get("weed")).resultOrPartial(Cultivar.LOGGER::warn).orElse(null)
                 : null;
         weedStage = weed == null ? 0 : tag.getInt("weed_stage");
+        activeInfluences = tag.contains("influences")
+                ? InfluenceLookup.Active.CODEC.listOf().parse(ops, tag.get("influences")).resultOrPartial(Cultivar.LOGGER::warn).orElse(List.of())
+                : List.of();
     }
 
     @Override
@@ -459,6 +485,16 @@ public class CropBlockEntity extends BlockEntity {
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    /** Create Engineer's Goggles readout (spec §3.12: goggles show what the Loupe shows). Client-side, synced state only. */
+    @Override
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        if (genome == null && weed == null && activeInfluences.isEmpty()) {
+            return false;
+        }
+        CropInfo.lines(this).forEach(line -> tooltip.add(Component.literal("    ").append(line)));
+        return true;
     }
 
     /** For comparators: 0 empty, 1–14 growth progress, 15 mature. */

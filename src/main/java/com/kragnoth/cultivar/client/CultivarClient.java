@@ -4,6 +4,7 @@ import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.client.config.CultivarClientConfig;
 import com.kragnoth.cultivar.client.crop.CropClientModule;
 import com.kragnoth.cultivar.client.dev.SceneShooter;
+import com.kragnoth.cultivar.client.loupe.LoupeClientModule;
 import com.kragnoth.cultivar.client.tools.ToolsClientModule;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -26,7 +27,8 @@ public final class CultivarClient {
     /** Client module index. One line per feature that has client-side code. */
     static final List<Supplier<ClientModule>> MODULES = List.of(
             CropClientModule::new,
-            ToolsClientModule::new
+            ToolsClientModule::new,
+            LoupeClientModule::new
     );
 
     public CultivarClient(IEventBus modBus, ModContainer container) {
