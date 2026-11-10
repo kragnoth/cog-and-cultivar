@@ -47,7 +47,10 @@ public class LedgerScreen extends Screen {
 
     public LedgerScreen(ItemStack ledger) {
         super(Component.translatable("item.cultivar.botanical_ledger"));
-        this.data = LedgerItem.data(ledger);
+        // What the player knows plus anything in this Ledger not yet read (the server merges them on use).
+        var merged = new java.util.HashSet<>(LedgerItem.data(ledger).researched());
+        merged.addAll(com.kragnoth.cultivar.content.ledger.ClientKnowledge.get().researched());
+        this.data = new LedgerItem.Data(merged);
     }
 
     @Override
@@ -143,10 +146,11 @@ public class LedgerScreen extends Screen {
                         .append(" " + p.min() + (p.max() > p.min() ? "-" + p.max() : "")));
             }
         }
+        boolean reveal = com.kragnoth.cultivar.core.config.CultivarServerConfig.REVEAL_ALL_MUTATIONS.get();
         List<Component> from = new ArrayList<>();
         List<Component> leadsTo = new ArrayList<>();
         for (Mutation m : mutations) {
-            boolean allKnown = known(m.parentA()) && known(m.parentB()) && known(m.child());
+            boolean allKnown = reveal || known(m.parentA()) && known(m.parentB()) && known(m.child());
             if (m.child().is(key)) {
                 from.add(allKnown ? name(m.parentA()).copy().append(" × ").append(name(m.parentB()))
                         .append(" (" + Math.round(m.chance() * 100) + "%)")
@@ -174,7 +178,8 @@ public class LedgerScreen extends Screen {
         return plant.unwrapKey().map(k -> CultivarSeedItem.plantName(k.location())).orElse(Component.literal("?"));
     }
 
-    private static Component describe(GrowthCondition c) {
+    /** Short text for a growth condition; shared with the JEI mutation category. */
+    public static Component describe(GrowthCondition c) {
         return switch (c) {
             case LightCondition l -> Component.translatable("ledger.cultivar.cond.light", l.min(), l.max());
             case SoilConditions.Humidity h -> soil("humidity", h.value().getSerializedName(), h.comparison().getSerializedName());

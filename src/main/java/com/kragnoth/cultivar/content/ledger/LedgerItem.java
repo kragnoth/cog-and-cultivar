@@ -16,6 +16,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -29,9 +31,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Botanical Ledger: records species. Use it on a planted trellis to record that species (the Assaying
- * Engine will record automatically in 2c). Use in the air to read it. A mutation shows up once you have
- * recorded its child and both parents, so discovery stays progressive.
+ * Botanical Ledger: records species. Use it on a planted trellis to record that species; the Assaying Engine and
+ * Trial Bed record into a Ledger in their slot. Carrying or reading a Ledger merges it with the holder's
+ * {@link Knowledge} both ways, so the player keeps what they learned and a shared Ledger teaches its reader.
+ * A mutation shows up once you know its child and both parents, so discovery stays progressive.
  */
 public class LedgerItem extends Item {
     /** Recorded species. Stored by key so removed datapack plants just drop out of the count. */
@@ -89,6 +92,9 @@ public class LedgerItem extends Item {
             var genome = crop.genome();
             genome.species().unwrapKey().ifPresent(key -> {
                 boolean added = record(ctx.getItemInHand(), key);
+                if (ctx.getPlayer() instanceof ServerPlayer sp) {
+                    Knowledge.exchange(sp, ctx.getItemInHand());
+                }
                 if (ctx.getPlayer() != null) {
                     ctx.getPlayer().displayClientMessage(Component.translatable(added ? "item.cultivar.botanical_ledger.recorded"
                             : "item.cultivar.botanical_ledger.known", CultivarSeedItem.plantName(genome)), true);
@@ -104,10 +110,20 @@ public class LedgerItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (level.isClientSide()) {
+        if (player instanceof ServerPlayer sp) {
+            Knowledge.exchange(sp, stack);
+        } else if (level.isClientSide()) {
             openScreen.accept(stack);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+
+    /** A carried Ledger keeps in step with its holder, once a second. */
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+        if (entity instanceof ServerPlayer sp && (level.getGameTime() + entity.getId()) % 20 == 0) {
+            Knowledge.exchange(sp, stack);
+        }
     }
 
     @Override

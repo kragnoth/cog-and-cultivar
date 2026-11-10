@@ -103,3 +103,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   emerald and diamond, bred from the vanilla tree under habitat conditions.
 - 2026-11-10: 12 low-value stepping-stone blooms (bone meal, dyes, ink, clay, string, slime, glowstone, coal, flint,
   gunpowder, iron nuggets, amethyst); every ore and gem now sits at least four crosses from vanilla.
+- 2026-11-10: per-player knowledge (Ledgers merge with their holder both ways; kept through death), JEI
+  Crossbreeding category hidden until known (`genetics.revealAllMutations` to show all), info pages for bred
+  plants, Cutting subtype, `/cultivar knowledge` commands. Still open from item 5: Assaying Engine, fertilizer and
+  soil categories; bed and Sprinkler info pages.

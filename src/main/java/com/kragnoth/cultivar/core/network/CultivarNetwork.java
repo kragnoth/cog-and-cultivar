@@ -14,7 +14,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
  * Prefer block-entity sync and data components over custom payloads where possible.
  */
 public final class CultivarNetwork {
-    public static final String PROTOCOL_VERSION = "1";
+    public static final String PROTOCOL_VERSION = "2";
 
     private CultivarNetwork() {}
 
