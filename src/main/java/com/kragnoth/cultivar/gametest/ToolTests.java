@@ -62,6 +62,12 @@ public final class ToolTests {
         Genome first = SeedSatchelItem.takeOne(satchel).orElseThrow();
         h.assertTrue(first.equals(strong), "dial set to growth takes the growth-9 seed first");
         h.assertTrue(satchel.get(ToolsModule.SATCHEL_CONTENTS.get()).total() == 3, "three seeds remain");
+        // Put the strong seed back: growth 2 is more than 2 below growth 9, so all three weak seeds are culls.
+        SeedSatchelItem.insert(satchel, CultivarSeedItem.of(strong));
+        int culled = 0;
+        while (SeedSatchelItem.cullOne(satchel).isPresent()) culled++;
+        h.assertTrue(culled == 3, "all three growth-2 seeds culled, got " + culled);
+        h.assertTrue(satchel.get(ToolsModule.SATCHEL_CONTENTS.get()).total() == 1, "the keeper remains");
         h.succeed();
     }
 }

@@ -25,5 +25,6 @@
   "item.cultivar.seed_satchel.empty": "Empty",
   "item.cultivar.seed_satchel.sorting": "Sorting by: %s",
   "item.cultivar.brass_dial": "Brass Dial",
-  "config.jade.plugin_cultivar.crop": "Cultivar crops"
+  "config.jade.plugin_cultivar.crop": "Cultivar crops",
+  "item.cultivar.seed_satchel.culled": "Composted %s culled seeds"
 }

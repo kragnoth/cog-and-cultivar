@@ -33,7 +33,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -150,6 +154,39 @@ public class SeedSatchelItem extends Item {
         return Optional.of(e.genome());
     }
 
+    /** Seeds within this many points of the best (on the dial's stat) are keepers and never culled. */
+    public static final int KEEP_WITHIN = 2;
+
+    /**
+     * Removes the single worst seed that is not a keeper, or empty if everything left is a keeper or the
+     * satchel has no dial. Keepers are seeds whose dialled stat is within {@link #KEEP_WITHIN} of the best.
+     */
+    public static Optional<Genome> cullOne(ItemStack satchel) {
+        Dial dial = satchel.get(ToolsModule.SATCHEL_DIAL.get());
+        Contents c = contents(satchel);
+        if (dial == null || c.entries().isEmpty()) {
+            return Optional.empty();
+        }
+        Genetics.Expression expr = Genetics.Expression.MAX;
+        int best = c.entries().stream().mapToInt(e -> Genetics.expressed(e.genome(), dial.stat(), expr)).max().orElse(0);
+        Optional<Entry> worst = c.entries().stream()
+                .filter(e -> Genetics.expressed(e.genome(), dial.stat(), expr) < best - KEEP_WITHIN)
+                .min(Comparator.comparingInt(e -> Genetics.expressed(e.genome(), dial.stat(), expr)));
+        if (worst.isEmpty()) {
+            return Optional.empty();
+        }
+        List<Entry> list = new ArrayList<>(c.entries());
+        int index = list.indexOf(worst.get());
+        Entry e = list.get(index);
+        if (e.count() > 1) {
+            list.set(index, new Entry(e.genome(), e.count() - 1));
+        } else {
+            list.remove(index);
+        }
+        satchel.set(ToolsModule.SATCHEL_CONTENTS.get(), new Contents(list));
+        return Optional.of(e.genome());
+    }
+
     /** Satchel on the cursor, clicked onto a slot: right-click stores that slot's seeds, or drops one into an empty slot. */
     @Override
     public boolean overrideStackedOnOther(ItemStack satchel, Slot slot, ClickAction action, Player player) {
@@ -237,6 +274,10 @@ public class SeedSatchelItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         Level level = ctx.getLevel();
+        BlockState clicked = level.getBlockState(ctx.getClickedPos());
+        if (clicked.is(Blocks.COMPOSTER) && ctx.isSecondaryUseActive()) {
+            return cullIntoComposter(ctx, clicked);
+        }
         if (!(level.getBlockEntity(ctx.getClickedPos()) instanceof CropBlockEntity crop) || crop.hasPlant()
                 || level.getBlockState(ctx.getClickedPos()).getValue(TrellisBlock.CROSS)) {
             return InteractionResult.PASS;
@@ -252,6 +293,30 @@ public class SeedSatchelItem extends Item {
         crop.plant(seed.get());
         level.playSound(null, ctx.getClickedPos(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1f, 1f);
         return InteractionResult.CONSUME;
+    }
+
+    /** Sneak-use on a composter: composts the worst non-keeper seeds until the composter is full. */
+    private InteractionResult cullIntoComposter(UseOnContext ctx, BlockState composter) {
+        if (!ctx.getItemInHand().has(ToolsModule.SATCHEL_DIAL.get())) {
+            return InteractionResult.PASS;
+        }
+        if (!(ctx.getLevel() instanceof ServerLevel level)) {
+            return InteractionResult.SUCCESS;
+        }
+        BlockState state = composter;
+        int culled = 0;
+        while (state.getValue(ComposterBlock.LEVEL) < ComposterBlock.READY - 1) {
+            Optional<Genome> worst = cullOne(ctx.getItemInHand());
+            if (worst.isEmpty()) {
+                break;
+            }
+            state = ComposterBlock.insertItem(ctx.getPlayer(), state, level, CultivarSeedItem.of(worst.get()), ctx.getClickedPos());
+            culled++;
+        }
+        if (ctx.getPlayer() != null) {
+            ctx.getPlayer().displayClientMessage(Component.translatable("item.cultivar.seed_satchel.culled", culled), true);
+        }
+        return culled > 0 ? InteractionResult.CONSUME : InteractionResult.PASS;
     }
 
     @Override
