@@ -1,0 +1,43 @@
+{
+  "stages": 4,
+  "growth_chance": 0.6,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.05,
+  "products": [
+    {
+      "item": "minecraft:red_dye",
+      "min": 1,
+      "max": 2,
+      "chance": 0.6
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 8,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_acidic",
+      "comparison": "equal",
+      "tolerance": 0.2
+    }
+  ],
+  "render": {
+    "models": [
+      "cultivar:crop/madder_root_stage0",
+      "cultivar:crop/madder_root_stage1",
+      "cultivar:crop/madder_root_stage2",
+      "cultivar:crop/madder_root_stage3"
+    ],
+    "shape": "cross"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:beetroot",
+  "parent_b": "minecraft:red_mushroom",
+  "child": "cultivar:madder_root",
+  "chance": 0.35,
+  "conditions": [
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_acidic",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

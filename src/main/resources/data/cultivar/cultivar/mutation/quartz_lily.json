@@ -1,6 +1,6 @@
 {
-  "parent_a": "cultivar:aurum_thistle",
-  "parent_b": "minecraft:nether_wart",
+  "parent_a": "cultivar:shardbloom",
+  "parent_b": "cultivar:brimstone_puff",
   "child": "cultivar:quartz_lily",
   "chance": 0.15,
   "conditions": [

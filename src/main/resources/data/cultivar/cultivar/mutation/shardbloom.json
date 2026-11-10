@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:glowcap",
+  "parent_b": "cultivar:flintwort",
+  "child": "cultivar:shardbloom",
+  "chance": 0.25,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 7,
+      "tolerance": 0
+    }
+  ]
+}

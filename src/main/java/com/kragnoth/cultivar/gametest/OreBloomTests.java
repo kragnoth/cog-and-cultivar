@@ -19,7 +19,8 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 public final class OreBloomTests {
     private OreBloomTests() {}
 
-    static final List<String> BLOOMS = List.of("coalroot", "ferrous_bloom", "verdigris_vine", "brassleaf",
+    static final List<String> BLOOMS = List.of("bonecap", "inkcap", "madder_root", "woad", "flintwort",
+            "brimstone_puff", "rustwort", "clayreed", "silkweed", "slimecap", "glowcap", "shardbloom", "coalroot", "ferrous_bloom", "verdigris_vine", "brassleaf",
             "aurum_thistle", "redstone_fern", "lazuli_bell", "quartz_lily", "emerald_fern", "diamond_briar");
 
     @GameTest(template = "empty")
@@ -42,7 +43,24 @@ public final class OreBloomTests {
                         bloom + " shares its parents with " + other.getKey().location());
             }
         }
+        // Infinite ores and gems should be a project: at least four crosses from the vanilla crops.
+        for (String deep : List.of("ferrous_bloom", "verdigris_vine", "brassleaf", "aurum_thistle", "redstone_fern",
+                "lazuli_bell", "quartz_lily", "emerald_fern", "diamond_briar")) {
+            int depth = depth(Cultivar.id(deep).toString(), mutations);
+            h.assertTrue(depth >= 4, deep + " is only " + depth + " crosses from vanilla");
+        }
         h.succeed();
+    }
+
+    /** Crosses needed to reach a plant from vanilla crops (which count as 0), via its cheapest mutation. */
+    private static int depth(String id, net.minecraft.core.Registry<Mutation> mutations) {
+        if (!id.startsWith(Cultivar.MOD_ID + ":")) return 0;
+        int best = Integer.MAX_VALUE;
+        for (Mutation m : mutations) {
+            if (!key(m.child()).equals(id)) continue;
+            best = Math.min(best, 1 + Math.max(depth(key(m.parentA()), mutations), depth(key(m.parentB()), mutations)));
+        }
+        return best;
     }
 
     private static Set<String> pair(Mutation m) {

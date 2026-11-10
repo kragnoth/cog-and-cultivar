@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:wheat",
+  "parent_b": "minecraft:red_mushroom",
+  "child": "cultivar:bonecap",
+  "chance": 0.35,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 7,
+      "tolerance": 0
+    }
+  ]
+}

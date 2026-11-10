@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:carrot",
+  "parent_b": "minecraft:sweet_berries",
+  "child": "cultivar:woad",
+  "chance": 0.35,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 12,
+      "max": 15,
+      "tolerance": 0
+    }
+  ]
+}

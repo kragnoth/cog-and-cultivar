@@ -1,8 +1,8 @@
 {
-  "parent_a": "cultivar:coalroot",
-  "parent_b": "minecraft:glow_berries",
+  "parent_a": "cultivar:brimstone_puff",
+  "parent_b": "cultivar:madder_root",
   "child": "cultivar:redstone_fern",
-  "chance": 0.2,
+  "chance": 0.15,
   "conditions": [
     {
       "type": "cultivar:light",

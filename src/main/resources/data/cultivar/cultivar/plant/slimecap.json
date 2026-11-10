@@ -1,0 +1,43 @@
+{
+  "stages": 4,
+  "growth_chance": 0.5,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.05,
+  "products": [
+    {
+      "item": "minecraft:slime_ball",
+      "min": 1,
+      "max": 1,
+      "chance": 0.4
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 8,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "watery",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "medium",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "models": [
+      "cultivar:crop/slimecap_stage0",
+      "cultivar:crop/slimecap_stage1",
+      "cultivar:crop/slimecap_stage2",
+      "cultivar:crop/slimecap_stage3"
+    ],
+    "shape": "cross"
+  }
+}

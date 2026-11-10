@@ -101,3 +101,5 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   gearshift instead. The Assay Card was removed (#35).
 - 2026-11-10: ore-blooms: 10 data-only resource crops dropping Create crushed ores, coal, redstone, lapis, quartz,
   emerald and diamond, bred from the vanilla tree under habitat conditions.
+- 2026-11-10: 12 low-value stepping-stone blooms (bone meal, dyes, ink, clay, string, slime, glowstone, coal, flint,
+  gunpowder, iron nuggets, amethyst); every ore and gem now sits at least four crosses from vanilla.

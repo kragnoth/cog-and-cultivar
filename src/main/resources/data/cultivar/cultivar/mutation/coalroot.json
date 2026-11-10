@@ -1,6 +1,6 @@
 {
-  "parent_a": "minecraft:potato",
-  "parent_b": "minecraft:brown_mushroom",
+  "parent_a": "cultivar:inkcap",
+  "parent_b": "cultivar:bonecap",
   "child": "cultivar:coalroot",
   "chance": 0.3,
   "conditions": [

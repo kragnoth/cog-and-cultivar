@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:bonecap",
+  "parent_b": "minecraft:cactus",
+  "child": "cultivar:flintwort",
+  "chance": 0.3,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "arid",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

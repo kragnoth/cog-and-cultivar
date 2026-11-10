@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:brown_mushroom",
+  "parent_b": "minecraft:sugar_cane",
+  "child": "cultivar:inkcap",
+  "chance": 0.35,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "flooded",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

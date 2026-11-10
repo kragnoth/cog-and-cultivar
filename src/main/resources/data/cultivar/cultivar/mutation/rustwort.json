@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:coalroot",
+  "parent_b": "cultivar:flintwort",
+  "child": "cultivar:rustwort",
+  "chance": 0.2,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "flooded",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

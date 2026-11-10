@@ -1,0 +1,43 @@
+{
+  "stages": 4,
+  "growth_chance": 0.5,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.05,
+  "products": [
+    {
+      "item": "minecraft:gunpowder",
+      "min": 1,
+      "max": 1,
+      "chance": 0.4
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 15,
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "at_most",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_alkaline",
+      "comparison": "equal",
+      "tolerance": 0.2
+    }
+  ],
+  "render": {
+    "models": [
+      "cultivar:crop/brimstone_puff_stage0",
+      "cultivar:crop/brimstone_puff_stage1",
+      "cultivar:crop/brimstone_puff_stage2",
+      "cultivar:crop/brimstone_puff_stage3"
+    ],
+    "shape": "cross"
+  }
+}
