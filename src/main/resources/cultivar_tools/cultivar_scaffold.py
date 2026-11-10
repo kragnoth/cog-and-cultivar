@@ -7,7 +7,8 @@ Workflow (see docs/PACKMAKERS.md in the Cog & Cultivar repo):
   3. Fill in mutation_plan.csv (parents, chance, habitat), then:
                               python3 cultivar_scaffold.py mutations mutation_plan.csv
   4. Sanity-check the tree:   python3 cultivar_scaffold.py check crops.json --pack cultivar_scaffold
-  5. Copy cultivar_scaffold/ into <world>/datapacks/ (or a global datapack mod) and /reload.
+  5. Copy cultivar_scaffold/ into <world>/datapacks/ (or its data/ folder into kubejs/data/ for every world), then
+     rejoin the world: plants and mutations are datapack registries, which /reload does not refresh.
 
 Everything generated is a starting point: plain JSON meant to be edited by hand.
 """
