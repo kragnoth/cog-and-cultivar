@@ -23,6 +23,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
@@ -40,7 +43,7 @@ import java.util.Optional;
 /**
  * Holds up to {@link #CAPACITY} seeds of one species, bundle-style: right-click seeds onto it (or it onto
  * seeds) to store, right-click an empty slot or with an empty cursor to take one out. Used on a trellis it
- * plants a stored seed. With a Brass Dial fitted it picks the best seed for the dial's stat; sneak-use in
+ * plants a stored seed, and picked-up seeds of its species are collected automatically. With a Brass Dial fitted it picks the best seed for the dial's stat; sneak-use in
  * the air cycles the stat.
  */
 public class SeedSatchelItem extends Item {
@@ -195,6 +198,38 @@ public class SeedSatchelItem extends Item {
             return true;
         }
         return false;
+    }
+
+    // ---------------------------------------------------------------- auto-pickup
+
+    /**
+     * Picked-up seeds go straight into a satchel already holding that species (first match in the inventory).
+     * Empty satchels don't grab seeds, so players choose what each satchel collects.
+     */
+    public static void onItemPickup(ItemEntityPickupEvent.Pre event) {
+        ItemEntity entity = event.getItemEntity();
+        ItemStack seeds = entity.getItem();
+        Genome genome = seeds.get(CoreModule.GENOME.get());
+        Player player = event.getPlayer();
+        if (genome == null || player.level().isClientSide() || entity.hasPickUpDelay()) {
+            return;
+        }
+        Inventory inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize() && !seeds.isEmpty(); i++) {
+            ItemStack satchel = inv.getItem(i);
+            if (satchel.getItem() instanceof SeedSatchelItem && contents(satchel).species()
+                    .map(g -> g.species().is(genome.species())).orElse(false)) {
+                int moved = insert(satchel, seeds);
+                if (moved > 0) {
+                    player.take(entity, moved);
+                    seeds.shrink(moved);
+                    player.level().playSound(null, player.blockPosition(), SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 0.4f, 1.2f);
+                }
+            }
+        }
+        if (seeds.isEmpty()) {
+            entity.discard();
+        }
     }
 
     // ---------------------------------------------------------------- world use
