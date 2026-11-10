@@ -13,6 +13,11 @@ A NeoForge 1.21.1 crop-genetics and breeding mod for steampunk/dieselpunk worlds
 | Create | 6.0.11 (Ponder 1.0.85, Flywheel 1.0.6) |
 | Java | 21 |
 
+## For pack makers
+
+Every plant, soil and mutation is datapack JSON. `/cultivar export` dumps every crop in your pack and ships a
+scaffold script that drafts plants and mutations for you. See [docs/PACKMAKERS.md](docs/PACKMAKERS.md).
+
 ## Building
 
 ```fish
