@@ -1,0 +1,2 @@
+{ "parent": "minecraft:item/handheld", "textures": { "layer0": "cultivar:item/transplanting_spade" },
+  "overrides": [ { "predicate": { "cultivar:holding": 1 }, "model": "cultivar:item/transplanting_spade_holding" } ] }

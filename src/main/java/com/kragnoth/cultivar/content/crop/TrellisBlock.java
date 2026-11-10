@@ -1,6 +1,10 @@
 package com.kragnoth.cultivar.content.crop;
 
+import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.api.CultivarRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.plant.Plant;
 import com.kragnoth.cultivar.content.core.CoreModule;
@@ -59,6 +63,9 @@ public class TrellisBlock extends BaseEntityBlock {
             TrellisTier.CODEC.fieldOf("tier").forGetter(TrellisBlock::tier),
             propertiesCodec()
     ).apply(i, TrellisBlock::new));
+
+    /** Items that act on crops through their own {@code useOn} instead of the trellis's interactions. */
+    public static final TagKey<Item> CROP_TOOLS = TagKey.create(Registries.ITEM, Cultivar.id("crop_tools"));
 
     private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 14, 14);
 
@@ -148,6 +155,10 @@ public class TrellisBlock extends BaseEntityBlock {
                                               InteractionHand hand, BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof CropBlockEntity crop)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        // Cultivar tools (spade, shears, tiller, satchel) handle the click themselves via Item#useOn.
+        if (stack.is(CROP_TOOLS)) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
         // Hoe clears weeds.
         if (stack.is(ItemTags.HOES) && crop.hasWeed()) {

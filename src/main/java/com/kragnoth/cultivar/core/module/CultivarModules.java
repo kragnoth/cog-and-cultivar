@@ -4,6 +4,7 @@ import com.kragnoth.cultivar.compat.create.CreateModule;
 import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.content.crop.CropModule;
 import com.kragnoth.cultivar.content.cloche.ClocheModule;
+import com.kragnoth.cultivar.content.tools.ToolsModule;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -17,6 +18,7 @@ public final class CultivarModules {
             CoreModule::new,
             CropModule::new,
             ClocheModule::new,
+            ToolsModule::new,
             CreateModule::new
     );
 

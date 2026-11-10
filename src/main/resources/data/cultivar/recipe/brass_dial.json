@@ -1,0 +1,1 @@
+{ "type": "minecraft:crafting_shapeless", "category": "misc", "ingredients": [ { "item": "create:brass_sheet" }, { "item": "create:cogwheel" }, { "item": "minecraft:glass_pane" } ], "result": { "id": "cultivar:brass_dial", "count": 1 } }

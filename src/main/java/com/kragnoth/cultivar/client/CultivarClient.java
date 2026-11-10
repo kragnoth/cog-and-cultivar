@@ -3,6 +3,7 @@ package com.kragnoth.cultivar.client;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.client.config.CultivarClientConfig;
 import com.kragnoth.cultivar.client.crop.CropClientModule;
+import com.kragnoth.cultivar.client.tools.ToolsClientModule;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -23,7 +24,8 @@ import java.util.function.Supplier;
 public final class CultivarClient {
     /** Client module index. One line per feature that has client-side code. */
     static final List<Supplier<ClientModule>> MODULES = List.of(
-            CropClientModule::new
+            CropClientModule::new,
+            ToolsClientModule::new
     );
 
     public CultivarClient(IEventBus modBus, ModContainer container) {

@@ -109,3 +109,44 @@ for x in range(16):
         knob.putpixel((x, y), BRASS[5] if (x + y) % 3 == 0 else BRASS[3])
 knob.save(f'{OUT}/block/brass_knob.png')
 print('cloche ok')
+
+# ---- Phase 2a tools: kitbash Excalibur tool sprites, brass accents from the C&C brass ramp
+def tint(src, mapping):
+    im = Image.open(src).convert('RGBA')
+    out = im.copy()
+    for x in range(16):
+        for y in range(16):
+            p = im.getpixel((x, y))
+            if p[3] > 0:
+                out.putpixel((x, y), mapping(x, y, p))
+    return out
+
+def lum(p):
+    return (0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2]) / 255
+
+def to_ramp(ramp):
+    return lambda x, y, p: ramp[min(len(ramp) - 1, int(lum(p) * len(ramp)))]
+
+shovel = Image.open(f'{EXC}/item/iron_shovel.png').convert('RGBA')
+shovel.save(f'{OUT}/item/transplanting_spade.png')
+full = shovel.copy()
+for x, y, c in ((10, 2, (0x4f, 0xae, 0x4a, 255)), (11, 1, (0x4f, 0xae, 0x4a, 255)), (12, 2, (0x3a, 0x8a, 0x36, 255)),
+                (11, 3, (0x6b, 0x4a, 0x2a, 255)), (10, 3, (0x6b, 0x4a, 0x2a, 255)), (12, 3, (0x6b, 0x4a, 0x2a, 255))):
+    full.putpixel((x, y), c)                                   # sprout + soil clump on the blade
+full.save(f'{OUT}/item/transplanting_spade_holding.png')
+shears = Image.open(f'{EXC}/item/shears.png').convert('RGBA')
+for x, y in ((7, 7), (8, 8), (7, 8), (8, 7)):
+    if shears.getpixel((x, y))[3] > 0:
+        shears.putpixel((x, y), BRASS[4])                      # brass pivot
+shears.save(f'{OUT}/item/pruning_shears.png')
+Image.open(f'{EXC}/item/wooden_hoe.png').convert('RGBA').save(f'{OUT}/item/timber_tiller.png')
+Image.open(f'{EXC}/item/iron_hoe.png').convert('RGBA').save(f'{OUT}/item/iron_tiller.png')
+Image.open(f'{EXC}/item/bundle.png').convert('RGBA').save(f'{OUT}/item/seed_satchel.png')
+tint(f'{EXC}/item/clock_00.png', to_ramp(BRASS)).save(f'{OUT}/item/brass_dial.png')
+dial_overlay = canvas()
+small = tint(f'{EXC}/item/clock_00.png', to_ramp(BRASS)).resize((7, 7), Image.NEAREST)
+dial_overlay.alpha_composite(small, (8, 8))
+satchel_dial = Image.open(f'{EXC}/item/bundle.png').convert('RGBA')
+satchel_dial.alpha_composite(dial_overlay)
+satchel_dial.save(f'{OUT}/item/seed_satchel_dial.png')
+print('tools ok')

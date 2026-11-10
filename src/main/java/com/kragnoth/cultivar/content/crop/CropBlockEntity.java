@@ -149,6 +149,66 @@ public class CropBlockEntity extends BlockEntity {
         return true;
     }
 
+    /** Plants at a given stage (transplanting keeps growth). */
+    public boolean plant(Genome newGenome, int atStage) {
+        if (!plant(newGenome)) {
+            return false;
+        }
+        stage = Math.max(0, Math.min(atStage, newGenome.species().value().matureStage()));
+        changed();
+        return true;
+    }
+
+    /** Lifts the living plant out (genome + stage), leaving an empty trellis. Weeds stay behind. */
+    public Optional<Uprooted> uproot() {
+        if (genome == null) {
+            return Optional.empty();
+        }
+        Uprooted out = new Uprooted(genome, stage);
+        genome = null;
+        stage = 0;
+        changed();
+        return Optional.of(out);
+    }
+
+    public record Uprooted(Genome genome, int stage) {}
+
+    /** Pruning: clip products from a mature plant, which then drops back to its after-harvest stage. */
+    public boolean clip(Consumer<ItemStack> drops) {
+        if (!isMature() || level == null || genome.species().value().clipProducts().isEmpty()) {
+            return false;
+        }
+        rollList(genome.species().value().clipProducts(), drops, level.random);
+        Plant plant = genome.species().value();
+        stage = Math.min(plant.afterHarvestStage(), plant.matureStage());
+        changed();
+        return true;
+    }
+
+    /** Knocks the weed back one stage; a stage-0 weed is removed (with its rake products). */
+    public boolean regressWeed(Consumer<ItemStack> drops) {
+        if (weed == null) {
+            return false;
+        }
+        if (weedStage > 0) {
+            weedStage--;
+            changed();
+            return true;
+        }
+        return clearWeeds(drops);
+    }
+
+    private static void rollList(List<Product> products, Consumer<ItemStack> drops, RandomSource random) {
+        for (Product product : products) {
+            if (random.nextFloat() < product.chance()) {
+                int count = product.min() + random.nextInt(Math.max(1, product.max() - product.min() + 1));
+                if (count > 0) {
+                    drops.accept(new ItemStack(product.item(), count));
+                }
+            }
+        }
+    }
+
     /** Harvests a mature plant: product rolls by gain, then back to the after-harvest stage. */
     public boolean harvest(Consumer<ItemStack> drops) {
         if (!isMature() || level == null) {
