@@ -35,7 +35,8 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
         @Override
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
             return switch (slot) {
-                case SEED_IN -> stack.has(CoreModule.GENOME.get()) && stack.getItem() instanceof CultivarSeedItem;
+                case SEED_IN -> stack.has(CoreModule.GENOME.get())
+                        && (stack.getItem() instanceof CultivarSeedItem || stack.getItem() instanceof com.kragnoth.cultivar.content.tools.CuttingItem);
                 case PAPER -> stack.is(Items.PAPER);
                 case LEDGER -> stack.getItem() instanceof LedgerItem;
                 default -> true;

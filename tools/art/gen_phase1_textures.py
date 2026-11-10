@@ -201,3 +201,17 @@ for y in range(4, 12, 2):
 card.save(f'{OUT}/item/assay_card.png')
 print('assay card ok')
 
+
+# ---- Cutting: a leafy sprig snipped from a sapling sprite, bound with a brass band at the cut end
+sprig = Image.open(f'{EXC}/block/oak_sapling.png').convert('RGBA').resize((16, 16), Image.NEAREST)
+cut = Image.new('RGBA', (16, 16), T)
+top = sprig.crop((2, 0, 14, 11)).resize((10, 9), Image.NEAREST)
+cut.alpha_composite(top, (4, 1))
+STEM = (0x5a, 0x3d, 0x1f, 255)
+for i in range(6):
+    cut.putpixel((8 - i // 2, 9 + i if 9 + i < 16 else 15), STEM)
+for x in (6, 7):
+    cut.putpixel((x, 12), BRASS[1])
+    cut.putpixel((x, 13), BRASS[2])
+cut.save(f'{OUT}/item/cutting.png')
+print('cutting ok')

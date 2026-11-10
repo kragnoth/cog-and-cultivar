@@ -21,6 +21,14 @@ public interface GrowthCondition {
      */
     GrowthResponse test(GrowthContext context, int strength);
 
+    /**
+     * True for conditions on the soil's own properties (humidity, acidity, nutrients). A plant with maximum
+     * Strength is Hardy and skips these during growth; mutation habitats always test them.
+     */
+    default boolean isSoilProperty() {
+        return false;
+    }
+
     /** Combined response of a list of conditions (worst wins; empty list is fertile). */
     static GrowthResponse testAll(Iterable<? extends GrowthCondition> conditions, GrowthContext context, int strength) {
         GrowthResponse result = GrowthResponse.FERTILE;

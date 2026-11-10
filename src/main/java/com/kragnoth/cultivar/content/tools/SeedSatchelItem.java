@@ -107,8 +107,8 @@ public class SeedSatchelItem extends Item {
     /** Inserts as many of {@code seeds} as fit; returns how many were taken. */
     public static int insert(ItemStack satchel, ItemStack seeds) {
         Genome genome = seeds.get(CoreModule.GENOME.get());
-        if (genome == null) {
-            return 0;
+        if (genome == null || !(seeds.getItem() instanceof CultivarSeedItem)) {
+            return 0; // seeds only: cuttings must not turn into reliable seeds
         }
         boolean assayed = seeds.has(CoreModule.ASSAYED.get());
         Contents c = contents(satchel);

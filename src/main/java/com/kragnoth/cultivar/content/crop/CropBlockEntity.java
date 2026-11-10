@@ -99,7 +99,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         return genome != null && stage >= genome.species().value().matureStage();
     }
 
-    private boolean isCross() {
+    public boolean isCross() {
         return getBlockState().getValue(TrellisBlock.CROSS);
     }
 
@@ -154,6 +154,47 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         return new GrowthContext(level, worldPosition, soil,
                 soil.map(s -> Hydration.effective(level, worldPosition.below(), s.humidity())),
                 soil.map(Soil::acidity), soil.map(Soil::nutrients));
+    }
+
+    // ---------------------------------------------------------------- hardiness
+
+    /** Maximum Strength makes a plant Hardy: it grows on any Cultivar soil regardless of the soil's properties. */
+    public boolean isHardy() {
+        return genome != null && stat(CoreModule.STRENGTH.getKey()) >= Genetics.max(CoreModule.STRENGTH.getKey());
+    }
+
+    /** The plant's growth requirements as they apply to this crop (soil properties dropped when Hardy). */
+    public List<GrowthCondition> requirements() {
+        if (genome == null) {
+            return List.of();
+        }
+        List<GrowthCondition> all = genome.species().value().requirements();
+        return isHardy() ? all.stream().filter(c -> !c.isSoilProperty()).toList() : all;
+    }
+
+    // ---------------------------------------------------------------- cuttings
+
+    /** Snipping needs a plant past its second stage. */
+    public boolean canTakeCutting() {
+        return genome != null && stage >= 2;
+    }
+
+    /**
+     * Snips the plant: it drops back one stage and gives a Cutting with its exact genome. A mature plant also
+     * yields its clip products. Returns false if the plant is too young.
+     */
+    public boolean clip(Consumer<ItemStack> drops) {
+        if (!canTakeCutting() || level == null) {
+            return false;
+        }
+        Plant plant = genome.species().value();
+        if (isMature()) {
+            rollList(plant.clipProducts(), drops, level.random);
+        }
+        drops.accept(com.kragnoth.cultivar.content.tools.CuttingItem.of(genome));
+        stage--;
+        changed();
+        return true;
     }
 
     // ---------------------------------------------------------------- tall crops (stacked trellis)
@@ -263,18 +304,6 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     }
 
     public record Uprooted(Genome genome, int stage) {}
-
-    /** Pruning: clip products from a mature plant, which then drops back to its after-harvest stage. */
-    public boolean clip(Consumer<ItemStack> drops) {
-        if (!isMature() || level == null || genome.species().value().clipProducts().isEmpty()) {
-            return false;
-        }
-        rollList(genome.species().value().clipProducts(), drops, level.random);
-        Plant plant = genome.species().value();
-        stage = Math.min(plant.afterHarvestStage(), plant.matureStage());
-        changed();
-        return true;
-    }
 
     /** Knocks the weed back one stage; a stage-0 weed is removed (with its rake products). */
     public boolean regressWeed(Consumer<ItemStack> drops) {
@@ -432,7 +461,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         Optional<Soil> soil = soil();
         int strength = stat(CoreModule.STRENGTH.getKey()) + tier().strengthBonus();
         GrowthResponse response = soil.isEmpty() ? GrowthResponse.INFERTILE
-                : GrowthCondition.testAll(plant.requirements(), growthContext(soil), strength);
+                : GrowthCondition.testAll(requirements(), growthContext(soil), strength);
         switch (response) {
             case KILL -> {
                 genome = null;
