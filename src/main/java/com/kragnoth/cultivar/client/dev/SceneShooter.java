@@ -64,8 +64,6 @@ public final class SceneShooter {
             new Shot("cloche_04_with_vs_without", 11.0, Y + 1.4, DZ + 3.4, 180f, 15f),
             new Shot("cloche_05_high_angle", 0.5, Y + 2.8, DZ + 2.2, 180f, 45f),
             new Shot("cloche_06_field", 3.5, Y + 4.5, 12.0, 180f, 28f),
-            // Loupe overlay: iron + cloche potato at (4, Y, 2), also in range of the beehive at (7, Y, 2).
-            new Shot("loupe_01_overlay", 4.5, Y + 1.4, 4.6, 180f, 20f),
             new Shot("ledger_01_index", 4.5, Y + 1.4, 4.6, 180f, 20f),
             new Shot("ledger_02_carrot", 4.5, Y + 1.4, 4.6, 180f, 20f),
             new Shot("assay_01_engine", 15.2, Y + 2.4, DZ + 2.6, 160f, 20f),
@@ -144,17 +142,12 @@ public final class SceneShooter {
                 server.execute(() -> {
                     ServerPlayer p = server.getPlayerList().getPlayers().getFirst();
                     boolean goggles = shot.name().startsWith("assay_02");
-                    boolean loupe = shot.name().startsWith("loupe") || goggles;
+                    boolean creative = goggles;
                     if (goggles) {
                         p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(
                                 net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("create", "goggles"))));
                     }
-                    p.setGameMode(loupe ? GameType.CREATIVE : GameType.SPECTATOR);
-                    if (loupe && !goggles) {
-                        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ToolsModule.BOTANISTS_LOUPE.get()));
-                        p.getAbilities().flying = true;
-                        p.onUpdateAbilities();
-                    }
+                    p.setGameMode(creative ? GameType.CREATIVE : GameType.SPECTATOR);
                     p.teleportTo(server.overworld(), shot.x(), shot.y() - p.getEyeHeight(), shot.z(), shot.yaw(), shot.pitch()); // shot.y is eye height
                 });
             }
@@ -167,7 +160,7 @@ public final class SceneShooter {
                 mc.player.xRotO = shot.pitch();
             }
             if (tick == base + 75) {
-                mc.options.hideGui = !shot.name().startsWith("loupe") && !shot.name().startsWith("ledger")
+                mc.options.hideGui = !shot.name().startsWith("ledger")
                         && !shot.name().startsWith("assay_02");
                 mc.setScreen(null);
                 if (shot.name().startsWith("ledger")) {

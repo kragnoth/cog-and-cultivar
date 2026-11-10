@@ -14,7 +14,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-/** Phase 2a hand tools: Transplanting Spade, Pruning Shears, Hand Tillers, Seed Satchel and Brass Dial. */
+/** Phase 2a hand tools: Transplanting Spade, Pruning Shears, Seed Satchel and Brass Dial. */
 public final class ToolsModule implements CultivarModule {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Cultivar.MOD_ID);
     public static final DeferredRegister.DataComponents COMPONENTS =
@@ -34,10 +34,6 @@ public final class ToolsModule implements CultivarModule {
             TransplantingSpadeItem::new, new Item.Properties().durability(250));
     public static final DeferredItem<PruningShearsItem> PRUNING_SHEARS = ITEMS.registerItem("pruning_shears",
             PruningShearsItem::new, new Item.Properties().durability(238));
-    public static final DeferredItem<HandTillerItem> TIMBER_TILLER = ITEMS.registerItem("timber_tiller",
-            p -> new HandTillerItem(false, p), new Item.Properties().durability(59));
-    public static final DeferredItem<HandTillerItem> IRON_TILLER = ITEMS.registerItem("iron_tiller",
-            p -> new HandTillerItem(true, p), new Item.Properties().durability(250));
     public static final DeferredItem<SeedSatchelItem> SEED_SATCHEL = ITEMS.registerItem("seed_satchel",
             SeedSatchelItem::new, new Item.Properties().stacksTo(1));
     public static final DeferredItem<Item> BRASS_DIAL = ITEMS.registerSimpleItem("brass_dial");
@@ -46,8 +42,6 @@ public final class ToolsModule implements CultivarModule {
     public static final DeferredItem<Item> SEED_MEAL = ITEMS.registerItem("seed_meal", Item::new, new Item.Properties());
     public static final DeferredItem<CuttingItem> CUTTING = ITEMS.registerItem("cutting",
             CuttingItem::new, new Item.Properties());
-    public static final DeferredItem<Item> BOTANISTS_LOUPE = ITEMS.registerItem("botanists_loupe",
-            Item::new, new Item.Properties().stacksTo(1));
 
     @Override
     public String id() {

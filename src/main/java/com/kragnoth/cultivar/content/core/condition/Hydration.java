@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Effective soil humidity: the soil's datapack value, one step wetter if water touches the soil block's side
  * (a channel or a waterlogged block) or a Planter Bed holds water, one step drier on unwatered farmland. Four block reads; pure function of
- * world state, so the server's growth checks and the client's Loupe readout always agree.
+ * world state, so the server's growth checks and the client's goggle readout always agree.
  */
 public final class Hydration {
     private Hydration() {}

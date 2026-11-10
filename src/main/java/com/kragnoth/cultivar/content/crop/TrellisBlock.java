@@ -207,7 +207,7 @@ public class TrellisBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof CropBlockEntity crop)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        // Cultivar tools (spade, shears, tiller, satchel) handle the click themselves via Item#useOn.
+        // Cultivar tools (spade, shears, satchel) handle the click themselves via Item#useOn.
         if (stack.is(CROP_TOOLS)) {
             return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }

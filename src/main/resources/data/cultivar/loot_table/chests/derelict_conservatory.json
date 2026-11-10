@@ -30,11 +30,6 @@
         },
         {
           "type": "minecraft:item",
-          "name": "cultivar:botanists_loupe",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
           "name": "cultivar:bell_cloche",
           "weight": 2
         }
