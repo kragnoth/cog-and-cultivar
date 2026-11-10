@@ -12,8 +12,8 @@
   "conditions": [
     {
       "type": "cultivar:humidity",
-      "value": "flooded",
-      "comparison": "equal",
+      "value": "watery",
+      "comparison": "at_least",
       "tolerance": 0
     }
   ]

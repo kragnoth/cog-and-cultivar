@@ -298,5 +298,11 @@
   "advancement.cultivar.in_the_rough": "Diamonds in the Rough",
   "advancement.cultivar.in_the_rough.desc": "Learn Diamond Briar, grown on heat-dried ground",
   "advancement.cultivar.herbarium": "Complete Herbarium",
-  "advancement.cultivar.herbarium.desc": "Learn every plant"
+  "advancement.cultivar.herbarium.desc": "Learn every plant",
+  "jei.cultivar.growing": "Growing",
+  "jei.cultivar.growing.soil": "Soils",
+  "jei.cultivar.growing.as_is": "Grows on these as they are",
+  "jei.cultivar.growing.shifted": "Grows on these with water beside, a Bell Cloche, or heat",
+  "jei.cultivar.growing.anywhere": "Grows on any soil, any light",
+  "jei.cultivar.growing.no_soil": "No soil fits at base Strength"
 }

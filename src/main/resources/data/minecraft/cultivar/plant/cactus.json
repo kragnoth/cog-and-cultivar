@@ -15,7 +15,7 @@
   "requirements": [
     {
       "type": "cultivar:light",
-      "min": 12,
+      "min": 0,
       "max": 15,
       "tolerance": 0.5
     },

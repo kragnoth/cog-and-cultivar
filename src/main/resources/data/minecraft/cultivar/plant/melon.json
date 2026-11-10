@@ -14,13 +14,13 @@
   "requirements": [
     {
       "type": "cultivar:light",
-      "min": 12,
+      "min": 9,
       "max": 15,
       "tolerance": 0.3
     },
     {
       "type": "cultivar:humidity",
-      "value": "wet",
+      "value": "damp",
       "comparison": "at_least",
       "tolerance": 0.15
     },

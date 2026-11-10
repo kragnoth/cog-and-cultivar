@@ -118,3 +118,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 - 2026-11-10: art pass: per-species seed tint (automatic from the product, `seed_color` override), satchel brass
   buckle, Planter Bed loam and Trial Bed pegged-plot floors (no longer vanilla coarse/rooted dirt), brass-framed
   Assaying Engine window. `tools/art/gen_art_pass.py`.
+- 2026-11-10: fixed farmland double-counting water (moist farmland beside water read watery, so wheat never grew in
+  the standard layout); vanilla crops' requirements now match vanilla (farmland crops light >= 9 on moist or dry
+  farmland; sugar cane, cactus, cocoa, glow berries any light). JEI Growing page with matching soils. Game test
+  guards vanilla farmland growth.

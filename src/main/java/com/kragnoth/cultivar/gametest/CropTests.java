@@ -69,6 +69,37 @@ public final class CropTests {
         h.succeed();
     }
 
+    /** Vanilla farmland crops grow wherever vanilla grows them: moist (even beside water) or dry farmland, light 9-15. */
+    @GameTest(template = "empty")
+    public static void vanillaCropsGrowOnVanillaFarmland(GameTestHelper h) {
+        var access = h.getLevel().registryAccess();
+        var soils = access.registryOrThrow(CultivarRegistries.SOIL);
+        var farmland = soils.stream().filter(s -> s.blocks().contains(Blocks.FARMLAND.builtInRegistryHolder())).findFirst().orElseThrow();
+        BlockPos moist = new BlockPos(1, 1, 1), dry = new BlockPos(4, 1, 1);
+        h.setBlock(moist, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7));
+        h.setBlock(moist.east(), Blocks.WATER);
+        h.setBlock(dry, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 0));
+        var moistHum = Hydration.effective(h.getLevel(), h.absolutePos(moist), farmland.humidity());
+        var dryHum = Hydration.effective(h.getLevel(), h.absolutePos(dry), farmland.humidity());
+        for (String id : java.util.List.of("wheat", "carrot", "potato", "beetroot", "pumpkin", "melon", "torchflower", "pitcher_plant")) {
+            Plant plant = access.registryOrThrow(CultivarRegistries.PLANT).get(ResourceLocation.withDefaultNamespace(id));
+            h.assertTrue(plant != null, id + " should load");
+            var needs = plant.requirements().stream().filter(com.kragnoth.cultivar.api.condition.GrowthCondition::isSoilProperty).toList();
+            for (var humidity : java.util.List.of(moistHum, dryHum)) {
+                var ctx = new com.kragnoth.cultivar.api.condition.GrowthContext(h.getLevel(), BlockPos.ZERO, java.util.Optional.of(farmland),
+                        java.util.Optional.of(humidity), java.util.Optional.of(farmland.acidity()), java.util.Optional.of(farmland.nutrients()));
+                h.assertTrue(com.kragnoth.cultivar.api.condition.GrowthCondition.testAll(needs, ctx, 1)
+                        == com.kragnoth.cultivar.api.condition.GrowthResponse.FERTILE, id + " should grow on " + humidity + " farmland");
+            }
+            for (var c : plant.requirements()) {
+                if (c instanceof com.kragnoth.cultivar.content.core.condition.LightCondition light) {
+                    h.assertTrue(light.min() <= 9 && light.max() >= 15, id + " should grow at vanilla light 9-15");
+                }
+            }
+        }
+        h.succeed();
+    }
+
     @GameTest(template = "empty")
     public static void waterShiftsHumidity(GameTestHelper h) {
         BlockPos wet = new BlockPos(1, 1, 1), dry = new BlockPos(4, 1, 1), mud = new BlockPos(7, 1, 1);
@@ -78,8 +109,8 @@ public final class CropTests {
         h.setBlock(mud, Blocks.MUD);
         h.setBlock(mud.west(), Blocks.WATER);
         var level = h.getLevel();
-        h.assertTrue(Hydration.effective(level, h.absolutePos(wet), SoilLevels.Humidity.WET) == SoilLevels.Humidity.WATERY,
-                "water beside farmland makes it watery");
+        h.assertTrue(Hydration.effective(level, h.absolutePos(wet), SoilLevels.Humidity.WET) == SoilLevels.Humidity.WET,
+                "water beside moist farmland doesn't count twice: wheat's standard layout reads wet");
         h.assertTrue(Hydration.effective(level, h.absolutePos(dry), SoilLevels.Humidity.WET) == SoilLevels.Humidity.DAMP,
                 "dry farmland reads damp");
         h.assertTrue(Hydration.effective(level, h.absolutePos(mud), SoilLevels.Humidity.FLOODED) == SoilLevels.Humidity.FLOODED,
