@@ -20,6 +20,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import com.kragnoth.cultivar.content.tools.ToolsModule;
+import com.kragnoth.cultivar.content.ledger.LedgerItem;
+import com.kragnoth.cultivar.content.ledger.LedgerModule;
+import com.kragnoth.cultivar.client.ledger.LedgerScreen;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -62,7 +65,9 @@ public final class SceneShooter {
             new Shot("cloche_05_high_angle", 0.5, Y + 2.8, DZ + 2.2, 180f, 45f),
             new Shot("cloche_06_field", 3.5, Y + 4.5, 12.0, 180f, 28f),
             // Loupe overlay: iron + cloche potato at (4, Y, 2), also in range of the beehive at (7, Y, 2).
-            new Shot("loupe_01_overlay", 4.5, Y + 1.4, 4.6, 180f, 20f));
+            new Shot("loupe_01_overlay", 4.5, Y + 1.4, 4.6, 180f, 20f),
+            new Shot("ledger_01_index", 4.5, Y + 1.4, 4.6, 180f, 20f),
+            new Shot("ledger_02_carrot", 4.5, Y + 1.4, 4.6, 180f, 20f));
 
     private static int tick = -1;
     private static boolean worldRequested;
@@ -136,7 +141,17 @@ public final class SceneShooter {
                 mc.player.xRotO = shot.pitch();
             }
             if (tick == base + 75) {
-                mc.options.hideGui = !shot.name().startsWith("loupe");
+                mc.options.hideGui = !shot.name().startsWith("loupe") && !shot.name().startsWith("ledger");
+                mc.setScreen(null);
+                if (shot.name().startsWith("ledger")) {
+                    ItemStack ledger = new ItemStack(LedgerModule.LEDGER.get());
+                    for (String id : new String[]{"wheat", "potato", "carrot"}) {
+                        LedgerItem.record(ledger, ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.withDefaultNamespace(id)));
+                    }
+                    LedgerScreen screen = new LedgerScreen(ledger);
+                    mc.setScreen(screen);
+                    screen.goToPage(shot.name().endsWith("index") ? 0 : 1);
+                }
             }
             if (tick == base + 80) {
                 Screenshot.grab(mc.gameDirectory, shot.name() + ".png", mc.getMainRenderTarget(),

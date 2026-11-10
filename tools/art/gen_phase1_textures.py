@@ -176,3 +176,13 @@ for i in range(6):
     loupe.putpixel((5 - i // 2 + 1, 10 + i), WOOD[3]); loupe.putpixel((6 - i // 2 + 1, 10 + i), WOOD[1])  # handle
 loupe.save(f'{OUT}/item/botanists_loupe.png')
 print('loupe ok')
+
+# ---- Phase 2b: Botanical Ledger: Excalibur writable book with brass corners and a green leaf tab
+ledger = Image.open(f'{EXC}/item/writable_book.png').convert('RGBA')
+for x, y in ((2, 2), (3, 2), (2, 3), (13, 13), (12, 13), (13, 12)):
+    if ledger.getpixel((x, y))[3] > 0:
+        ledger.putpixel((x, y), BRASS[4])
+for x, y in ((11, 1), (12, 1), (12, 2)):
+    ledger.putpixel((x, y), (0x4f, 0xae, 0x4a, 255))
+ledger.save(f'{OUT}/item/botanical_ledger.png')
+print('ledger ok')
