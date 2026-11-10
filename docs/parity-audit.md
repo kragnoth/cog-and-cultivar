@@ -83,7 +83,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
    - Categories for mutations (parents, child, habitat), the Assaying Engine, fertilizers and soils.
    - Info pages for beds and the Sprinkler.
 6. ~~**Bell Cloche +1 humidity**~~ (done, with heat as the drying lever).
-7. **Advancements:** a short progression from first trellis to the first mutation, the Assaying Engine, a Planter Bed plot and a full Ledger.
+7. ~~**Advancements:**~~ (done) a short progression from first trellis to the first mutation, the Assaying Engine, a Planter Bed plot and a full Ledger.
 8. **Phase 6 content:** ~~ore-blooms~~, ~~blight variants~~ (done); Brass Apiary dropped.
 9. **Phase 7:** Ponder scenes for every block, sounds, art pass.
 10. **In-game verification:** deployer actions with spade, shears, satchel and cutting; Pipez and Modern Dynamics feeding the Sprinkler and beds.
@@ -113,3 +113,5 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   assayed seed, optional Ledger), info pages for trellises, Bell Cloche, Ledger, Planter Bed, Trial Bed, Sprinkler.
   The pack-maker `check` warns about crosses that can't be bred on plain trellises.
 - 2026-11-10: 9 habitat blights (humidity, acidity, nutrients, light) with mature-only cleanup drops; JEI Blight page.
+- 2026-11-10: sounds for crosses (chime + sparkle on a new species), hoe-clearing blight, Assaying Engine finish,
+  Sprinkler spray, opening the Ledger; 12 advancements on a `cultivar:learned_plant` trigger.

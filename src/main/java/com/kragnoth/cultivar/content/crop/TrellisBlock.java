@@ -215,6 +215,7 @@ public class TrellisBlock extends BaseEntityBlock {
         if (stack.is(ItemTags.HOES) && crop.hasWeed()) {
             if (!level.isClientSide()) {
                 crop.clearWeeds(drop -> popResource(level, pos, drop));
+                level.playSound(null, pos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1f, 1f);
                 stack.hurtAndBreak(1, player, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());

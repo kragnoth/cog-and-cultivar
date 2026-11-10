@@ -1,0 +1,23 @@
+{
+  "parent": "cultivar:field_notes",
+  "display": {
+    "icon": {
+      "id": "cultivar:seed"
+    },
+    "title": {
+      "translate": "advancement.cultivar.new_growth"
+    },
+    "description": {
+      "translate": "advancement.cultivar.new_growth.desc"
+    },
+    "frame": "goal"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "cultivar:learned_plant",
+      "conditions": {
+        "bred": true
+      }
+    }
+  }
+}

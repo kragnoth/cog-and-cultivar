@@ -25,6 +25,10 @@ public final class LedgerModule implements CultivarModule {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Cultivar.MOD_ID);
     public static final DeferredRegister.DataComponents COMPONENTS =
             DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, Cultivar.MOD_ID);
+    public static final DeferredRegister<net.minecraft.advancements.CriterionTrigger<?>> TRIGGERS =
+            DeferredRegister.create(Registries.TRIGGER_TYPE, Cultivar.MOD_ID);
+    public static final DeferredHolder<net.minecraft.advancements.CriterionTrigger<?>, LearnedPlantTrigger> LEARNED_PLANT =
+            TRIGGERS.register("learned_plant", LearnedPlantTrigger::new);
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, Cultivar.MOD_ID);
 
@@ -48,12 +52,18 @@ public final class LedgerModule implements CultivarModule {
         ITEMS.register(modBus);
         COMPONENTS.register(modBus);
         ATTACHMENTS.register(modBus);
+        TRIGGERS.register(modBus);
         modBus.addListener((BuildCreativeModeTabContentsEvent event) -> {
             if (event.getTabKey() == CoreModule.TAB.getKey()) {
                 event.accept(LEDGER.get());
             }
         });
-        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> sync(e));
+        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
+            sync(e);
+            if (e.getEntity() instanceof ServerPlayer player) {
+                Knowledge.award(player, Knowledge.get(player).researched()); // old saves catch up on advancements
+            }
+        });
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerRespawnEvent e) -> sync(e));
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerChangedDimensionEvent e) -> sync(e));
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent e) -> e.getDispatcher().register(KnowledgeCommand.build()));

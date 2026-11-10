@@ -113,6 +113,7 @@ public class LedgerItem extends Item {
         if (player instanceof ServerPlayer sp) {
             Knowledge.exchange(sp, stack);
         } else if (level.isClientSide()) {
+            player.playSound(SoundEvents.BOOK_PAGE_TURN, 1f, 1f);
             openScreen.accept(stack);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());

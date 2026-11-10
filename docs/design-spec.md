@@ -740,7 +740,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **Trial Bed** ✅ | Research plot (brass casing): touching Trial Beds grow and cross their stocked seeds for real with every limiter removed (ideal soil host: no requirements, weeds or mutation habitats). Free trellises in a checkerboard: producers plant random stocked species (spending a seed), hold mature to parent, then rotate; frames breed, and a child of a new species records that mutation in the Ledger. Bonus: every N minutes (config, default 5) a roll at a configurable chance (default 5% for a full 9×9, scaled by plot size) discovers a random untested mutation whose parents are both stocked, records parents + child in the plot's Ledger (recipe appears), and spends one seed of each parent. Inputs: seeds + Ledger; output: the Ledger | A 9×9 fills a Ledger over time |
 | **6 — Content** (slimmed) | **Ore-blooms** ✅ (22 blooms incl. 12 low-value stepping stones, data-only, drop `create:crushed_raw_*` and gems), **habitat blight variants** ✅ (9, data-driven `habitat`). Derelict Conservatories ✅ (greenhouse + lean-to ruins, decay processor, loot). Optional: Wall Trellis. Dropped: Brass Apiary, Seed Vault, Livestock Trough/fodder genes, Ore Petals, Brassleaf gating | Pack-ready |
 | **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
-| **7 — Polish** | Excalibur-based asset pass, sounds, Ponder scenes, JEI/EMI categories, Jade | Release |
+| **7 — Polish** | Excalibur-based asset pass (blooms ✅, blights ✅), sounds ✅ (vanilla/Create events), advancements ✅, Ponder scenes, JEI ✅ / EMI categories, Jade | Release |
 
 ---
 

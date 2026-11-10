@@ -1,0 +1,27 @@
+{
+  "parent": "cultivar:field_notes",
+  "display": {
+    "icon": {
+      "id": "cultivar:assaying_engine"
+    },
+    "title": {
+      "translate": "advancement.cultivar.assay_office"
+    },
+    "description": {
+      "translate": "advancement.cultivar.assay_office.desc"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "cultivar:assaying_engine"
+          }
+        ]
+      }
+    }
+  }
+}

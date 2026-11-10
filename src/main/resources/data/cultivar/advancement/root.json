@@ -1,0 +1,29 @@
+{
+  "display": {
+    "icon": {
+      "id": "cultivar:timber_trellis"
+    },
+    "title": {
+      "translate": "advancement.cultivar.root"
+    },
+    "description": {
+      "translate": "advancement.cultivar.root.desc"
+    },
+    "frame": "task",
+    "background": "minecraft:textures/block/spruce_planks.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "cultivar:timber_trellis"
+          }
+        ]
+      }
+    }
+  }
+}

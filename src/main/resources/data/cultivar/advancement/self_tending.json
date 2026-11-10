@@ -1,0 +1,27 @@
+{
+  "parent": "cultivar:assay_office",
+  "display": {
+    "icon": {
+      "id": "cultivar:planter_bed"
+    },
+    "title": {
+      "translate": "advancement.cultivar.self_tending"
+    },
+    "description": {
+      "translate": "advancement.cultivar.self_tending.desc"
+    },
+    "frame": "task"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "cultivar:planter_bed"
+          }
+        ]
+      }
+    }
+  }
+}
