@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Human-readable crop readout shared by the Botanist's Loupe, Create goggles and Jade, so they always
+ * Human-readable crop readout shared by Create goggles and Jade, so they always
  * agree. Works on either side; reads only state that is synced to clients.
  */
 public final class CropInfo {

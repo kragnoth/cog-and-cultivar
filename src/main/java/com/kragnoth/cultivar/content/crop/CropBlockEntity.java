@@ -111,7 +111,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     @Nullable
     private InfluenceEffects cachedInfluence;
     private long influenceExpiry;
-    /** Which influences are active here; synced so Loupe, goggles and Jade can show them. */
+    /** Which influences are active here; synced so goggles and Jade can show them. */
     private List<InfluenceLookup.Active> activeInfluences = List.of();
 
     /**
@@ -328,7 +328,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         stage = 0;
         changed();
         if (level instanceof ServerLevel) {
-            invalidateInfluence(); // compute now so the Loupe/goggles show influences right away
+            invalidateInfluence(); // compute now so goggles show influences right away
         }
         return true;
     }
@@ -666,7 +666,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    /** Create Engineer's Goggles readout (spec §3.12: goggles show what the Loupe shows). Client-side, synced state only. */
+    /** Create Engineer's Goggles readout (the crop readout; the Loupe was folded into goggles). Client-side, synced state only. */
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if (genome == null && weed == null && activeInfluences.isEmpty()) {

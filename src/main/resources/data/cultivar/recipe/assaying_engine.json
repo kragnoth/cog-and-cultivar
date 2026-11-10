@@ -1,12 +1,27 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
-  "pattern": ["GLG", "GSG", " C "],
+  "pattern": [
+    "GLG",
+    "GSG",
+    " C "
+  ],
   "key": {
-    "G": { "item": "minecraft:glass_pane" },
-    "L": { "item": "cultivar:botanists_loupe" },
-    "S": { "item": "create:shaft" },
-    "C": { "item": "create:brass_casing" }
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "L": {
+      "item": "create:electron_tube"
+    },
+    "S": {
+      "item": "create:shaft"
+    },
+    "C": {
+      "item": "create:brass_casing"
+    }
   },
-  "result": { "id": "cultivar:assaying_engine", "count": 1 }
+  "result": {
+    "id": "cultivar:assaying_engine",
+    "count": 1
+  }
 }

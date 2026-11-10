@@ -61,7 +61,7 @@ public final class CultivarServerConfig {
         CLONE_MUTATIONS = b.comment("Whether a single-parent clone can still drift stats.")
                 .define("cloneMutations", false);
         REQUIRE_ASSAY = b.comment("Seed item tooltips hide stats until the seed is assayed (Assaying Engine).",
-                        "The Loupe and goggles always read crops in the field.")
+                        "Goggles always read crops in the field.")
                 .define("requireAssay", true);
         SATCHEL_SEED_BASE = b.comment("Harvesting a mature plant with the Seed Satchel (hand or Deployer): base chance of a seed.",
                         "Chance = base + perVigour * Vigour. Harvesters, hands and shears never give seeds.")

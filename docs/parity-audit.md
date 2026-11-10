@@ -53,10 +53,12 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 | **Bell Cloche** | ⚠️ cloche influence works, placed by beds | The spec's +1 humidity step was never added; item description |
 | **Transplanting Spade** | ✅ | Item description; deployer behaviour unverified in game |
 | **Pruning Shears** | ✅ cuttings, clip products | Item description; deployer behaviour unverified |
-| **Timber / Iron Tiller** | ⚠️ area weeding; tiers differ only in durability and reach | Confirm they still earn their place now that beds have no weeds and hoes clear blight on single trellises. Candidate to drop, or merge into one tool |
+| ~~Timber / Iron Tiller~~ | Removed (#37): hoes clear blight on a trellis; beds have none | — |
+| ~~(old)~~ Timber / Iron Tiller | ⚠️ area weeding; tiers differ only in durability and reach | Confirm they still earn their place now that beds have no weeds and hoes clear blight on single trellises. Candidate to drop, or merge into one tool |
 | **Seed Satchel** | ✅ seed harvest (Vigour), dial cull, pick-up | Item description; deployer seed harvest unverified |
 | **Brass Dial** | ✅ satchel upgrade | Item description |
-| **Botanist's Loupe** | ⚠️ overlaps with Create goggles (both show crop info) | Differentiate: goggles give the summary; the Loupe shows full allele pairs and hidden stats, matching the Assay Card. Or drop it in favour of goggles |
+| ~~Botanist's Loupe~~ | Removed (#37): Create goggles show the crop readout | — |
+| ~~(old)~~ Botanist's Loupe | ⚠️ overlaps with Create goggles (both show crop info) | Differentiate: goggles give the summary; the Loupe shows full allele pairs and hidden stats, matching the Assay Card. Or drop it in favour of goggles |
 | **Botanical Ledger** | ✅ GUI, Engine/Trial recording, Display Link | Item description; JEI "researched" link |
 
 ## Planned content still open
@@ -75,7 +77,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
    - Wrench support on Sprinkler and both beds.
    - One redstone convention across machines: pause, or strip + dump for plots.
 3. **Tool tags for trellises** (axe for timber, pickaxe for iron).
-4. **Purpose review:** Loupe (differentiate or drop), Tillers (keep, merge or drop). Assay Card: dropped.
+4. **Purpose review:** done: Assay Card, Loupe and Tillers removed (#35, #37).
 5. **JEI:**
    - Cutting subtype.
    - Categories for mutations (parents, child, habitat), the Assaying Engine, fertilizers and soils.

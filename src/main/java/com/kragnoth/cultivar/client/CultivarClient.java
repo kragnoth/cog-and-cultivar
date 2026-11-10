@@ -4,7 +4,6 @@ import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.client.config.CultivarClientConfig;
 import com.kragnoth.cultivar.client.crop.CropClientModule;
 import com.kragnoth.cultivar.client.dev.SceneShooter;
-import com.kragnoth.cultivar.client.loupe.LoupeClientModule;
 import com.kragnoth.cultivar.client.ledger.LedgerClientModule;
 import com.kragnoth.cultivar.client.assay.AssayClientModule;
 import com.kragnoth.cultivar.client.tools.ToolsClientModule;
@@ -30,7 +29,6 @@ public final class CultivarClient {
     static final List<Supplier<ClientModule>> MODULES = List.of(
             CropClientModule::new,
             ToolsClientModule::new,
-            LoupeClientModule::new,
             LedgerClientModule::new,
             AssayClientModule::new,
             com.kragnoth.cultivar.client.bed.BedClientModule::new,

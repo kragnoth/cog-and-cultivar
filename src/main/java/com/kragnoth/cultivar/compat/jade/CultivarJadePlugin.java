@@ -41,7 +41,7 @@ public final class CultivarJadePlugin implements IWailaPlugin {
             if (!(CropBlockEntity.resolve(accessor.getLevel(), accessor.getPosition()).orElse(null) instanceof CropBlockEntity crop)) {
                 return;
             }
-            // Compact on purpose: the full readout lives in the Botanist's Loupe and Create goggles.
+            // Compact on purpose: the full readout lives in Create goggles.
             List<Component> lines = CropInfo.lines(crop);
             tooltip.add(lines.getFirst());
             if (crop.weed() != null) {

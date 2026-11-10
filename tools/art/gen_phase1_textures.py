@@ -151,8 +151,6 @@ for x, y in ((7, 7), (8, 8), (7, 8), (8, 7)):
     if shears.getpixel((x, y))[3] > 0:
         shears.putpixel((x, y), BRASS[4])                      # brass pivot
 shears.save(f'{OUT}/item/pruning_shears.png')
-Image.open(f'{EXC}/item/wooden_hoe.png').convert('RGBA').save(f'{OUT}/item/timber_tiller.png')
-Image.open(f'{EXC}/item/iron_hoe.png').convert('RGBA').save(f'{OUT}/item/iron_tiller.png')
 Image.open(f'{EXC}/item/bundle.png').convert('RGBA').save(f'{OUT}/item/seed_satchel.png')
 tint(f'{EXC}/item/clock_00.png', to_ramp(BRASS)).save(f'{OUT}/item/brass_dial.png')
 dial_overlay = canvas()
@@ -163,19 +161,6 @@ satchel_dial.alpha_composite(dial_overlay)
 satchel_dial.save(f'{OUT}/item/seed_satchel_dial.png')
 print('tools ok')
 
-# ---- Phase 2b: Botanist's Loupe: brass-ringed lens on a short handle (kitbashed from Excalibur spyglass colours)
-loupe = canvas()
-for x in range(16):
-    for y in range(16):
-        d = ((x - 9.5) ** 2 + (y - 6.5) ** 2) ** 0.5
-        if d <= 3.6:
-            loupe.putpixel((x, y), (190, 220, 225, 200) if (x + y) % 5 else (240, 250, 250, 230))   # lens glass
-        elif d <= 5.0:
-            loupe.putpixel((x, y), BRASS[4] if x + y < 16 else BRASS[1])                          # brass ring
-for i in range(6):
-    loupe.putpixel((5 - i // 2 + 1, 10 + i), WOOD[3]); loupe.putpixel((6 - i // 2 + 1, 10 + i), WOOD[1])  # handle
-loupe.save(f'{OUT}/item/botanists_loupe.png')
-print('loupe ok')
 
 # ---- Phase 2b: Botanical Ledger: Excalibur writable book with brass corners and a green leaf tab
 ledger = Image.open(f'{EXC}/item/writable_book.png').convert('RGBA')
