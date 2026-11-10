@@ -93,7 +93,7 @@ rod(WOOD).save(f'{OUT}/block/timber_rod.png')
 rod(IRON).save(f'{OUT}/block/iron_rod.png')
 for stage, rows in enumerate((5, 8, 12, 16)):
     recolour(f'{EXC}/block/dead_bush.png', RUST, rows).save(f'{OUT}/block/rust_rot_stage{stage}.png')
-Image.open(f'{EXC}/item/wheat_seeds.png').convert('RGBA').save(f'{OUT}/item/seed.png')
+# seed.png now comes from gen_art_pass.py (tintable greyscale).
 print('ok')
 
 # ---- Bell Cloche (1d): Excalibur glass frame with brass rim, plus a brass knob
@@ -151,14 +151,8 @@ for x, y in ((7, 7), (8, 8), (7, 8), (8, 7)):
     if shears.getpixel((x, y))[3] > 0:
         shears.putpixel((x, y), BRASS[4])                      # brass pivot
 shears.save(f'{OUT}/item/pruning_shears.png')
-Image.open(f'{EXC}/item/bundle.png').convert('RGBA').save(f'{OUT}/item/seed_satchel.png')
+# seed_satchel.png and seed_satchel_dial.png now come from gen_art_pass.py (brass buckle).
 tint(f'{EXC}/item/clock_00.png', to_ramp(BRASS)).save(f'{OUT}/item/brass_dial.png')
-dial_overlay = canvas()
-small = tint(f'{EXC}/item/clock_00.png', to_ramp(BRASS)).resize((7, 7), Image.NEAREST)
-dial_overlay.alpha_composite(small, (8, 8))
-satchel_dial = Image.open(f'{EXC}/item/bundle.png').convert('RGBA')
-satchel_dial.alpha_composite(dial_overlay)
-satchel_dial.save(f'{OUT}/item/seed_satchel_dial.png')
 print('tools ok')
 
 

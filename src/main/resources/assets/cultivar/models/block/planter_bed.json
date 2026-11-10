@@ -2,7 +2,7 @@
   "parent": "block/block",
   "textures": {
     "casing": "create:block/andesite_casing",
-    "floor": "minecraft:block/coarse_dirt",
+    "floor": "cultivar:block/bed_soil",
     "particle": "create:block/andesite_casing"
   },
   "elements": [

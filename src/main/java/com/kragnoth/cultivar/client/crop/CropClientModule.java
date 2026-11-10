@@ -25,6 +25,11 @@ public final class CropClientModule implements ClientModule {
         modBus.addListener(CropClientModule::wrapModels);
         modBus.addListener(CropClientModule::registerCropModels);
         modBus.addListener(CropClientModule::registerColors);
+        modBus.addListener((RegisterColorHandlersEvent.Item event) ->
+                event.register((stack, tint) -> tint == 0 ? SeedColors.of(stack) : -1, CropModule.SEED.get()));
+        modBus.addListener((net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent event) -> SeedColors.clear());
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn event) -> SeedColors.clear());
     }
 
     /** Every model under {@code models/crop/} in any namespace, so datapack plants can name them. */

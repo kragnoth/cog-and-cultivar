@@ -110,5 +110,7 @@ shipped files under `data/minecraft/cultivar/` in the mod jar.
   takes root where it fits. `rake_products` drop when a mature blight is cleared with a hoe.
 - **Advancements and quests** can use the `cultivar:learned_plant` trigger: optional `plant` (that species was
   learned), `bred: true` (any bred species), `complete: true` (every species known).
+- **Seed colours** are automatic: each species' seed is tinted from its first product's sprite. Set
+  `"seed_color": "#RRGGBB"` on a plant to choose it yourself.
 - **Overriding art:** a resource pack can re-skin any crop by overriding the textures it names, or the
   `cultivar:crop/...` model.

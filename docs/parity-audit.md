@@ -26,7 +26,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 | Consistent redstone meaning | ⚠️ | Planter Bed: redstone = strip + dump. Trial Bed, Sprinkler and Assaying Engine ignore redstone |
 | JEI coverage | ⚠️ | Seed subtypes only. No categories for mutations (with habitats), the Assaying Engine, fertilizers, soils, or Trial/Planter Beds; Cutting has no subtype, so JEI shows a blank Cutting |
 | Mining tool tags | ⚠️ | Machines are tagged pickaxe; trellises have no tag (timber should be axe, iron pickaxe) |
-| Advancements / progression | ❌ | None. Create addons usually guide players through their tech tree |
+| Advancements / progression | ✅ | 12 advancements on `cultivar:learned_plant` (#49) |
 | Custom sounds | ❌ | Vanilla sounds throughout (Phase 7, optional) |
 | Translations | ⚠️ | en_us only (normal for now) |
 | Pack-maker tooling | ✅ | `/cultivar export`, scaffold script, conditions, documented API |
@@ -115,3 +115,6 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 - 2026-11-10: 9 habitat blights (humidity, acidity, nutrients, light) with mature-only cleanup drops; JEI Blight page.
 - 2026-11-10: sounds for crosses (chime + sparkle on a new species), hoe-clearing blight, Assaying Engine finish,
   Sprinkler spray, opening the Ledger; 12 advancements on a `cultivar:learned_plant` trigger.
+- 2026-11-10: art pass: per-species seed tint (automatic from the product, `seed_color` override), satchel brass
+  buckle, Planter Bed loam and Trial Bed pegged-plot floors (no longer vanilla coarse/rooted dirt), brass-framed
+  Assaying Engine window. `tools/art/gen_art_pass.py`.

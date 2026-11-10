@@ -25,6 +25,7 @@ import java.util.Optional;
  * @param spreadChance      chance per eligible tick for that clone to happen
  * @param seeds             vanilla/modded items that plant this species on a trellis (converted to a base genome)
  * @param render            client display: block-atlas textures spread across the stages, and the plant shape
+ * @param seedColor         seed item tint ({@code "#RRGGBB"}); without it the client samples the first product's sprite
  */
 public record Plant(int stages,
                     int afterHarvestStage,
@@ -38,7 +39,17 @@ public record Plant(int stages,
                     List<PlantModifier> modifiers,
                     Optional<HolderSet<Item>> seeds,
                     Optional<PlantRender> render,
-                    int height) {
+                    int height,
+                    Optional<Integer> seedColor) {
+    /** {@code "#RRGGBB"} (or {@code "RRGGBB"}) as an RGB int. */
+    public static final Codec<Integer> HEX_COLOR = Codec.STRING.comapFlatMap(s -> {
+        try {
+            return com.mojang.serialization.DataResult.success(Integer.parseInt(s.startsWith("#") ? s.substring(1) : s, 16) & 0xFFFFFF);
+        } catch (NumberFormatException e) {
+            return com.mojang.serialization.DataResult.error(() -> "not a hex colour: " + s);
+        }
+    }, c -> String.format("#%06X", c));
+
     public static final Codec<Plant> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.intRange(1, 16).fieldOf("stages").forGetter(Plant::stages),
             Codec.intRange(0, 15).optionalFieldOf("after_harvest_stage", 0).forGetter(Plant::afterHarvestStage),
@@ -52,7 +63,8 @@ public record Plant(int stages,
             PlantModifier.CODEC.listOf().optionalFieldOf("modifiers", List.of()).forGetter(Plant::modifiers),
             RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("seeds").forGetter(Plant::seeds),
             PlantRender.CODEC.optionalFieldOf("render").forGetter(Plant::render),
-            Codec.intRange(1, 4).optionalFieldOf("height", 1).forGetter(Plant::height)
+            Codec.intRange(1, 4).optionalFieldOf("height", 1).forGetter(Plant::height),
+            HEX_COLOR.optionalFieldOf("seed_color").forGetter(Plant::seedColor)
     ).apply(i, Plant::new));
 
     public Plant {
