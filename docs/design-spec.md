@@ -494,20 +494,32 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 
 > **Cog & Cultivar (slimmed):** ore-blooms are plain plant JSON. They drop `create:crushed_raw_<metal>` directly at a low chance, so they feed Create's washing and ore-doubling chain with no new items. Mutations follow the same habitat logic as the rest of the tree (e.g. a copper bloom needs flooded soil, as copper oxidises in water). Art uses pack-driven `cultivar:crop/` models with metal-coloured textures. Pack makers add their own metals the same way. Ore Petals and Brassleaf gating are dropped (there is no brass trellis tier).
 >
-> **Shipped tree** (`data/cultivar/cultivar/{plant,mutation}/`; every pair is unique against the crop tree):
+> **Shipped tree** (`data/cultivar/cultivar/{plant,mutation}/`; every pair is unique against the crop tree). Low-value blooms come first and are the stepping stones; every ore and gem sits at least four crosses from vanilla (enforced by `OreBloomTests`).
 >
-> | Bloom | Parents | Habitat | Drop (per roll) |
-> |---|---|---|---|
-> | Coalroot | Potato × Brown Mushroom | light ≤ 7 | coal, 50% |
-> | Ferrous Bloom | Coalroot × Beetroot | light ≤ 7 | crushed raw iron, 35% |
-> | Verdigris Vine | Ferrous Bloom × Sugar Cane | flooded | crushed raw copper, 40% |
-> | Brassleaf | Verdigris Vine × Ferrous Bloom | light ≤ 7 | crushed raw zinc, 35% |
-> | Aurum Thistle | Brassleaf × Cactus | arid | crushed raw gold, 25% |
-> | Redstone Fern | Coalroot × Glow Berries | light ≤ 5 | redstone 1–2, 50% |
-> | Lazuli Bell | Redstone Fern × Verdigris Vine | light ≤ 5 | lapis 1–2, 40% |
-> | Quartz Lily | Aurum Thistle × Nether Wart | dry, slightly alkaline | quartz, 40% |
-> | Emerald Fern | Lazuli Bell × Aurum Thistle | light ≥ 13 | emerald, 10% |
-> | Diamond Briar | Emerald Fern × Redstone Fern | light ≤ 3 | diamond, 5% |
+> | Bloom | Depth | Parents | Habitat | Drop (per roll) |
+> |---|---|---|---|---|
+> | Bonecap | 1 | Wheat × Red Mushroom | light ≤ 7 | bone meal 1–2 |
+> | Inkcap | 1 | Brown Mushroom × Sugar Cane | flooded | ink sac |
+> | Madder Root | 1 | Beetroot × Red Mushroom | slightly acidic | red dye 1–2 |
+> | Woad | 1 | Carrot × Sweet Berries | light ≥ 12 | blue dye 1–2 |
+> | Clayreed | 1 | Carrot × Sugar Cane | flooded | clay ball 1–2 |
+> | Silkweed | 1 | Wheat × Sweet Berries | light ≥ 12 | string 1–2 |
+> | Glowcap | 1 | Glow Berries × Brown Mushroom | light ≤ 5 | glowstone dust 1–2 |
+> | Coalroot | 2 | Inkcap × Bonecap | light ≤ 7 | coal |
+> | Flintwort | 2 | Bonecap × Cactus | arid | flint |
+> | Slimecap | 2 | Inkcap × Clayreed | flooded | slime ball |
+> | Brimstone Puff | 3 | Coalroot × Nether Wart | arid | gunpowder |
+> | Rustwort | 3 | Coalroot × Flintwort | flooded | iron nuggets 1–3 |
+> | Shardbloom | 3 | Glowcap × Flintwort | light ≤ 7 | amethyst shard |
+> | Ferrous Bloom | 4 | Rustwort × Coalroot | light ≤ 7 | crushed raw iron |
+> | Redstone Fern | 4 | Brimstone Puff × Madder Root | light ≤ 5 | redstone 1–2 |
+> | Quartz Lily | 4 | Shardbloom × Brimstone Puff | dry, slightly alkaline | quartz |
+> | Verdigris Vine | 5 | Ferrous Bloom × Slimecap | flooded | crushed raw copper |
+> | Lazuli Bell | 5 | Redstone Fern × Woad | light ≤ 5 | lapis 1–2 |
+> | Brassleaf | 6 | Verdigris Vine × Ferrous Bloom | light ≤ 7 | crushed raw zinc |
+> | Aurum Thistle | 7 | Brassleaf × Silkweed | arid | crushed raw gold |
+> | Emerald Fern | 8 | Lazuli Bell × Aurum Thistle | light ≥ 13 | emerald (10%) |
+> | Diamond Briar | 9 | Emerald Fern × Shardbloom | light ≤ 3 | diamond (5%) |
 >
 > Blooms grow slowly (growth chance 0.5) and mostly want dark, damp, medium-nutrient soil. Exceptions: Verdigris wants watery soil, Aurum and Emerald want bright light, and Quartz shares Nether Wart's soil. They have no seed item: seeds come from the Seed Satchel only. The models are a vanilla flower cross with two small buds of the ore's block at its foot when ripe.
 
@@ -708,7 +720,7 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **5 — Climate** ❌ dropped | Temperature added no gameplay; soils, the Sprinkler and the Bell Cloche already cover climate control. Left to addons via the API (see ARCHITECTURE.md "Extending from an addon") | — |
 | **Planter Bed** ✅ | End-stage breeding machine. Self-contained, pipe-fed (soil, ranked seed stock, fertilizer, trellis + cloche supply, 4000 mB water, 9 outputs); touching beds form one plot (shared capabilities, balanced water, plot-wide goggles + comparator). Places fed trellises/cloches itself; redstone strips them back. Breeder beds (grafting frame above) bank newborn children as seeds and re-arm; producer beds plant the best seed, hold mature crops for neighbouring breeders, harvest, and upgrade to better seeds of the same species. Ranking = weighted stats (config) | A self-improving plot fed only by pipes |
 | **Trial Bed** ✅ | Research plot (brass casing): touching Trial Beds grow and cross their stocked seeds for real with every limiter removed (ideal soil host: no requirements, weeds or mutation habitats). Free trellises in a checkerboard: producers plant random stocked species (spending a seed), hold mature to parent, then rotate; frames breed, and a child of a new species records that mutation in the Ledger. Bonus: every N minutes (config, default 5) a roll at a configurable chance (default 5% for a full 9×9, scaled by plot size) discovers a random untested mutation whose parents are both stocked, records parents + child in the plot's Ledger (recipe appears), and spends one seed of each parent. Inputs: seeds + Ledger; output: the Ledger | A 9×9 fills a Ledger over time |
-| **6 — Content** (slimmed) | **Ore-blooms** ✅ (10 blooms, data-only, drop `create:crushed_raw_*` and gems), **habitat blight variants** (data-only), **Brass Apiary** (one block). Derelict Conservatories ✅ (greenhouse + lean-to ruins, decay processor, loot). Optional: Wall Trellis. Dropped: Seed Vault, Livestock Trough/fodder genes, Ore Petals, Brassleaf gating | Pack-ready |
+| **6 — Content** (slimmed) | **Ore-blooms** ✅ (22 blooms incl. 12 low-value stepping stones, data-only, drop `create:crushed_raw_*` and gems), **habitat blight variants** (data-only), **Brass Apiary** (one block). Derelict Conservatories ✅ (greenhouse + lean-to ruins, decay processor, loot). Optional: Wall Trellis. Dropped: Seed Vault, Livestock Trough/fodder genes, Ore Petals, Brassleaf gating | Pack-ready |
 | **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
 | **7 — Polish** | Excalibur-based asset pass, sounds, Ponder scenes, JEI/EMI categories, Jade | Release |
 

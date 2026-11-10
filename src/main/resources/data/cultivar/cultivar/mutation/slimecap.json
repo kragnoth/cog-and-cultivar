@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:inkcap",
+  "parent_b": "cultivar:clayreed",
+  "child": "cultivar:slimecap",
+  "chance": 0.3,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "flooded",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

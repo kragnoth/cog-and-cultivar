@@ -72,6 +72,7 @@ public final class SceneShooter {
             new Shot("crops_02_close_left", 3.0, Y + 1.6, -17.8, 180f, 18f),
             new Shot("crops_03_close_right", 10.0, Y + 1.6, -17.8, 180f, 18f),
             new Shot("blooms_01_row", 19.5, Y + 2.6, -16.5, 180f, 22f),
+            new Shot("blooms_03_row_east", 29.5, Y + 2.6, -16.5, 180f, 22f),
             new Shot("blooms_02_close", 17.0, Y + 1.5, -18.6, 180f, 16f),
             new Shot("tall_01_stacks", 3.5, Y + 2.8, -21.0, 180f, 12f),
             new Shot("ruin_01_greenhouse", 33.5, Y + 6.5, -15.0, 25f, 22f),
@@ -248,7 +249,7 @@ public final class SceneShooter {
         }
 
         // Ore-blooms beside them: ripe with their ore buds on the back row, half-grown in front.
-        String[] blooms = {"coalroot", "ferrous_bloom", "verdigris_vine", "brassleaf", "aurum_thistle",
+        String[] blooms = {"bonecap", "inkcap", "madder_root", "woad", "flintwort", "brimstone_puff", "rustwort", "clayreed", "silkweed", "slimecap", "glowcap", "shardbloom", "coalroot", "ferrous_bloom", "verdigris_vine", "brassleaf", "aurum_thistle",
                 "redstone_fern", "lazuli_bell", "quartz_lily", "emerald_fern", "diamond_briar"};
         for (int i = 0; i < blooms.length; i++) {
             Holder<Plant> p = level.registryAccess().registryOrThrow(CultivarRegistries.PLANT)

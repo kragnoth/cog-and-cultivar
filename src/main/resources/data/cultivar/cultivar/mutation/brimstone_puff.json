@@ -1,0 +1,14 @@
+{
+  "parent_a": "cultivar:coalroot",
+  "parent_b": "minecraft:nether_wart",
+  "child": "cultivar:brimstone_puff",
+  "chance": 0.2,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "arid",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "parent_a": "cultivar:redstone_fern",
-  "parent_b": "cultivar:verdigris_vine",
+  "parent_b": "cultivar:woad",
   "child": "cultivar:lazuli_bell",
   "chance": 0.15,
   "conditions": [

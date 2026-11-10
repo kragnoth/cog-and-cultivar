@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:wheat",
+  "parent_b": "minecraft:sweet_berries",
+  "child": "cultivar:silkweed",
+  "chance": 0.35,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 12,
+      "max": 15,
+      "tolerance": 0
+    }
+  ]
+}

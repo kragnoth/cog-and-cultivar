@@ -104,6 +104,19 @@ model('pitcher_plant_stage1', {"plant": "minecraft:item/pitcher_plant"}, rise("#
 model('pitcher_plant_stage2', {"plant": "minecraft:item/pitcher_plant"}, rise("#plant", 16))
 # Ore-blooms: a flower rises in three steps; when ripe, two small buds of the ore's block sit at its foot.
 ORE_BLOOMS = {
+    # Intermediates: low-value steps on the way to the ores.
+    'bonecap': ('minecraft:block/lily_of_the_valley', 'minecraft:block/bone_block_side'),
+    'inkcap': ('minecraft:block/brown_mushroom', 'minecraft:block/black_wool'),
+    'madder_root': ('minecraft:block/red_tulip', 'minecraft:block/red_wool'),
+    'woad': ('minecraft:block/orange_tulip', 'minecraft:block/blue_wool'),
+    'flintwort': ('minecraft:block/wither_rose', 'minecraft:block/gravel'),
+    'brimstone_puff': ('minecraft:block/crimson_roots', 'minecraft:block/tnt_side'),
+    'rustwort': ('minecraft:block/pink_tulip', 'minecraft:block/iron_ore'),
+    'clayreed': ('minecraft:block/seagrass', 'minecraft:block/clay'),
+    'silkweed': ('minecraft:block/cobweb', 'minecraft:block/white_wool'),
+    'slimecap': ('minecraft:block/warped_fungus', 'minecraft:block/slime_block'),
+    'glowcap': ('minecraft:block/warped_roots', 'minecraft:block/glowstone'),
+    'shardbloom': ('minecraft:block/amethyst_cluster', 'minecraft:block/amethyst_block'),
     'coalroot': ('minecraft:block/dead_bush', 'minecraft:block/coal_block'),
     'ferrous_bloom': ('minecraft:block/azure_bluet', 'minecraft:block/raw_iron_block'),
     'verdigris_vine': ('minecraft:block/twisting_vines_plant', 'minecraft:block/raw_copper_block'),

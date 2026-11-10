@@ -1,6 +1,6 @@
 {
   "parent_a": "cultivar:brassleaf",
-  "parent_b": "minecraft:cactus",
+  "parent_b": "cultivar:silkweed",
   "child": "cultivar:aurum_thistle",
   "chance": 0.15,
   "conditions": [
