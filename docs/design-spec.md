@@ -178,17 +178,17 @@ Vanilla soil defaults (1.21 datagen): farmland WET/SLIGHTLY_ACIDIC/HIGH ×1.0; s
 | Child | Parents | Habitat |
 |---|---|---|
 | Beetroot | Wheat × Potato | damp soil or wetter |
-| Carrot / Brown Mushroom | Potato × Beetroot | light ≥ 10 + high nutrients / light ≤ 7 |
+| Carrot / Brown Mushroom | Potato × Beetroot | light ≥ 10 + high nutrients / twilight (light 9–11) |
 | Sugar Cane / Bamboo | Wheat × Beetroot | flooded (mud) / wet soil in shade (light ≤ 11) |
 | Pumpkin | Carrot × Beetroot | very high nutrients (podzol) |
 | Melon | Pumpkin × Beetroot | light ≥ 13, wet or wetter |
 | Cactus | Sugar Cane × Pumpkin | arid (sand) |
-| Red Mushroom | Brown Mushroom × Beetroot | light ≤ 7 |
+| Red Mushroom | Brown Mushroom × Beetroot | twilight (light 9–11) |
 | Cocoa | Bamboo × Pumpkin | light ≤ 11, wet or wetter |
 | Sweet Berries | Beetroot × Cactus | acidic (podzol) |
-| Glow Berries | Sweet Berries × Red Mushroom | light ≤ 5 |
+| Glow Berries | Sweet Berries × Red Mushroom | light ≤ 7 |
 | Nether Wart | Red Mushroom × Cactus | dry + slightly alkaline (soul sand) |
-| Torchflower | Glow Berries × Pumpkin | light ≥ 14, 10 % |
+| Torchflower | Glow Berries × Pumpkin | torch-lit (light 10–12), 10 % |
 | Pitcher Plant | Torchflower × Sugar Cane | flooded, 10 % |
 
 **Farmer's Delight family (optional, loads only with each mod):** Onion = Carrot × Potato; Cabbage = Beetroot × Onion (damp, light 9–14); Tomato = Sweet Berries × Potato (nightshades, light ≥ 13, 2 tall); Rice = Wheat × Sugar Cane (flooded, 2 tall); Asparagus = Onion × Bamboo (wet); Sweet Potato = Potato × Sugar Cane (light ≥ 12); Chili Pepper = Tomato × Cactus (light ≥ 14); Peanut = Potato × Cocoa (light ≥ 12, damp); Cranberries = Sweet Berries × Sugar Cane (flooded bog); Cotton = Wheat × Cactus (light ≥ 13); Bell Pepper = Tomato × Pumpkin (light ≥ 12); Pale Bell Pepper = Bell Pepper × Cotton; Dark Bell Pepper = Bell Pepper × Sweet Berries (acidic: anthocyanins); Coffee = Cocoa × Sweet Berries (shade, wet); Bullet Pepper = Nether Wart × Tomato and Powdery Cane = Bamboo × Nether Wart (soul sand). Rich Soil / Rich Soil Farmland are very-high-nutrient soils. FD knives clip crops (tag `cultivar:clippers`).
@@ -500,7 +500,7 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 >
 > | Bloom | Depth | Parents | Habitat | Drop (per roll) |
 > |---|---|---|---|---|
-> | Bonecap | 1 | Wheat × Red Mushroom | light ≤ 7 | bone meal 1–2 |
+> | Bonecap | 1 | Wheat × Red Mushroom | twilight (light 9–11) | bone meal 1–2 |
 > | Inkcap | 1 | Brown Mushroom × Sugar Cane | flooded | ink sac |
 > | Madder Root | 1 | Beetroot × Red Mushroom | slightly acidic | red dye 1–2 |
 > | Woad | 1 | Carrot × Sweet Berries | light ≥ 12 | blue dye 1–2 |
@@ -514,16 +514,18 @@ Solids are still usable by hand or deployer. Fluids work via a **Spout** onto cr
 > | Rustwort | 3 | Coalroot × Flintwort | flooded | iron nuggets 1–3 |
 > | Shardbloom | 3 | Glowcap × Flintwort | light ≤ 7 | amethyst shard |
 > | Ferrous Bloom | 4 | Rustwort × Coalroot | light ≤ 7 | crushed raw iron |
-> | Redstone Fern | 4 | Brimstone Puff × Madder Root | light ≤ 5 | redstone 1–2 |
+> | Redstone Fern | 4 | Brimstone Puff × Madder Root | light ≤ 7 | redstone 1–2 |
 > | Quartz Lily | 4 | Shardbloom × Brimstone Puff | dry, slightly alkaline | quartz |
 > | Verdigris Vine | 5 | Ferrous Bloom × Slimecap | flooded | crushed raw copper |
-> | Lazuli Bell | 5 | Redstone Fern × Woad | light ≤ 5 | lapis 1–2 |
+> | Lazuli Bell | 5 | Redstone Fern × Woad | twilight (light 9–11) | lapis 1–2 |
 > | Brassleaf | 6 | Verdigris Vine × Ferrous Bloom | light ≤ 7 | crushed raw zinc |
 > | Aurum Thistle | 7 | Brassleaf × Silkweed | arid | crushed raw gold |
-> | Emerald Fern | 8 | Lazuli Bell × Aurum Thistle | light ≥ 13 | emerald (10%) |
-> | Diamond Briar | 9 | Emerald Fern × Shardbloom | light ≤ 3 | diamond (5%) |
+> | Emerald Fern | 8 | Aurum Thistle × Woad | light ≥ 13 | emerald (10%) |
+> | Diamond Briar | 9 | Emerald Fern × Quartz Lily | arid (heat-dried) | diamond (5%) |
 >
-> Blooms grow slowly (growth chance 0.5) and mostly want dark, damp, medium-nutrient soil. Exceptions: Verdigris wants watery soil, Aurum and Emerald want bright light, and Quartz shares Nether Wart's soil. They have no seed item: seeds come from the Seed Satchel only. The models are a vanilla flower cross with two small buds of the ore's block at its foot when ripe.
+> **Breedable by design:** parents and the frame share light (adjacent blocks differ by at most 1), so every cross has a light level both parents and the child tolerate. Crops grow at light ≥ 9 and mushrooms at ≤ 12 (vanilla's own rules), which leaves a twilight band (9–11) for crop × mushroom crosses. `tools/data/check_crosses.py` verifies every shipped cross in CI.
+>
+> Blooms grow slowly (growth chance 0.5) and mostly want dim (light ≤ 10), damp, medium-nutrient soil. Exceptions: Verdigris wants watery soil, Aurum (poor, dry soil) and Emerald want bright light, Quartz shares Nether Wart's soil, and Diamond Briar grows only in scorched (dry or arid) ground at any light. They have no seed item: seeds come from the Seed Satchel only. The models are a vanilla flower cross with two small buds of the ore's block at its foot when ripe.
 
 The original AgriCraft-derived notes below are kept for reference.
 

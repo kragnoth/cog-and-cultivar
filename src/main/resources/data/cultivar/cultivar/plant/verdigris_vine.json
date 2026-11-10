@@ -15,7 +15,7 @@
     {
       "type": "cultivar:light",
       "min": 0,
-      "max": 8,
+      "max": 10,
       "tolerance": 0.5
     },
     {

@@ -6,8 +6,8 @@
   "conditions": [
     {
       "type": "cultivar:light",
-      "min": 14,
-      "max": 15,
+      "min": 10,
+      "max": 12,
       "tolerance": 0
     }
   ]
