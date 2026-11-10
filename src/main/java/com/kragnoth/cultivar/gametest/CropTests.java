@@ -1,5 +1,8 @@
 package com.kragnoth.cultivar.gametest;
 
+import net.minecraft.world.level.block.FarmBlock;
+import com.kragnoth.cultivar.api.soil.SoilLevels;
+import com.kragnoth.cultivar.content.core.condition.Hydration;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.api.CultivarRegistries;
 import com.kragnoth.cultivar.api.genetics.Genome;
@@ -63,6 +66,24 @@ public final class CropTests {
             }
         }
         h.assertTrue(access.registryOrThrow(CultivarRegistries.WEED).size() >= 1, "weeds loaded");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void waterShiftsHumidity(GameTestHelper h) {
+        BlockPos wet = new BlockPos(1, 1, 1), dry = new BlockPos(4, 1, 1), mud = new BlockPos(7, 1, 1);
+        h.setBlock(wet, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7));
+        h.setBlock(wet.east(), Blocks.WATER);
+        h.setBlock(dry, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 0));
+        h.setBlock(mud, Blocks.MUD);
+        h.setBlock(mud.west(), Blocks.WATER);
+        var level = h.getLevel();
+        h.assertTrue(Hydration.effective(level, h.absolutePos(wet), SoilLevels.Humidity.WET) == SoilLevels.Humidity.WATERY,
+                "water beside farmland makes it watery");
+        h.assertTrue(Hydration.effective(level, h.absolutePos(dry), SoilLevels.Humidity.WET) == SoilLevels.Humidity.DAMP,
+                "dry farmland reads damp");
+        h.assertTrue(Hydration.effective(level, h.absolutePos(mud), SoilLevels.Humidity.FLOODED) == SoilLevels.Humidity.FLOODED,
+                "flooded is the ceiling");
         h.succeed();
     }
 }

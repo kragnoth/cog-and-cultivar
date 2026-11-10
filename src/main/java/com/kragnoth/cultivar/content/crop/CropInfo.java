@@ -2,6 +2,7 @@ package com.kragnoth.cultivar.content.crop;
 
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.soil.Soil;
+import com.kragnoth.cultivar.api.soil.SoilLevels;
 import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.content.core.genetics.Genetics;
 import com.kragnoth.cultivar.content.core.influence.InfluenceLookup;
@@ -34,7 +35,7 @@ public final class CropInfo {
         } else {
             out.add(Component.translatable("cultivar.info.empty").withStyle(ChatFormatting.DARK_GRAY));
         }
-        crop.soil().ifPresentOrElse(soil -> out.add(soilLine(soil)),
+        crop.soil().ifPresentOrElse(soil -> out.add(soilLine(soil, crop.humidity().orElse(soil.humidity()))),
                 () -> out.add(Component.translatable("cultivar.info.no_soil").withStyle(ChatFormatting.RED)));
         for (InfluenceLookup.Active active : crop.activeInfluences()) {
             ResourceLocation id = active.id().location();
@@ -59,9 +60,9 @@ public final class CropInfo {
         return mature == 0 ? 100 : 100 * crop.stage() / mature;
     }
 
-    private static MutableComponent soilLine(Soil soil) {
+    private static MutableComponent soilLine(Soil soil, SoilLevels.Humidity humidity) {
         return Component.translatable("cultivar.info.soil",
-                level("humidity", soil.humidity().getSerializedName()),
+                level("humidity", humidity.getSerializedName()),
                 level("acidity", soil.acidity().getSerializedName()),
                 level("nutrients", soil.nutrients().getSerializedName())).withStyle(ChatFormatting.DARK_AQUA);
     }
