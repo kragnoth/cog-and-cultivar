@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:glow_berries",
+  "parent_b": "minecraft:pumpkin",
+  "child": "minecraft:torchflower",
+  "chance": 0.1,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 14,
+      "max": 15,
+      "tolerance": 0
+    }
+  ]
+}

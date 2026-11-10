@@ -171,6 +171,27 @@ Vanilla soil defaults (1.21 datagen): farmland WET/SLIGHTLY_ACIDIC/HIGH ×1.0; s
 
 **Mutation chains (1.21 data):** vanilla flowers and crops form a tree; resource crops start from **Ferranium (melon × pumpkin)** and branch to Aurigold, Lapender, Redstodendron, Cuprosia, Niccissus, Platiolus, Osmonium, Plombean, Petinia, Jaslumine, Quartzanthemum, Nitor Wart, Amathyllis, Diamahlia, Emeryllis, Carbonation and Nethereed.
 
+**Cog & Cultivar vanilla tree (our own design, not AgriCraft's):** each child mixes its parents, and each mutation fires only when the cross frame recreates the child's habitat (conditions use tolerance 0, so stats never widen them). Hard-to-reach crops sit deepest, so breeding is a long alternative to exploring, not a shortcut. A parent pair may fork into two children when their habitats are mutually exclusive. Start: Wheat, Potato.
+
+| Child | Parents | Habitat |
+|---|---|---|
+| Beetroot | Wheat × Potato | damp soil or wetter |
+| Carrot / Brown Mushroom | Potato × Beetroot | light ≥ 10 + high nutrients / light ≤ 7 |
+| Sugar Cane / Bamboo | Wheat × Beetroot | flooded (mud) / wet soil in shade (light ≤ 11) |
+| Pumpkin | Carrot × Beetroot | very high nutrients (podzol) |
+| Melon | Pumpkin × Beetroot | light ≥ 13, wet or wetter |
+| Cactus | Sugar Cane × Pumpkin | arid (sand) |
+| Red Mushroom | Brown Mushroom × Beetroot | light ≤ 7 |
+| Cocoa | Bamboo × Pumpkin | light ≤ 11, wet or wetter |
+| Sweet Berries | Beetroot × Cactus | acidic (podzol) |
+| Glow Berries | Sweet Berries × Red Mushroom | light ≤ 5 |
+| Nether Wart | Red Mushroom × Cactus | dry + slightly alkaline (soul sand) |
+| Torchflower | Glow Berries × Pumpkin | light ≥ 14, 10 % |
+| Pitcher Plant | Torchflower × Sugar Cane | flooded, 10 % |
+
+Parents that can't grow in the child's habitat (e.g. potatoes in the dark) are bred for strength or moved in mature with the Transplanting Spade. Crop visuals for crops without a plain crop texture are block models under `models/crop/` that crop vanilla textures by UV, so any resource pack re-skins them.
+
+
 ---
 
 ### 2.6 Weeds

@@ -1,0 +1,44 @@
+{
+  "stages": 4,
+  "after_harvest_stage": 1,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:sweet_berries",
+  "products": [
+    {
+      "item": "minecraft:sweet_berries",
+      "min": 1,
+      "max": 3
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 8,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "equal",
+      "tolerance": 0.25
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_acidic",
+      "comparison": "at_most",
+      "tolerance": 0.15
+    }
+  ],
+  "render": {
+    "textures": [
+      "minecraft:block/sweet_berry_bush_stage0",
+      "minecraft:block/sweet_berry_bush_stage1",
+      "minecraft:block/sweet_berry_bush_stage2",
+      "minecraft:block/sweet_berry_bush_stage3"
+    ],
+    "shape": "cross"
+  }
+}

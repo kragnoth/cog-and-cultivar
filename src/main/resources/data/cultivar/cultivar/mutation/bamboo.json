@@ -1,0 +1,20 @@
+{
+  "parent_a": "minecraft:wheat",
+  "parent_b": "minecraft:beetroot",
+  "child": "minecraft:bamboo",
+  "chance": 0.4,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "comparison": "equal",
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 11,
+      "tolerance": 0
+    }
+  ]
+}

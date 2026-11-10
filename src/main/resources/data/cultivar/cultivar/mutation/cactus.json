@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:sugar_cane",
+  "parent_b": "minecraft:pumpkin",
+  "child": "minecraft:cactus",
+  "chance": 0.3,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "arid",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

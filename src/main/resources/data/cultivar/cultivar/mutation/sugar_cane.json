@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:wheat",
+  "parent_b": "minecraft:beetroot",
+  "child": "minecraft:sugar_cane",
+  "chance": 0.4,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "flooded",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

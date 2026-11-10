@@ -47,9 +47,21 @@ public final class CropTests {
     @GameTest(template = "empty")
     public static void starterDataLoaded(GameTestHelper h) {
         var access = h.getLevel().registryAccess();
-        h.assertTrue(access.registryOrThrow(CultivarRegistries.PLANT).size() >= 4, "vanilla plants loaded");
-        h.assertTrue(access.registryOrThrow(CultivarRegistries.SOIL).size() >= 2, "soils loaded");
-        h.assertTrue(access.registryOrThrow(CultivarRegistries.MUTATION).size() >= 2, "mutations loaded");
+        h.assertTrue(access.registryOrThrow(CultivarRegistries.PLANT).size() >= 17, "all vanilla crops loaded");
+        h.assertTrue(access.registryOrThrow(CultivarRegistries.SOIL).size() >= 6, "soils loaded");
+        h.assertTrue(access.registryOrThrow(CultivarRegistries.MUTATION).size() >= 15, "vanilla mutation tree loaded");
+        // Every parent pair forks only on habitat: two mutations sharing parents must not share conditions.
+        var mutations = access.registryOrThrow(CultivarRegistries.MUTATION).stream().toList();
+        for (int i = 0; i < mutations.size(); i++) {
+            for (int j = i + 1; j < mutations.size(); j++) {
+                var a = mutations.get(i);
+                var b = mutations.get(j);
+                if (a.matches(b.parentA(), b.parentB())) {
+                    h.assertTrue(!a.conditions().isEmpty() && !b.conditions().isEmpty(),
+                            "forked mutations of the same parents both need habitat conditions");
+                }
+            }
+        }
         h.assertTrue(access.registryOrThrow(CultivarRegistries.WEED).size() >= 1, "weeds loaded");
         h.succeed();
     }

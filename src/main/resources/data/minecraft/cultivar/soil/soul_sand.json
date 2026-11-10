@@ -1,0 +1,10 @@
+{
+  "blocks": [
+    "minecraft:soul_sand",
+    "minecraft:soul_soil"
+  ],
+  "humidity": "dry",
+  "acidity": "slightly_alkaline",
+  "nutrients": "low",
+  "growth_modifier": 0.9
+}

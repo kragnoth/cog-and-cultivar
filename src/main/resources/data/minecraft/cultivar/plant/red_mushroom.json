@@ -1,0 +1,41 @@
+{
+  "stages": 4,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:red_mushroom",
+  "products": [
+    {
+      "item": "minecraft:red_mushroom",
+      "min": 1,
+      "max": 2
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 7,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "medium",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "models": [
+      "cultivar:crop/red_mushroom_stage0",
+      "cultivar:crop/red_mushroom_stage1"
+    ],
+    "shape": "cross"
+  }
+}

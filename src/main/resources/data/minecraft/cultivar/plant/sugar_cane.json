@@ -1,0 +1,44 @@
+{
+  "stages": 4,
+  "after_harvest_stage": 1,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:sugar_cane",
+  "products": [
+    {
+      "item": "minecraft:sugar_cane",
+      "min": 1,
+      "max": 3
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 10,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "watery",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "medium",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "shape": "cross",
+    "models": [
+      "cultivar:crop/sugar_cane_stage0",
+      "cultivar:crop/sugar_cane_stage1",
+      "cultivar:crop/sugar_cane_stage2",
+      "cultivar:crop/sugar_cane_stage3"
+    ]
+  }
+}

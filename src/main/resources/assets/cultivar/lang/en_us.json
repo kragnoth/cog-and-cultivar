@@ -58,5 +58,18 @@
   "item.cultivar.assay_card.of": "Assay Card: %s",
   "item.cultivar.seed.unassayed": "Unassayed: stats unknown",
   "cultivar.assay.idle": "Idle: no seeds loaded",
-  "cultivar.assay.progress": "Assaying %s: %s%%"
+  "cultivar.assay.progress": "Assaying %s: %s%%",
+  "plant.minecraft.pumpkin": "Pumpkin",
+  "plant.minecraft.melon": "Melon",
+  "plant.minecraft.sugar_cane": "Sugar Cane",
+  "plant.minecraft.bamboo": "Bamboo",
+  "plant.minecraft.cactus": "Cactus",
+  "plant.minecraft.cocoa": "Cocoa",
+  "plant.minecraft.sweet_berries": "Sweet Berries",
+  "plant.minecraft.glow_berries": "Glow Berries",
+  "plant.minecraft.nether_wart": "Nether Wart",
+  "plant.minecraft.brown_mushroom": "Brown Mushroom",
+  "plant.minecraft.red_mushroom": "Red Mushroom",
+  "plant.minecraft.torchflower": "Torchflower",
+  "plant.minecraft.pitcher_plant": "Pitcher Plant"
 }

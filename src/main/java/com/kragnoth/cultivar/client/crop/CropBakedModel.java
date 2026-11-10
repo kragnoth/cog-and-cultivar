@@ -9,7 +9,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +25,8 @@ import net.neoforged.neoforge.client.model.data.ModelProperty;
 import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +41,13 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
     private static final ModelProperty<Visual> VISUAL = new ModelProperty<>();
 
     /** What to draw inside the frame; either part may be null. */
-    private record Visual(@Nullable ResourceLocation plant, PlantRender.Shape shape, @Nullable ResourceLocation weed) {}
+    private record Visual(@Nullable ResourceLocation plant, PlantRender.Shape shape, boolean model, @Nullable ResourceLocation weed) {}
 
     private record Key(ResourceLocation texture, PlantRender.Shape shape) {}
 
     private final Map<Key, List<BakedQuad>> cache = new ConcurrentHashMap<>();
+    private final Map<ResourceLocation, List<BakedQuad>> modelCache = new ConcurrentHashMap<>();
+    private final Map<ResourceLocation, Boolean> greyscale = new ConcurrentHashMap<>();
 
     public CropBakedModel(BakedModel original) {
         super(original);
@@ -54,12 +60,14 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
         }
         ResourceLocation plantTex = null;
         PlantRender.Shape shape = PlantRender.Shape.HASH;
+        boolean model = false;
         Genome genome = crop.genome();
         if (genome != null) {
             Plant plant = genome.species().value();
             if (plant.render().isPresent()) {
                 PlantRender render = plant.render().get();
-                plantTex = render.textureFor(crop.stage(), plant.stages());
+                model = render.usesModels();
+                plantTex = model ? render.modelFor(crop.stage(), plant.stages()) : render.textureFor(crop.stage(), plant.stages());
                 shape = render.shape();
             }
         }
@@ -74,7 +82,7 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
         if (plantTex == null && weedTex == null) {
             return modelData;
         }
-        return modelData.derive().with(VISUAL, new Visual(plantTex, shape, weedTex)).build();
+        return modelData.derive().with(VISUAL, new Visual(plantTex, shape, model, weedTex)).build();
     }
 
     @Override
@@ -86,13 +94,66 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
             return base;
         }
         List<BakedQuad> out = new ArrayList<>(base);
-        if (visual.plant() != null) {
+        if (visual.plant() != null && visual.model()) {
+            out.addAll(modelCache.computeIfAbsent(visual.plant(), this::bakeModel));
+        } else if (visual.plant() != null) {
             out.addAll(cache.computeIfAbsent(new Key(visual.plant(), visual.shape()), CropBakedModel::bake));
         }
         if (visual.weed() != null) {
             out.addAll(cache.computeIfAbsent(new Key(visual.weed(), PlantRender.Shape.HASH), CropBakedModel::bake));
         }
         return out;
+    }
+
+    // ---------------------------------------------------------------- crop models
+
+    /** Model ids registered by {@link CropClientModule}: everything under {@code models/crop/}. */
+    public static ModelResourceLocation modelLocation(ResourceLocation id) {
+        return ModelResourceLocation.standalone(id);
+    }
+
+    private List<BakedQuad> bakeModel(ResourceLocation id) {
+        BakedModel model = Minecraft.getInstance().getModelManager().getModel(modelLocation(id));
+        RandomSource rand = RandomSource.create(42L);
+        List<BakedQuad> quads = new ArrayList<>();
+        for (BakedQuad q : model.getQuads(null, null, rand, ModelData.EMPTY, null)) {
+            quads.add(q);
+        }
+        for (Direction d : Direction.values()) {
+            quads.addAll(model.getQuads(null, d, rand, ModelData.EMPTY, null));
+        }
+        // Drop the tint where the pack already coloured the texture, so it isn't tinted twice.
+        quads.replaceAll(q -> q.isTinted() && !isGreyscale(q.getSprite())
+                ? new BakedQuad(q.getVertices(), -1, q.getDirection(), q.getSprite(), q.isShade(), q.hasAmbientOcclusion())
+                : q);
+        return List.copyOf(quads);
+    }
+
+    private boolean isGreyscale(TextureAtlasSprite sprite) {
+        return greyscale.computeIfAbsent(sprite.contents().name(), name -> {
+            ResourceLocation file = name.withPath(p -> "textures/" + p + ".png");
+            var resource = Minecraft.getInstance().getResourceManager().getResource(file);
+            if (resource.isEmpty()) {
+                return true;
+            }
+            try (InputStream in = resource.get().open(); NativeImage image = NativeImage.read(in)) {
+                long spread = 0, count = 0;
+                for (int y = 0; y < image.getHeight(); y++) {
+                    for (int x = 0; x < image.getWidth(); x++) {
+                        int abgr = image.getPixelRGBA(x, y);
+                        if ((abgr >>> 24) < 16) {
+                            continue;
+                        }
+                        int r = abgr & 0xFF, g = (abgr >> 8) & 0xFF, b = (abgr >> 16) & 0xFF;
+                        spread += Math.max(r, Math.max(g, b)) - Math.min(r, Math.min(g, b));
+                        count++;
+                    }
+                }
+                return count == 0 || spread / count < 16;
+            } catch (IOException e) {
+                return true;
+            }
+        });
     }
 
     // ---------------------------------------------------------------- quad building

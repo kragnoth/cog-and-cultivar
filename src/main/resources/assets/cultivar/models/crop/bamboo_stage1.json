@@ -1,0 +1,146 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "minecraft:block/bamboo_stalk",
+    "stalk": "minecraft:block/bamboo_stalk",
+    "leaves": "minecraft:block/bamboo_small_leaves"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        10,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stalk",
+          "uv": [
+            0,
+            6,
+            2,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#stalk",
+          "uv": [
+            0,
+            6,
+            2,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#stalk",
+          "uv": [
+            0,
+            6,
+            2,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#stalk",
+          "uv": [
+            0,
+            6,
+            2,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0.7999999999999998,
+        1,
+        8
+      ],
+      "to": [
+        15.2,
+        10,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            9
+          ],
+          "texture": "#leaves"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            9
+          ],
+          "texture": "#leaves"
+        }
+      }
+    },
+    {
+      "from": [
+        0.7999999999999998,
+        1,
+        8
+      ],
+      "to": [
+        15.2,
+        10,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            9
+          ],
+          "texture": "#leaves"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            9
+          ],
+          "texture": "#leaves"
+        }
+      }
+    }
+  ]
+}

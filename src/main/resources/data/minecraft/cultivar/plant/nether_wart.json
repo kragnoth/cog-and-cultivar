@@ -1,0 +1,42 @@
+{
+  "stages": 4,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:nether_wart",
+  "products": [
+    {
+      "item": "minecraft:nether_wart",
+      "min": 2,
+      "max": 4
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 15,
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "equal",
+      "tolerance": 0.2
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_alkaline",
+      "comparison": "equal",
+      "tolerance": 0.2
+    }
+  ],
+  "render": {
+    "textures": [
+      "minecraft:block/nether_wart_stage0",
+      "minecraft:block/nether_wart_stage1",
+      "minecraft:block/nether_wart_stage2"
+    ],
+    "shape": "hash"
+  }
+}

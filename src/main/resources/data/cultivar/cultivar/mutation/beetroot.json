@@ -1,1 +1,14 @@
-{ "parent_a": "minecraft:carrot", "parent_b": "minecraft:wheat", "child": "minecraft:beetroot", "chance": 0.5 }
+{
+  "parent_a": "minecraft:wheat",
+  "parent_b": "minecraft:potato",
+  "child": "minecraft:beetroot",
+  "chance": 0.5,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "at_least",
+      "tolerance": 0
+    }
+  ]
+}

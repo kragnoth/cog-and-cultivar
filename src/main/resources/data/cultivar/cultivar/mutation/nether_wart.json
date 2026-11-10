@@ -1,0 +1,20 @@
+{
+  "parent_a": "minecraft:red_mushroom",
+  "parent_b": "minecraft:cactus",
+  "child": "minecraft:nether_wart",
+  "chance": 0.2,
+  "conditions": [
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "equal",
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_alkaline",
+      "comparison": "equal",
+      "tolerance": 0
+    }
+  ]
+}

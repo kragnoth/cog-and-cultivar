@@ -200,3 +200,4 @@ for y in range(4, 12, 2):
         card.putpixel((11, y), BRASS[1])
 card.save(f'{OUT}/item/assay_card.png')
 print('assay card ok')
+

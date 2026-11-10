@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:sweet_berries",
+  "parent_b": "minecraft:red_mushroom",
+  "child": "minecraft:glow_berries",
+  "chance": 0.2,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 5,
+      "tolerance": 0
+    }
+  ]
+}

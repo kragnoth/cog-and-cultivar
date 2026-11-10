@@ -1,0 +1,42 @@
+{
+  "stages": 3,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:torchflower_seeds",
+  "products": [
+    {
+      "item": "minecraft:torchflower",
+      "min": 1,
+      "max": 1
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 12,
+      "max": 15,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "comparison": "equal",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "high",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "textures": [
+      "minecraft:block/torchflower_crop_stage0",
+      "minecraft:block/torchflower_crop_stage1",
+      "minecraft:block/torchflower"
+    ],
+    "shape": "cross"
+  }
+}

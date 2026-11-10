@@ -1,0 +1,14 @@
+{
+  "parent_a": "minecraft:beetroot",
+  "parent_b": "minecraft:cactus",
+  "child": "minecraft:sweet_berries",
+  "chance": 0.3,
+  "conditions": [
+    {
+      "type": "cultivar:acidity",
+      "value": "acidic",
+      "comparison": "at_most",
+      "tolerance": 0
+    }
+  ]
+}

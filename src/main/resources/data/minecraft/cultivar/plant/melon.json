@@ -1,0 +1,43 @@
+{
+  "stages": 8,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "minecraft:melon_seeds",
+  "products": [
+    {
+      "item": "minecraft:melon_slice",
+      "min": 2,
+      "max": 5
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 12,
+      "max": 15,
+      "tolerance": 0.3
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "high",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "shape": "cross",
+    "models": [
+      "cultivar:crop/melon_stage0",
+      "cultivar:crop/melon_stage1",
+      "cultivar:crop/melon_stage2",
+      "cultivar:crop/melon_stage3"
+    ]
+  }
+}
