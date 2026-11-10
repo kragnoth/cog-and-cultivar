@@ -1,0 +1,23 @@
+{
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "cultivar:derelict_conservatory/greenhouse",
+        "projection": "rigid",
+        "processors": "cultivar:derelict_decay"
+      }
+    },
+    {
+      "weight": 2,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "cultivar:derelict_conservatory/lean_to",
+        "projection": "rigid",
+        "processors": "cultivar:derelict_decay"
+      }
+    }
+  ]
+}
