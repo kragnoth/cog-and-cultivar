@@ -2,10 +2,10 @@ package com.kragnoth.cultivar.gametest;
 
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.api.influence.InfluenceEffects;
-import com.kragnoth.cultivar.content.cloche.ClocheModule;
 import com.kragnoth.cultivar.content.core.influence.HoneyLevelScaling;
 import com.kragnoth.cultivar.content.core.influence.InfluenceLookup;
 import com.kragnoth.cultivar.content.crop.CropModule;
+import com.kragnoth.cultivar.content.crop.TrellisBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -53,8 +53,7 @@ public final class InfluenceTests {
     @GameTest(template = "empty")
     public static void clocheAboveCrop(GameTestHelper h) {
         BlockPos crop = new BlockPos(0, 1, 0);
-        h.setBlock(crop, CropModule.TIMBER_TRELLIS.get());
-        h.setBlock(crop.above(), ClocheModule.BELL_CLOCHE.get());
+        h.setBlock(crop, CropModule.TIMBER_TRELLIS.get().defaultBlockState().setValue(TrellisBlock.CLOCHE, true));
         InfluenceEffects fx = InfluenceLookup.compute(h.getLevel(), h.absolutePos(crop));
         near(h, fx.growthMultiplier(), 1.1, "cloche growth");
         near(h, fx.weedMultiplier(), 0.5, "cloche weed suppression");
