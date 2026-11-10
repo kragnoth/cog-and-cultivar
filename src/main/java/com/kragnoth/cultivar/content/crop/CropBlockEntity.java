@@ -450,12 +450,21 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
 
     // ---------------------------------------------------------------- ticking
 
+    /** On an ideal soil host (Trial Bed): requirements, weeds and mutation habitats are ignored. */
+    public boolean onIdealHost() {
+        if (level == null) {
+            return false;
+        }
+        BlockPos below = worldPosition.below();
+        return level.getBlockState(below).getBlock() instanceof com.kragnoth.cultivar.api.soil.SoilHost host && host.isIdeal(level, below);
+    }
+
     public void randomTick(ServerLevel level, RandomSource random) {
         if (isSegment()) {
             return; // upper segments are scaffolding for the plant rooted below
         }
         InfluenceEffects fx = influence();
-        if (tickWeeds(level, random, fx)) {
+        if (!onIdealHost() && tickWeeds(level, random, fx)) {
             return;
         }
         if (isCross()) {
@@ -518,6 +527,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         Optional<Soil> soil = soil();
         int strength = stat(CoreModule.STRENGTH.getKey()) + tier().strengthBonus();
         GrowthResponse response = soil.isEmpty() ? GrowthResponse.INFERTILE
+                : onIdealHost() ? GrowthResponse.FERTILE
                 : GrowthCondition.testAll(requirements(), growthContext(soil), strength);
         switch (response) {
             case KILL -> {
@@ -560,7 +570,8 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         GrowthContext ctx = growthContext(soil());
         var settings = new BreedingEngine.Settings(CultivarServerConfig.STAT_EXPRESSION.get(), fx,
                 CultivarServerConfig.CLONE_MUTATIONS.get());
-        BreedingEngine.breed(parents, mutations, m -> GrowthCondition.testAll(m.conditions(), ctx, 1).canGrow(), settings, random)
+        boolean ideal = onIdealHost();
+        BreedingEngine.breed(parents, mutations, m -> ideal || GrowthCondition.testAll(m.conditions(), ctx, 1).canGrow(), settings, random)
                 .ifPresent(child -> {
                     level.setBlock(worldPosition, getBlockState().setValue(TrellisBlock.CROSS, false), Block.UPDATE_ALL);
                     genome = child;

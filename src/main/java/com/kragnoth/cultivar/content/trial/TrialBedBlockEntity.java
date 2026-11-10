@@ -38,8 +38,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 /**
- * Trial Bed: touching Trial Beds form a trial plot that cross-tests the seeds it's fed, with every limiter removed
- * (no soil, light, habitat or growing). Every {@code intervalMinutes} the plot rolls
+ * Trial Bed: touching Trial Beds form a trial plot that grows and cross-tests the seeds it's fed, with every limiter
+ * removed (the bed is an ideal soil host: requirements, weeds and mutation habitats are ignored).
+ * <p>Each bed sets up its own free trellis in a checkerboard: <b>producer</b> squares plant random stocked species
+ * (spending a seed), hold them mature for a while so they can parent, then rotate to another species;
+ * <b>frame</b> squares are grafting frames. When a frame breeds a child of a new species from its neighbours, the
+ * mutation is recorded in the plot's Ledger and the frame is cleared and re-armed.
+ * <p>Bonus: every {@code intervalMinutes} the plot also rolls
  * {@code chance × min(1, beds / fullSize)}: on success it picks a random mutation whose two parents are both
  * stocked and that the plot's Ledger doesn't fully know yet, records parents and child in the Ledger (so the
  * recipe shows there), and spends one seed of each parent. Inputs: seeds and a Ledger. Output: the Ledger.
@@ -104,6 +109,8 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
     };
 
     private int timer;
+    private int cooldown;
+    private int heldCycles;
     private boolean needsSync;
     private List<TrialBedBlockEntity> plot;
     private long plotTick = Long.MIN_VALUE;
@@ -219,6 +226,10 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
             needsSync = false;
             server.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
+        if (--cooldown <= 0) {
+            cooldown = 10;
+            work(server, server.random);
+        }
         if (server.getGameTime() % 20 != 0 || !isLeader()) {
             return;
         }
@@ -229,7 +240,113 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
     }
 
-    /** One discovery roll; public so game tests can drive it. Returns the mutation found, if any. */
+    /** Producer squares on even (x + z), grafting frames on odd. */
+    public boolean isFrameSquare() {
+        return ((worldPosition.getX() + worldPosition.getZ()) & 1) == 1;
+    }
+
+    /** One growing cycle for this bed's square; public so game tests can drive it. */
+    public void work(ServerLevel server, RandomSource random) {
+        BlockPos above = worldPosition.above();
+        BlockState there = server.getBlockState(above);
+        if (there.canBeReplaced() && server.getFluidState(above).isEmpty()) {
+            server.setBlock(above, com.kragnoth.cultivar.content.crop.CropModule.TIMBER_TRELLIS.get().defaultBlockState()
+                    .setValue(TrellisBlock.CROSS, isFrameSquare()), Block.UPDATE_ALL);
+            return;
+        }
+        if (!(server.getBlockEntity(above) instanceof com.kragnoth.cultivar.content.crop.CropBlockEntity crop) || crop.isSegment()) {
+            return;
+        }
+        if (isFrameSquare()) {
+            if (crop.isCross()) {
+                if (random.nextInt(4) == 0) {
+                    there.randomTick(server, above, random); // extra breeding attempts
+                }
+                return;
+            }
+            if (crop.hasPlant()) {
+                // A child was born: was it a mutation? Record it, then clear and re-arm the frame.
+                recordIfMutation(server, crop);
+                crop.uproot();
+            }
+            server.setBlock(above, server.getBlockState(above).setValue(TrellisBlock.CROSS, true), Block.UPDATE_ALL);
+            return;
+        }
+        if (!crop.hasPlant()) {
+            plantRandom(crop, random);
+            return;
+        }
+        if (crop.isMature()) {
+            if (heldCycles++ >= CultivarServerConfig.TRIAL_HOLD_CYCLES.get()) {
+                heldCycles = 0;
+                crop.uproot();
+                plantRandom(crop, random); // rotate to test new pairs
+            }
+            return;
+        }
+        if (random.nextInt(8) == 0) {
+            there.randomTick(server, above, random); // research rigs grow briskly
+        }
+    }
+
+    private void plantRandom(com.kragnoth.cultivar.content.crop.CropBlockEntity crop, RandomSource random) {
+        List<int[]> options = new ArrayList<>();
+        List<TrialBedBlockEntity> beds = plot();
+        for (int b = 0; b < beds.size(); b++) {
+            for (int i = 0; i < SEED_SLOTS; i++) {
+                if (!beds.get(b).inventory.getStackInSlot(i).isEmpty()) {
+                    options.add(new int[]{b, i});
+                }
+            }
+        }
+        if (options.isEmpty()) {
+            return;
+        }
+        int[] pick = options.get(random.nextInt(options.size()));
+        TrialBedBlockEntity bed = beds.get(pick[0]);
+        TrellisBlock.genomeFor(bed.inventory.getStackInSlot(pick[1]), level).ifPresent(g -> {
+            if (crop.plant(g)) {
+                bed.inventory.extractItem(pick[1], 1, false);
+            }
+        });
+    }
+
+    private void recordIfMutation(ServerLevel server, com.kragnoth.cultivar.content.crop.CropBlockEntity child) {
+        ItemStack ledger = ledger();
+        if (ledger == null || child.genome() == null) {
+            return;
+        }
+        Set<ResourceKey<Plant>> neighbours = new HashSet<>();
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            if (server.getBlockEntity(child.getBlockPos().relative(d)) instanceof com.kragnoth.cultivar.content.crop.CropBlockEntity n
+                    && n.genome() != null) {
+                n.genome().species().unwrapKey().ifPresent(neighbours::add);
+            }
+        }
+        var childKey = child.genome().species().unwrapKey();
+        if (childKey.isEmpty() || neighbours.contains(childKey.get())) {
+            return; // an ordinary cross, not a mutation
+        }
+        for (Mutation m : server.registryAccess().registryOrThrow(CultivarRegistries.MUTATION)) {
+            var a = m.parentA().unwrapKey();
+            var b = m.parentB().unwrapKey();
+            if (m.child().is(childKey.get()) && a.isPresent() && b.isPresent()
+                    && neighbours.contains(a.get()) && neighbours.contains(b.get())) {
+                LedgerItem.record(ledger, a.get());
+                LedgerItem.record(ledger, b.get());
+                LedgerItem.record(ledger, childKey.get());
+                for (TrialBedBlockEntity bed : plot()) {
+                    bed.needsSync = true;
+                }
+                BlockPos p = child.getBlockPos();
+                server.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 10, 0.3, 0.3, 0.3, 0);
+                server.playSound(null, p, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1f, 1.4f);
+                return;
+            }
+        }
+    }
+
+    /** Bonus discovery roll; public so game tests can drive it. Returns the mutation found, if any. */
     public Optional<Mutation> roll(ServerLevel server, RandomSource random, double chance) {
         if (random.nextDouble() >= chance) {
             return Optional.empty();
