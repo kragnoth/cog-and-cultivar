@@ -93,8 +93,9 @@ shipped files under `data/minecraft/cultivar/` in the mod jar.
 
 - **Habitat conditions** on mutations use tolerance 0, so a high Strength stat never widens them. Players have to
   build the habitat.
-- **Water** beside a soil block makes it one humidity step wetter, and dry farmland reads one step drier. Mud is
-  flooded.
+- **Water** beside a soil block makes it one humidity step wetter, a Bell Cloche one more, and a lit heat source
+  beside or under it one step drier (add blocks to `#cultivar:soil_heaters`). Steps add up. With no water or heat,
+  dry farmland reads one step drier. Mud is flooded; coarse dirt is dry.
 - **Resource crops** are ordinary plants: copy one of `data/cultivar/cultivar/plant/ferrous_bloom.json`, point its product
   at your metal's crushed ore (or nugget) and add a mutation. Give it a `chance` below 1 to keep yields modest.
 - **Knowledge** belongs to each player and is filled from Botanical Ledgers. JEI's Crossbreeding category only

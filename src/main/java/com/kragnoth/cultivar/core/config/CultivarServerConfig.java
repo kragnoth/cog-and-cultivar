@@ -52,7 +52,9 @@ public final class CultivarServerConfig {
                 .defineInRange("growthMultiplier", 1.0, 0.0, 10.0);
         WEEDS_ENABLED = b.comment("Whether blight/weeds can spawn on crops.")
                 .define("weedsEnabled", true);
-        WATER_SHIFTS_HUMIDITY = b.comment("Water beside a soil block makes it one humidity step wetter; dry farmland reads one step drier.")
+        WATER_SHIFTS_HUMIDITY = b.comment("Water beside a soil block makes it one humidity step wetter, and a lit heat source beside or under it",
+                        "(#cultivar:soil_heaters) one step drier; a Bell Cloche adds one more wet step. Steps add up.",
+                        "With no water or heat, dry farmland reads one step drier.")
                 .define("waterShiftsHumidity", true);
         b.pop();
 
