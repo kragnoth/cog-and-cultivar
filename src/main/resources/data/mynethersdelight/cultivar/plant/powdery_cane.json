@@ -1,0 +1,49 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mynethersdelight"
+    }
+  ],
+  "stages": 6,
+  "height": 3,
+  "after_harvest_stage": 1,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "mynethersdelight:powder_cannon",
+  "products": [
+    {
+      "item": "mynethersdelight:powder_cannon",
+      "min": 1,
+      "max": 2
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "equal",
+      "tolerance": 0.2
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_alkaline",
+      "comparison": "equal",
+      "tolerance": 0.2
+    }
+  ],
+  "render": {
+    "textures": [
+      "mynethersdelight:block/powdery_cannon_stage0",
+      "mynethersdelight:block/powdery_cannon_small_leaves",
+      "mynethersdelight:block/powdery_cannon_large_leaves"
+    ],
+    "top": [
+      "mynethersdelight:block/powdery_cannon_small_leaves",
+      "mynethersdelight:block/powdery_cannon_large_leaves",
+      "mynethersdelight:block/powdery_cannon_large_leaves_bloomed"
+    ],
+    "shape": "cross"
+  }
+}

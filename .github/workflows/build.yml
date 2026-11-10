@@ -41,8 +41,12 @@ jobs:
             exit 1
           fi
 
-      - name: Dedicated server game tests
+      - name: Dedicated server game tests (with optional compat mods)
         run: ./gradlew runGameTestServer --no-daemon $CREATE
+
+      - name: Dedicated server game tests (without optional compat mods)
+        if: matrix.create == '6.0.10-281'
+        run: ./gradlew runGameTestServer --no-daemon $CREATE -Pwith_delight=false
 
       - uses: actions/upload-artifact@v5
         if: matrix.create == '6.0.10-281'

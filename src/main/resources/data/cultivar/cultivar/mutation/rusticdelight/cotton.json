@@ -1,0 +1,20 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "rusticdelight"
+    }
+  ],
+  "parent_a": "minecraft:wheat",
+  "parent_b": "minecraft:cactus",
+  "child": "rusticdelight:cotton",
+  "chance": 0.3,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 13,
+      "max": 15,
+      "tolerance": 0
+    }
+  ]
+}

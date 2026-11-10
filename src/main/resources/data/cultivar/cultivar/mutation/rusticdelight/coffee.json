@@ -1,0 +1,26 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "rusticdelight"
+    }
+  ],
+  "parent_a": "minecraft:cocoa",
+  "parent_b": "minecraft:sweet_berries",
+  "child": "rusticdelight:coffee",
+  "chance": 0.25,
+  "conditions": [
+    {
+      "type": "cultivar:light",
+      "min": 0,
+      "max": 11,
+      "tolerance": 0
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "wet",
+      "comparison": "at_least",
+      "tolerance": 0
+    }
+  ]
+}

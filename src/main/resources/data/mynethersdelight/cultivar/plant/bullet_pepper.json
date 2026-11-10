@@ -1,0 +1,43 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mynethersdelight"
+    }
+  ],
+  "stages": 4,
+  "after_harvest_stage": 1,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "mynethersdelight:bullet_pepper",
+  "products": [
+    {
+      "item": "mynethersdelight:bullet_pepper",
+      "min": 1,
+      "max": 2
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:humidity",
+      "value": "dry",
+      "comparison": "equal",
+      "tolerance": 0.2
+    },
+    {
+      "type": "cultivar:acidity",
+      "value": "slightly_alkaline",
+      "comparison": "equal",
+      "tolerance": 0.2
+    }
+  ],
+  "render": {
+    "textures": [
+      "mynethersdelight:block/powdery_top",
+      "mynethersdelight:block/powdery_top_leaves",
+      "mynethersdelight:block/powdery_top_bloomed"
+    ],
+    "shape": "cross"
+  }
+}

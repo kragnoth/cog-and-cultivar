@@ -87,6 +87,16 @@ dependencies {
     compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+
+    // Farmer's Delight and its crop add-ons: optional. Their Cultivar data only loads when they're present
+    // (neoforge:conditions). They're in the dev runtime by default; -Pwith_delight=false tests the absent path.
+    compileOnly "maven.modrinth:farmers-delight:${farmers_delight_version}"
+    if (project.findProperty('with_delight') != 'false') {
+        runtimeOnly "maven.modrinth:farmers-delight:${farmers_delight_version}"
+        runtimeOnly "maven.modrinth:expanded-delight:${expanded_delight_version}"
+        runtimeOnly "maven.modrinth:rustic-delight:${rustic_delight_version}"
+        runtimeOnly "maven.modrinth:my-nethers-delight:${my_nethers_delight_version}"
+    }
     runtimeOnly "dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}"
 }
 

@@ -74,5 +74,21 @@
   "plant.minecraft.pitcher_plant": "Pitcher Plant",
   "commands.cultivar.export.done": "Exported %s crops (%s not yet covered by a Cultivar plant) to %s",
   "commands.cultivar.export.failed": "Export failed: %s",
-  "cultivar.info.needs_segments": "Needs %s more trellis stacked above"
+  "cultivar.info.needs_segments": "Needs %s more trellis stacked above",
+  "plant.farmersdelight.cabbage": "Cabbage",
+  "plant.farmersdelight.onion": "Onion",
+  "plant.farmersdelight.tomato": "Tomato",
+  "plant.farmersdelight.rice": "Rice",
+  "plant.expandeddelight.asparagus": "Asparagus",
+  "plant.expandeddelight.sweet_potato": "Sweet Potato",
+  "plant.expandeddelight.chili_pepper": "Chili Pepper",
+  "plant.expandeddelight.peanut": "Peanut",
+  "plant.expandeddelight.cranberries": "Cranberries",
+  "plant.rusticdelight.cotton": "Cotton",
+  "plant.rusticdelight.bell_pepper": "Bell Pepper",
+  "plant.rusticdelight.pale_bell_pepper": "Pale Bell Pepper",
+  "plant.rusticdelight.dark_bell_pepper": "Dark Bell Pepper",
+  "plant.rusticdelight.coffee": "Coffee",
+  "plant.mynethersdelight.bullet_pepper": "Bullet Pepper",
+  "plant.mynethersdelight.powdery_cane": "Powdery Cane"
 }

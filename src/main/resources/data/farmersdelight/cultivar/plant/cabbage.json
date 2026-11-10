@@ -1,0 +1,53 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    }
+  ],
+  "stages": 8,
+  "growth_chance": 0.75,
+  "growth_bonus": 0.025,
+  "spread_chance": 0.1,
+  "seeds": "farmersdelight:cabbage_seeds",
+  "products": [
+    {
+      "item": "farmersdelight:cabbage",
+      "min": 1,
+      "max": 1
+    }
+  ],
+  "requirements": [
+    {
+      "type": "cultivar:light",
+      "min": 9,
+      "max": 14,
+      "tolerance": 0.5
+    },
+    {
+      "type": "cultivar:humidity",
+      "value": "damp",
+      "comparison": "at_least",
+      "tolerance": 0.15
+    },
+    {
+      "type": "cultivar:nutrients",
+      "value": "high",
+      "comparison": "at_least",
+      "tolerance": 0.1
+    }
+  ],
+  "render": {
+    "textures": [
+      "farmersdelight:block/cabbages_stage0",
+      "farmersdelight:block/cabbages_stage1",
+      "farmersdelight:block/cabbages_stage2",
+      "farmersdelight:block/cabbages_stage3",
+      "farmersdelight:block/cabbages_stage4",
+      "farmersdelight:block/cabbages_stage5",
+      "farmersdelight:block/cabbages_stage6",
+      "farmersdelight:block/cabbages_stage7"
+    ],
+    "shape": "hash"
+  }
+}
