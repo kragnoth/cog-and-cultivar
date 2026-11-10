@@ -243,5 +243,21 @@
   "commands.cultivar.knowledge.granted": "Taught %s species to %s player(s)",
   "commands.cultivar.knowledge.revoked": "Removed %s species from %s player(s)",
   "commands.cultivar.knowledge.list": "%s knows %s of %s species:",
-  "commands.cultivar.knowledge.unknown": "Unknown plant: %s"
+  "commands.cultivar.knowledge.unknown": "Unknown plant: %s",
+  "jei.cultivar.assaying": "Assaying",
+  "jei.cultivar.assaying.ledger": "Optional: a Ledger in the engine records each species it assays",
+  "jei.cultivar.assaying.rotation": "Needs rotation from below",
+  "jei.cultivar.soil": "Soils",
+  "jei.cultivar.soil.growth": "Growth ×%s",
+  "jei.cultivar.soil.shifts": "Water +1, cloche +1, heat −1 humidity",
+  "jei.cultivar.fertilizer": "Fertilizers",
+  "jei.cultivar.fertilizer.potency": "%s growth tick(s) per use",
+  "jei.cultivar.fertilizer.mutation": "Can trigger a cross",
+  "jei.cultivar.fertilizer.weeds": "Can spread blight",
+  "jei.cultivar.info.trellis": "Plant seeds on a trellis standing on soil. The soil sets humidity, acidity and nutrients (see Soils). Humidity shifts one step wetter with water beside the soil or a Bell Cloche on the trellis, and one step drier with a lit heat source (Blaze Burner, campfire, magma block) beside or under it. To cross plants, right-click an empty trellis with another trellis to make a grafting frame: mature crops beside it become its parents.",
+  "jei.cultivar.info.bell_cloche": "Place it on a trellis: the crop grows 10% faster, its soil is one humidity step wetter, and no new blight takes root. Lift it off with an empty hand.",
+  "jei.cultivar.info.botanical_ledger": "Your botanical knowledge belongs to you; the Ledger is how it moves. Record a planted crop with it, or let an Assaying Engine or Trial Bed fill it. Carrying or reading a Ledger teaches you what it holds and copies what you know into it. Crosses appear in JEI once you know both parents and the child.",
+  "jei.cultivar.info.planter_bed": "A self-contained growing station. Touching beds form one plot that shares water, seeds and output. Feed seeds, fertilizer, trellises and Bell Cloches by pipe or hopper; it plants, grows and keeps its best seeds, and offers crops for extraction. A redstone signal strips the plot and dumps everything for collection.",
+  "jei.cultivar.info.trial_bed": "A research plot. Touching trial beds grow the seeds they are fed on a checkerboard of trellises with every habitat limit removed, and record each real cross into the Ledger in their slot. Now and then they also discover an untested cross outright. A redstone signal pauses the plot and returns its seeds.",
+  "jei.cultivar.info.sprinkler": "Mount it on any fluid pipe and feed it water. While it has water it gives nearby crops extra growth, sometimes a bone-meal pulse, and keeps farmland moist. A redstone signal stops it."
 }

@@ -74,6 +74,9 @@ python3 cultivar_scaffold.py check crops.json --pack cultivar_scaffold
 The check reports:
 
 - mutations that name unknown plants
+- crosses that can't be bred on plain trellises at base stats (warning only): the parents and the grafting frame
+  sit side by side and share light, so a dark-only and a bright-only parent never work together. Each plant has
+  its own soil, which heat, water and a Bell Cloche can shift
 - forks where a child has no habitat conditions
 - the roots of your tree (plants players must find rather than breed)
 - crops that still have no plant

@@ -105,8 +105,10 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   gunpowder, iron nuggets, amethyst); every ore and gem now sits at least four crosses from vanilla.
 - 2026-11-10: per-player knowledge (Ledgers merge with their holder both ways; kept through death), JEI
   Crossbreeding category hidden until known (`genetics.revealAllMutations` to show all), info pages for bred
-  plants, Cutting subtype, `/cultivar knowledge` commands. Still open from item 5: Assaying Engine, fertilizer and
-  soil categories; bed and Sprinkler info pages.
+  plants, Cutting subtype, `/cultivar knowledge` commands. Rest of item 5 done the same day (see below).
 - 2026-11-10: Bell Cloche +1 humidity; heat sources (`#cultivar:soil_heaters`) dry soil one step; coarse dirt soil.
 - 2026-11-10: every cross breedable on plain trellises at base stats (shared-light rule, twilight band);
   `tools/data/check_crosses.py` runs in CI.
+- 2026-11-10: JEI finished: Soils (humidity/acidity/nutrients/growth, shift note), Fertilizers, Assaying (seed →
+  assayed seed, optional Ledger), info pages for trellises, Bell Cloche, Ledger, Planter Bed, Trial Bed, Sprinkler.
+  The pack-maker `check` warns about crosses that can't be bred on plain trellises.

@@ -13,7 +13,19 @@ import com.kragnoth.cultivar.content.ledger.LedgerModule;
 import com.kragnoth.cultivar.content.tools.ToolsModule;
 import com.kragnoth.cultivar.content.trial.TrialModule;
 import com.kragnoth.cultivar.core.config.CultivarServerConfig;
+import com.kragnoth.cultivar.api.plant.Fertilizer;
+import com.kragnoth.cultivar.api.soil.Soil;
+import com.kragnoth.cultivar.content.assay.AssayModule;
+import com.kragnoth.cultivar.content.bed.PlanterBedModule;
+import com.kragnoth.cultivar.content.cloche.ClocheModule;
+import com.kragnoth.cultivar.content.irrigation.IrrigationModule;
 import java.util.ArrayList;
+import java.util.Locale;
+import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.recipe.RecipeType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +52,7 @@ import org.jetbrains.annotations.Nullable;
  *   <li>Crosses are a category, each hidden until the player knows the child and both parents (the same rule as the
  *       Ledger), so JEI never spoils discovery. {@code genetics.revealAllMutations} shows them all.</li>
  *   <li>Every bred plant gets an info page saying how it is found.</li>
+ *   <li>Reference pages that spoil nothing: soils, fertilizers, the Assaying Engine; info pages for the machines.</li>
  * </ul>
  */
 @JeiPlugin
@@ -73,9 +86,57 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.registerSubtypeInterpreter(ToolsModule.CUTTING.get(), bySpecies);
     }
 
+    record SoilPage(Soil soil) {}
+
+    record FertilizerPage(Fertilizer fertilizer) {}
+
+    static final RecipeType<SoilPage> SOILS = RecipeType.create(Cultivar.MOD_ID, "soil", SoilPage.class);
+    static final RecipeType<FertilizerPage> FERTILIZERS = RecipeType.create(Cultivar.MOD_ID, "fertilizer", FertilizerPage.class);
+
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
-        registration.addRecipeCategories(new MutationCategory(registration.getJeiHelpers().getGuiHelper()));
+        IGuiHelper gui = registration.getJeiHelpers().getGuiHelper();
+        registration.addRecipeCategories(
+                new MutationCategory(gui),
+                new AssayCategory(gui),
+                new LinesCategory<>(gui, SOILS, "jei.cultivar.soil", new ItemStack(Items.FARMLAND), 6, CultivarJeiPlugin::soilItems, CultivarJeiPlugin::soilLines),
+                new LinesCategory<>(gui, FERTILIZERS, "jei.cultivar.fertilizer", new ItemStack(Items.BONE_MEAL), 3,
+                        p -> p.fertilizer().items().stream().map(h -> new ItemStack(h.value())).toList(),
+                        CultivarJeiPlugin::fertilizerLines));
+    }
+
+    private static List<ItemStack> soilItems(SoilPage page) {
+        return page.soil().blocks().stream().map(h -> new ItemStack(h.value().asItem())).filter(st -> !st.isEmpty()).toList();
+    }
+
+    private static List<Component> soilLines(SoilPage page) {
+        Soil soil = page.soil();
+        List<Component> lines = new ArrayList<>();
+        var first = soil.blocks().stream().findFirst();
+        first.ifPresent(h -> lines.add(h.value().getName().copy().withStyle(ChatFormatting.BOLD)));
+        lines.add(Component.translatable("ledger.cultivar.cond.humidity", level(soil.humidity().getSerializedName())));
+        lines.add(Component.translatable("ledger.cultivar.cond.acidity", level(soil.acidity().getSerializedName())));
+        lines.add(Component.translatable("ledger.cultivar.cond.nutrients", level(soil.nutrients().getSerializedName())));
+        lines.add(Component.translatable("jei.cultivar.soil.growth", String.format(Locale.ROOT, "%.2f", soil.growthModifier())));
+        lines.add(Component.translatable("jei.cultivar.soil.shifts").withStyle(ChatFormatting.DARK_GRAY));
+        return lines;
+    }
+
+    private static List<Component> fertilizerLines(FertilizerPage page) {
+        Fertilizer f = page.fertilizer();
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.translatable("jei.cultivar.fertilizer.potency", f.potency()));
+        if (f.triggersMutation()) {
+            lines.add(Component.translatable("jei.cultivar.fertilizer.mutation"));
+        }
+        if (f.triggersWeeds()) {
+            lines.add(Component.translatable("jei.cultivar.fertilizer.weeds"));
+        }
+        return lines;
+    }
+
+    private static String level(String serialized) {
+        return serialized.replace('_', ' ');
     }
 
     @Override
@@ -93,6 +154,26 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.addRecipes(MutationCategory.TYPE, List.copyOf(CROSSES));
         Component info = Component.translatable("jei.cultivar.bred_info");
         bred.forEach(plant -> registration.addItemStackInfo(MutationCategory.seed(plant), info));
+
+        var access = level.registryAccess();
+        registration.addRecipes(SOILS, access.registryOrThrow(CultivarRegistries.SOIL).stream().map(SoilPage::new).toList());
+        registration.addRecipes(FERTILIZERS,
+                access.registryOrThrow(CultivarRegistries.FERTILIZER).stream().map(FertilizerPage::new).toList());
+        List<ItemStack> seeds = access.registryOrThrow(CultivarRegistries.PLANT).holders()
+                .map(h -> MutationCategory.seed(h)).toList();
+        registration.addRecipes(AssayCategory.TYPE, List.of(new AssayCategory.Assay(seeds)));
+
+        info(registration, PlanterBedModule.BED_ITEM.get(), "planter_bed");
+        info(registration, TrialModule.TRIAL_BED_ITEM.get(), "trial_bed");
+        info(registration, IrrigationModule.SPRINKLER_ITEM.get(), "sprinkler");
+        info(registration, ClocheModule.BELL_CLOCHE.get(), "bell_cloche");
+        info(registration, LedgerModule.LEDGER.get(), "botanical_ledger");
+        info(registration, CropModule.TIMBER_TRELLIS.get(), "trellis");
+        info(registration, CropModule.IRON_TRELLIS.get(), "trellis");
+    }
+
+    private static void info(IRecipeRegistration registration, ItemLike item, String key) {
+        registration.addIngredientInfo(item, Component.translatable("jei.cultivar.info." + key));
     }
 
     @Override
@@ -101,6 +182,11 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(CropModule.TIMBER_TRELLIS.get(), MutationCategory.TYPE);
         registration.addRecipeCatalyst(CropModule.IRON_TRELLIS.get(), MutationCategory.TYPE);
         registration.addRecipeCatalyst(TrialModule.TRIAL_BED.get(), MutationCategory.TYPE);
+        registration.addRecipeCatalyst(AssayModule.ENGINE_ITEM.get(), AssayCategory.TYPE);
+        for (var trellis : List.of(CropModule.TIMBER_TRELLIS.get(), CropModule.IRON_TRELLIS.get())) {
+            registration.addRecipeCatalyst(trellis, SOILS, FERTILIZERS);
+        }
+        registration.addRecipeCatalyst(PlanterBedModule.BED_ITEM.get(), FERTILIZERS);
     }
 
     @Override
