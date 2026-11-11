@@ -129,3 +129,6 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   stats, breeding the same species, keeping the best, parallel frames, bees, Vigour), Crossbreeding (habitat, shared
   light, Ledger/JEI, humidity levers, Trial Bed), Assaying seeds (rotation, input/output, speed, Ledger, goggles).
   Text mirrored to lang by tools/ponder/ponder_lang.py (checked in CI); structures by gen_ponder_schematics.py.
+- 2026-11-10: Seed Satchel screen (R-click in the air): every stored genome with count and stats (or "not
+  assayed"), Take / Void per row, Void unassayed, and an auto-collect toggle so break-and-replant seeds stop
+  filling it. Server-validated `satchel_action` packet; protocol 3.

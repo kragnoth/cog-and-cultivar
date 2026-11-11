@@ -144,4 +144,48 @@ public final class ToolTests {
                 "seeds go into the satchel until it's full");
         h.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void satchelScreenActions(GameTestHelper h) {
+        var wheat = h.getLevel().registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.PLANT)
+                .getHolderOrThrow(net.minecraft.resources.ResourceKey.create(com.kragnoth.cultivar.api.CultivarRegistries.PLANT,
+                        net.minecraft.resources.ResourceLocation.withDefaultNamespace("wheat")));
+        var stats = new java.util.HashMap<>(Genome.base(wheat).stats());
+        stats.put(CoreModule.GAIN.getKey(), new com.kragnoth.cultivar.api.genetics.AllelePair(4, 4));
+        Genome good = new Genome(wheat, stats);
+        ItemStack satchel = new ItemStack(ToolsModule.SEED_SATCHEL.get());
+        satchel.set(ToolsModule.SATCHEL_CONTENTS.get(), new SeedSatchelItem.Contents(java.util.List.of(
+                new SeedSatchelItem.Entry(good, 3, true),
+                new SeedSatchelItem.Entry(Genome.base(wheat), 5, false),
+                new SeedSatchelItem.Entry(Genome.base(wheat), 2, true))));
+        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.get(h.getLevel(),
+                new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes("cultivar-satchel".getBytes()), "cultivar_satchel"));
+        player.getInventory().clearContent();
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, satchel);
+        var main = net.minecraft.world.InteractionHand.MAIN_HAND;
+
+        SeedSatchelItem.apply(player, new com.kragnoth.cultivar.content.tools.SatchelActionPayload(main, 0,
+                com.kragnoth.cultivar.content.tools.SatchelActionPayload.Action.TAKE));
+        ItemStack held = player.getItemInHand(main);
+        int taken = 0;
+        for (ItemStack st : player.getInventory().items) {
+            if (st.is(com.kragnoth.cultivar.content.crop.CropModule.SEED.get())) taken += st.getCount();
+        }
+        h.assertTrue(taken == 3, "Take moves that row's seeds into the inventory, got " + taken);
+        h.assertTrue(SeedSatchelItem.entries(held).size() == 2, "the taken row is gone");
+
+        SeedSatchelItem.apply(player, new com.kragnoth.cultivar.content.tools.SatchelActionPayload(main, 0,
+                com.kragnoth.cultivar.content.tools.SatchelActionPayload.Action.VOID_UNASSAYED));
+        h.assertTrue(SeedSatchelItem.entries(held).size() == 1 && SeedSatchelItem.entries(held).getFirst().assayed(),
+                "Void unassayed keeps only assayed rows");
+        SeedSatchelItem.apply(player, new com.kragnoth.cultivar.content.tools.SatchelActionPayload(main, 0,
+                com.kragnoth.cultivar.content.tools.SatchelActionPayload.Action.VOID));
+        h.assertTrue(SeedSatchelItem.entries(held).isEmpty(), "Void removes the row");
+        SeedSatchelItem.apply(player, new com.kragnoth.cultivar.content.tools.SatchelActionPayload(main, 9,
+                com.kragnoth.cultivar.content.tools.SatchelActionPayload.Action.VOID));
+        SeedSatchelItem.apply(player, new com.kragnoth.cultivar.content.tools.SatchelActionPayload(main, 0,
+                com.kragnoth.cultivar.content.tools.SatchelActionPayload.Action.TOGGLE_COLLECT));
+        h.assertTrue(held.has(ToolsModule.SATCHEL_NO_COLLECT.get()), "the toggle turns auto-collect off");
+        h.succeed();
+    }
 }

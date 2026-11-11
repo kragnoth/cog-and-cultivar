@@ -65,7 +65,7 @@ public class SeedSatchelItem extends Item {
         public static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
                 Genome.STREAM_CODEC, Entry::genome, ByteBufCodecs.VAR_INT, Entry::count, ByteBufCodecs.BOOL, Entry::assayed, Entry::new);
 
-        ItemStack toStack() {
+        public ItemStack toStack() {
             return CultivarSeedItem.of(genome, assayed);
         }
     }
@@ -290,7 +290,8 @@ public class SeedSatchelItem extends Item {
         Inventory inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize() && !seeds.isEmpty(); i++) {
             ItemStack satchel = inv.getItem(i);
-            if (satchel.getItem() instanceof SeedSatchelItem && contents(satchel).species()
+            if (satchel.getItem() instanceof SeedSatchelItem && !satchel.has(ToolsModule.SATCHEL_NO_COLLECT.get())
+                    && contents(satchel).species()
                     .map(g -> g.species().is(genome.species())).orElse(false)) {
                 int moved = insert(satchel, seeds);
                 if (moved > 0) {
@@ -374,7 +375,10 @@ public class SeedSatchelItem extends Item {
         ItemStack satchel = player.getItemInHand(hand);
         Dial dial = satchel.get(ToolsModule.SATCHEL_DIAL.get());
         if (!player.isShiftKeyDown() || dial == null) {
-            return InteractionResultHolder.pass(satchel);
+            if (level.isClientSide()) {
+                openScreen.accept(hand); // see what's inside, take or void seeds, toggle auto-collect
+            }
+            return InteractionResultHolder.sidedSuccess(satchel, level.isClientSide());
         }
         if (!level.isClientSide()) {
             List<ResourceKey<Stat>> stats = CoreModule.STATS.getEntries().stream().map(h -> h.getKey()).toList();
@@ -385,6 +389,48 @@ public class SeedSatchelItem extends Item {
             level.playSound(null, player.blockPosition(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.4f, 1.6f);
         }
         return InteractionResultHolder.sidedSuccess(satchel, level.isClientSide());
+    }
+
+    // ---------------------------------------------------------------- satchel screen
+
+    /** Set by the client module: opens the satchel screen for the satchel in that hand. */
+    public static java.util.function.Consumer<InteractionHand> openScreen = hand -> {};
+
+    public static List<Entry> entries(ItemStack satchel) {
+        return contents(satchel).entries();
+    }
+
+    /** Applies a screen action server-side, after checking the player really holds a satchel in that hand. */
+    public static void apply(net.minecraft.server.level.ServerPlayer player, SatchelActionPayload p) {
+        ItemStack satchel = player.getItemInHand(p.hand());
+        if (!(satchel.getItem() instanceof SeedSatchelItem)) {
+            return;
+        }
+        List<Entry> list = new ArrayList<>(contents(satchel).entries());
+        switch (p.action()) {
+            case TOGGLE_COLLECT -> {
+                if (satchel.has(ToolsModule.SATCHEL_NO_COLLECT.get())) {
+                    satchel.remove(ToolsModule.SATCHEL_NO_COLLECT.get());
+                } else {
+                    satchel.set(ToolsModule.SATCHEL_NO_COLLECT.get(), net.minecraft.util.Unit.INSTANCE);
+                }
+                player.playNotifySound(SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.4f, 1.4f);
+                return;
+            }
+            case VOID_UNASSAYED -> list.removeIf(e -> !e.assayed());
+            case TAKE, VOID -> {
+                if (p.index() < 0 || p.index() >= list.size()) {
+                    return;
+                }
+                Entry e = list.remove(p.index());
+                if (p.action() == SatchelActionPayload.Action.TAKE) {
+                    player.getInventory().placeItemBackInInventory(e.toStack().copyWithCount(e.count()));
+                }
+            }
+        }
+        satchel.set(ToolsModule.SATCHEL_CONTENTS.get(), new Contents(list));
+        player.playNotifySound(p.action() == SatchelActionPayload.Action.TAKE ? SoundEvents.BUNDLE_REMOVE_ONE : SoundEvents.COMPOSTER_FILL,
+                SoundSource.PLAYERS, 0.6f, 1f);
     }
 
     // ---------------------------------------------------------------- display
@@ -414,6 +460,9 @@ public class SeedSatchelItem extends Item {
         if (dial != null) {
             tooltip.add(Component.translatable("item.cultivar.seed_satchel.sorting",
                     Component.translatable("stat.cultivar." + dial.stat().location().getPath())).withStyle(ChatFormatting.GOLD));
+        }
+        if (stack.has(ToolsModule.SATCHEL_NO_COLLECT.get())) {
+            tooltip.add(Component.translatable("item.cultivar.seed_satchel.no_collect").withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 }
