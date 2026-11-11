@@ -355,8 +355,9 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
         }
         int[] pick = options.get(random.nextInt(options.size()));
         TrialBedBlockEntity bed = beds.get(pick[0]);
-        TrellisBlock.genomeFor(bed.inventory.getStackInSlot(pick[1]), level).ifPresent(g -> {
-            if (crop.plant(g)) {
+        ItemStack from = bed.inventory.getStackInSlot(pick[1]);
+        TrellisBlock.genomeFor(from, level).ifPresent(g -> {
+            if (crop.plant(g, from)) {
                 bed.inventory.extractItem(pick[1], 1, false);
             }
         });

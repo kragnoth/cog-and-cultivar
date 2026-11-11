@@ -57,6 +57,9 @@ public class CuttingItem extends Item {
             return InteractionResult.SUCCESS;
         }
         boolean took = level.random.nextDouble() < takeChance(genome) && crop.plant(genome, START_STAGE);
+        if (took) {
+            crop.setAssayed(stack.has(CoreModule.ASSAYED.get()));
+        }
         if (ctx.getPlayer() == null || !ctx.getPlayer().getAbilities().instabuild) {
             stack.shrink(1);
         }

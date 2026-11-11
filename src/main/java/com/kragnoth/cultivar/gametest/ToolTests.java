@@ -188,4 +188,34 @@ public final class ToolTests {
         h.assertTrue(held.has(ToolsModule.SATCHEL_NO_COLLECT.get()), "the toggle turns auto-collect off");
         h.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void cropStatsNeedAnAssayedSeed(GameTestHelper h) {
+        var wheat = h.getLevel().registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.PLANT)
+                .getHolderOrThrow(net.minecraft.resources.ResourceKey.create(com.kragnoth.cultivar.api.CultivarRegistries.PLANT,
+                        net.minecraft.resources.ResourceLocation.withDefaultNamespace("wheat")));
+        BlockPos pos = new BlockPos(1, 2, 1);
+        h.setBlock(pos.below(), net.minecraft.world.level.block.Blocks.FARMLAND);
+        h.setBlock(pos, com.kragnoth.cultivar.content.crop.CropModule.TIMBER_TRELLIS.get());
+        var crop = (com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(pos);
+        ItemStack plain = com.kragnoth.cultivar.content.crop.CultivarSeedItem.of(Genome.base(wheat));
+        ItemStack read = com.kragnoth.cultivar.content.crop.CultivarSeedItem.of(Genome.base(wheat), true);
+        String statName = net.minecraft.network.chat.Component.translatable("stat.cultivar.gain").getString();
+        java.util.function.Predicate<com.kragnoth.cultivar.content.crop.CropBlockEntity> showsStats = c ->
+                com.kragnoth.cultivar.content.crop.CropInfo.lines(c).stream().anyMatch(l -> l.getString().contains(statName));
+
+        crop.plant(Genome.base(wheat), plain);
+        h.assertTrue(!crop.statsKnown() && !showsStats.test(crop), "an unassayed seed's crop hides its stats");
+        java.util.List<ItemStack> drops = new java.util.ArrayList<>();
+        crop.collectBreakDrops(drops::add);
+        h.assertTrue(!drops.getFirst().has(CoreModule.ASSAYED.get()), "its seed drops unassayed");
+
+        crop.uproot();
+        crop.plant(Genome.base(wheat), read);
+        h.assertTrue(crop.statsKnown() && showsStats.test(crop), "an assayed seed's crop shows its stats");
+        drops.clear();
+        crop.collectBreakDrops(drops::add);
+        h.assertTrue(drops.getFirst().has(CoreModule.ASSAYED.get()), "a known crop's seed stays assayed");
+        h.succeed();
+    }
 }

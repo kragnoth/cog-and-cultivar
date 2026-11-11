@@ -280,7 +280,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         if (breeding) {
             if (crop.hasPlant()) {
                 // A child was born on our frame: bank it as a seed and re-arm.
-                offerSeed(CultivarSeedItem.of(crop.genome()));
+                offerSeed(crop.seedStack());
                 crop.uproot();
                 server.setBlock(above, server.getBlockState(above).setValue(TrellisBlock.CROSS, true), Block.UPDATE_ALL);
                 return;
@@ -300,11 +300,12 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
                 return;
             }
             Genome before = crop.genome();
+            ItemStack beforeSeed = crop.seedStack();
             List<ItemStack> drops = new ArrayList<>();
             crop.harvest(drops::add);
             drops.forEach(d -> output(server, above, d));
             if (random.nextDouble() < com.kragnoth.cultivar.content.tools.SeedSatchelItem.seedChance(before) && stockHasRoom()) {
-                offerSeed(CultivarSeedItem.of(before));
+                offerSeed(beforeSeed);
             }
             // Upgrade: a better seed of the same species replaces this plant.
             bestSeed(before).ifPresent(slot -> {
@@ -363,7 +364,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
             return;
         }
         if (server.getBlockEntity(above) instanceof CropBlockEntity crop && crop.hasPlant()) {
-            offerSeed(CultivarSeedItem.of(crop.genome()));
+            offerSeed(crop.seedStack());
             crop.uproot();
         }
         int trellises = state.getValue(TrellisBlock.CROSS) ? 2 : 1;
@@ -430,7 +431,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
 
     private void plantFrom(CropBlockEntity crop, Slot slot) {
         TrellisBlock.genomeFor(slot.stack(), slot.bed().level).ifPresent(g -> {
-            if (crop.plant(g)) {
+            if (crop.plant(g, slot.stack())) {
                 slot.bed().inventory.extractItem(slot.index(), 1, false);
             }
         });

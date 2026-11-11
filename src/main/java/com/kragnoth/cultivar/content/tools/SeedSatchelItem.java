@@ -129,7 +129,7 @@ public class SeedSatchelItem extends Item {
         if (random.nextDouble() >= seedChance(genome)) {
             return false;
         }
-        ItemStack rest = bag.apply(CultivarSeedItem.of(genome));
+        ItemStack rest = bag.apply(CultivarSeedItem.of(genome, crop.isAssayed()));
         if (!rest.isEmpty()) {
             drops.accept(rest);
         }
@@ -341,7 +341,7 @@ public class SeedSatchelItem extends Item {
         if (seed.isEmpty()) {
             return InteractionResult.PASS;
         }
-        crop.plant(seed.get().get(CoreModule.GENOME.get()));
+        crop.plant(seed.get().get(CoreModule.GENOME.get()), seed.get());
         level.playSound(null, ctx.getClickedPos(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1f, 1f);
         return InteractionResult.CONSUME;
     }

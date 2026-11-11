@@ -24,13 +24,14 @@ import java.util.List;
 
 /** Lifts a living plant (genome + growth stage) from a trellis and sets it down on an empty one. */
 public class TransplantingSpadeItem extends Item {
-    public record Held(Genome genome, int stage) {
+    public record Held(Genome genome, int stage, boolean assayed) {
         public static final Codec<Held> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Genome.CODEC.fieldOf("genome").forGetter(Held::genome),
-                Codec.INT.fieldOf("stage").forGetter(Held::stage)
+                Codec.INT.fieldOf("stage").forGetter(Held::stage),
+                Codec.BOOL.optionalFieldOf("assayed", false).forGetter(Held::assayed)
         ).apply(i, Held::new));
         public static final StreamCodec<RegistryFriendlyByteBuf, Held> STREAM_CODEC = StreamCodec.composite(
-                Genome.STREAM_CODEC, Held::genome, ByteBufCodecs.VAR_INT, Held::stage, Held::new);
+                Genome.STREAM_CODEC, Held::genome, ByteBufCodecs.VAR_INT, Held::stage, ByteBufCodecs.BOOL, Held::assayed, Held::new);
     }
 
     public TransplantingSpadeItem(Properties properties) {
@@ -48,13 +49,14 @@ public class TransplantingSpadeItem extends Item {
         Held held = stack.get(ToolsModule.SPADE_PLANT.get());
         if (held == null && crop.hasPlant()) {
             if (!level.isClientSide()) {
-                crop.uproot().ifPresent(u -> stack.set(ToolsModule.SPADE_PLANT.get(), new Held(u.genome(), u.stage())));
+                crop.uproot().ifPresent(u -> stack.set(ToolsModule.SPADE_PLANT.get(), new Held(u.genome(), u.stage(), u.assayed())));
                 level.playSound(null, ctx.getClickedPos(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.BLOCKS, 1f, 1f);
             }
             return InteractionResult.sidedSuccess(level.isClientSide());
         }
         if (held != null && !crop.hasPlant()) {
             if (!level.isClientSide() && crop.plant(held.genome(), held.stage())) {
+                crop.setAssayed(held.assayed());
                 stack.remove(ToolsModule.SPADE_PLANT.get());
                 if (ctx.getPlayer() != null) {
                     stack.hurtAndBreak(1, ctx.getPlayer(), net.minecraft.world.entity.LivingEntity.getSlotForHand(ctx.getHand()));
