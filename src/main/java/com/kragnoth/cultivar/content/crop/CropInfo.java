@@ -36,10 +36,14 @@ public final class CropInfo {
                 out.add(Component.translatableWithFallback("cultivar.info.needs_segments",
                         "Needs %s more trellis stacked above", missing).withStyle(ChatFormatting.YELLOW));
             }
-            CoreModule.STATS.getEntries().forEach(stat -> out.add(Component.literal("  ")
-                    .append(Component.translatable("stat.cultivar." + stat.getId().getPath()))
-                    .append(": " + Genetics.expressed(genome, stat.getKey()))
-                    .withStyle(ChatFormatting.GRAY)));
+            if (crop.statsKnown()) {
+                CoreModule.STATS.getEntries().forEach(stat -> out.add(Component.literal("  ")
+                        .append(Component.translatable("stat.cultivar." + stat.getId().getPath()))
+                        .append(": " + Genetics.expressed(genome, stat.getKey()))
+                        .withStyle(ChatFormatting.GRAY)));
+            } else {
+                out.add(Component.translatable("cultivar.info.unassayed").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+            }
         } else {
             out.add(Component.translatable("cultivar.info.empty").withStyle(ChatFormatting.DARK_GRAY));
         }

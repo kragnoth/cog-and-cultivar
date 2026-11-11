@@ -132,3 +132,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 - 2026-11-10: Seed Satchel screen (R-click in the air): every stored genome with count and stats (or "not
   assayed"), Take / Void per row, Void unassayed, and an auto-collect toggle so break-and-replant seeds stop
   filling it. Server-validated `satchel_action` packet; protocol 3.
+- 2026-11-10: planted crops remember whether their genome is known. Goggles and Jade (via Create's goggle info)
+  show stats only for crops grown from assayed seeds/cuttings/satchel entries, spade-moved known crops, or clones of
+  known parents; new cross children read "Stats unknown". Seeds and cuttings from a known crop stay assayed.
+  `requireAssay = false` shows everything as before. Protocol 4.

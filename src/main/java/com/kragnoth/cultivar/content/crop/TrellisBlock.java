@@ -250,7 +250,7 @@ public class TrellisBlock extends BaseEntityBlock {
         // Planting.
         Optional<Genome> genome = genomeFor(stack, level);
         if (genome.isPresent() && !state.getValue(CROSS) && !crop.hasPlant()) {
-            if (!level.isClientSide() && crop.plant(genome.get())) {
+            if (!level.isClientSide() && crop.plant(genome.get(), stack)) {
                 level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1f, 1f);
                 stack.consume(1, player);
             }

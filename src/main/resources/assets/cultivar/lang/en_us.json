@@ -321,6 +321,7 @@
   "stat.cultivar.growth.short": "Gr",
   "stat.cultivar.strength.short": "St",
   "stat.cultivar.vigour.short": "Vi",
+  "cultivar.info.unassayed": "  Stats unknown: assay its seed",
   "cultivar.ponder.None.text_1": "...",
   "cultivar.ponder.spreading.header": "Spreading crops",
   "cultivar.ponder.spreading.text_1": "Plant seeds on a Trellis standing on soil. Most vanilla and modded seeds work.",

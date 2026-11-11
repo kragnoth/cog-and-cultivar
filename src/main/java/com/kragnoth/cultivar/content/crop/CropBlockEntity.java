@@ -59,6 +59,8 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     @Nullable
     private Genome genome;
     private int stage;
+    /** Whether this plant's genome is known (planted from an assayed seed/cutting, or a clone of a known parent). */
+    private boolean assayed;
     @Nullable
     private Holder<Weed> weed;
     private int weedStage;
@@ -191,7 +193,11 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         if (isMature()) {
             rollList(plant.clipProducts(), drops, level.random);
         }
-        drops.accept(com.kragnoth.cultivar.content.tools.CuttingItem.of(genome));
+        ItemStack cutting = com.kragnoth.cultivar.content.tools.CuttingItem.of(genome);
+        if (assayed) {
+            cutting.set(CoreModule.ASSAYED.get(), net.minecraft.util.Unit.INSTANCE);
+        }
+        drops.accept(cutting);
         stage--;
         changed();
         return true;
@@ -325,6 +331,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
             return false;
         }
         genome = newGenome;
+        assayed = false;
         stage = 0;
         changed();
         if (level instanceof ServerLevel) {
@@ -334,12 +341,44 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     }
 
     /** Plants at a given stage (transplanting keeps growth). */
+    /** Plants from an item: seeds, cuttings and satchel entries carry whether their genome has been assayed. */
+    public boolean plant(Genome newGenome, ItemStack from) {
+        if (!plant(newGenome)) {
+            return false;
+        }
+        setAssayed(from.has(CoreModule.ASSAYED.get()));
+        return true;
+    }
+
+    public boolean isAssayed() {
+        return assayed;
+    }
+
+    public void setAssayed(boolean known) {
+        if (assayed != known) {
+            assayed = known;
+            changed();
+        }
+    }
+
+    /** Stats may be shown: the genome is known, or the server doesn't require assaying. */
+    public boolean statsKnown() {
+        return assayed || com.kragnoth.cultivar.core.config.CultivarServerConfig.SPEC.isLoaded()
+                && !com.kragnoth.cultivar.core.config.CultivarServerConfig.REQUIRE_ASSAY.get();
+    }
+
+    /** A seed of this plant: assayed when the plant's genome is known (it's the same genome). */
+    public ItemStack seedStack() {
+        return CultivarSeedItem.of(genome, assayed);
+    }
+
     /**
      * Display only (Ponder scenes): shows {@code shown} at {@code atStage}, or an empty trellis when null. Clears blight,
      * no planting rules or side effects beyond the usual sync.
      */
     public void setDisplay(@Nullable Genome shown, int atStage) {
         genome = shown;
+        assayed = shown != null;
         weed = null;
         weedStage = 0;
         stage = shown == null ? 0 : Math.max(0, Math.min(atStage, shown.species().value().matureStage()));
@@ -360,14 +399,15 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         if (genome == null) {
             return Optional.empty();
         }
-        Uprooted out = new Uprooted(genome, stage);
+        Uprooted out = new Uprooted(genome, stage, assayed);
+        assayed = false;
         genome = null;
         stage = 0;
         changed();
         return Optional.of(out);
     }
 
-    public record Uprooted(Genome genome, int stage) {}
+    public record Uprooted(Genome genome, int stage, boolean assayed) {}
 
     /** Knocks the weed back one stage (a mature one drops its rake products first); a stage-0 weed is removed. */
     public boolean regressWeed(Consumer<ItemStack> drops) {
@@ -454,7 +494,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     /** Items returned when the block is broken (trellis items are added by the block). */
     public void collectBreakDrops(Consumer<ItemStack> drops) {
         if (genome != null && level != null) {
-            drops.accept(CultivarSeedItem.of(genome));
+            drops.accept(seedStack());
             if (isMature()) {
                 rollProducts(drops, level.random);
             }
@@ -589,10 +629,14 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
 
     private void tickBreeding(ServerLevel level, RandomSource random, InfluenceEffects fx) {
         List<Genome> parents = new ArrayList<>(4);
+        List<Genome> known = new ArrayList<>(4);
         for (Direction dir : Direction.Plane.HORIZONTAL) {
             BlockPos np = worldPosition.relative(dir);
             if (level.isLoaded(np) && level.getBlockEntity(np) instanceof CropBlockEntity n && n.isMature() && n.weed == null) {
                 parents.add(n.genome);
+                if (n.assayed) {
+                    known.add(n.genome);
+                }
             }
         }
         if (parents.isEmpty()) {
@@ -607,6 +651,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
                 .ifPresent(child -> {
                     level.setBlock(worldPosition, getBlockState().setValue(TrellisBlock.CROSS, false), Block.UPDATE_ALL);
                     genome = child;
+                    assayed = known.contains(child); // an exact clone of a known parent is known too
                     stage = 0;
                     changed();
                     boolean novel = parents.stream().noneMatch(p -> p.species().equals(child.species()));
@@ -641,6 +686,9 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         var ops = registries.createSerializationContext(NbtOps.INSTANCE);
         // Always write stage: an empty tag is skipped by the client, which would leave a ghost plant after uprooting.
         tag.putInt("stage", stage);
+        if (assayed) {
+            tag.putBoolean("assayed", true);
+        }
         if (genome != null) {
             Genome.CODEC.encodeStart(ops, genome).resultOrPartial(Cultivar.LOGGER::error).ifPresent(t -> tag.put("genome", t));
         }
@@ -664,6 +712,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
                 ? Genome.CODEC.parse(ops, tag.get("genome")).resultOrPartial(Cultivar.LOGGER::warn).orElse(null)
                 : null;
         stage = genome == null ? 0 : Math.min(tag.getInt("stage"), genome.species().value().matureStage());
+        assayed = genome != null && tag.getBoolean("assayed");
         weed = tag.contains("weed")
                 ? RegistryFixedCodec.create(CultivarRegistries.WEED).parse(ops, tag.get("weed")).resultOrPartial(Cultivar.LOGGER::warn).orElse(null)
                 : null;
