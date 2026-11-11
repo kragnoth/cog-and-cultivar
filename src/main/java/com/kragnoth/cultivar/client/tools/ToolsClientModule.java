@@ -17,6 +17,8 @@ public final class ToolsClientModule implements ClientModule {
 
     @Override
     public void onConstructClient(IEventBus modBus, ModContainer container) {
+        com.kragnoth.cultivar.content.tools.SeedSatchelItem.openScreen =
+                hand -> net.minecraft.client.Minecraft.getInstance().setScreen(new SatchelScreen(hand));
         modBus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(() -> {
             ItemProperties.register(ToolsModule.TRANSPLANTING_SPADE.get(), Cultivar.id("holding"),
                     (stack, level, entity, seed) -> stack.has(ToolsModule.SPADE_PLANT.get()) ? 1f : 0f);

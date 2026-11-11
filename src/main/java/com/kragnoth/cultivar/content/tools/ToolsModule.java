@@ -30,6 +30,11 @@ public final class ToolsModule implements CultivarModule {
             COMPONENTS.registerComponentType("satchel_dial", b -> b.persistent(SeedSatchelItem.Dial.CODEC)
                     .networkSynchronized(SeedSatchelItem.Dial.STREAM_CODEC));
 
+    /** Present = the satchel no longer auto-collects seeds you walk over. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<net.minecraft.util.Unit>> SATCHEL_NO_COLLECT =
+            COMPONENTS.registerComponentType("satchel_no_collect", b -> b.persistent(net.minecraft.util.Unit.CODEC)
+                    .networkSynchronized(net.minecraft.network.codec.StreamCodec.unit(net.minecraft.util.Unit.INSTANCE)));
+
     public static final DeferredItem<TransplantingSpadeItem> TRANSPLANTING_SPADE = ITEMS.registerItem("transplanting_spade",
             TransplantingSpadeItem::new, new Item.Properties().durability(250));
     public static final DeferredItem<PruningShearsItem> PRUNING_SHEARS = ITEMS.registerItem("pruning_shears",
@@ -56,6 +61,15 @@ public final class ToolsModule implements CultivarModule {
         modBus.addListener((BuildCreativeModeTabContentsEvent event) -> {
             if (event.getTabKey() == CoreModule.TAB.getKey()) {
                 ITEMS.getEntries().stream().filter(item -> item != CUTTING).forEach(item -> event.accept(item.get()));
+            }
+        });
+    }
+
+    @Override
+    public void registerPayloads(net.neoforged.neoforge.network.registration.PayloadRegistrar registrar) {
+        registrar.playToServer(SatchelActionPayload.TYPE, SatchelActionPayload.STREAM_CODEC, (payload, context) -> {
+            if (context.player() instanceof net.minecraft.server.level.ServerPlayer player) {
+                SeedSatchelItem.apply(player, payload);
             }
         });
     }
