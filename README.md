@@ -26,8 +26,4 @@ scaffold script that drafts plants and mutations for you. See [docs/PACKMAKERS.m
 ./gradlew runData        # datagen into src/generated/resources
 ```
 
-## Licence
-
-Code: MIT. Art derived from **Excalibur by Maffhew** is not covered by the MIT licence (see `LICENSE`).
-
 **Author:** Kragnoth
