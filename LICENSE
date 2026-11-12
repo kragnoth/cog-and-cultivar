@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----------------------------------------------------------------------------
-Art assets: the MIT licence above covers source code only. Textures under
-src/main/resources/assets/cultivar/textures/ that are derived from the
-Excalibur resource pack by Maffhew are used with the author's permission and
-are NOT covered by the MIT licence; they may not be reused outside this mod
-without the Excalibur author's permission.
