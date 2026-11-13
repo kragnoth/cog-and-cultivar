@@ -17,7 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         # First entry is the compile baseline (oldest supported). Others must also build and pass tests.
-        create: ['6.0.10-281', '6.0.11-320']
+        # Add a version here to test it too (6.0.11 is unreleased; it's the 26.1 base).
+        create: ['6.0.10-281']
     env:
       CREATE: -Pcreate_version=${{ matrix.create }}
     steps:

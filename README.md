@@ -10,7 +10,7 @@ A NeoForge 1.21.1 crop-genetics and breeding mod for steampunk/dieselpunk worlds
 | Mod id | `cultivar` |
 | Minecraft | 1.21.1 |
 | NeoForge | 21.1.219 |
-| Create | 6.0.11 (Ponder 1.0.85, Flywheel 1.0.6) |
+| Create | 6.0.10 (Ponder 1.0.82, Flywheel 1.0.6) |
 | Java | 21 |
 
 ## For pack makers
