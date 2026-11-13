@@ -205,6 +205,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
         info(registration, PlanterBedModule.BED_ITEM.get(), "planter_bed");
         info(registration, TrialModule.TRIAL_BED_ITEM.get(), "trial_bed");
         info(registration, IrrigationModule.SPRINKLER_ITEM.get(), "sprinkler");
+        info(registration, IrrigationModule.OLLA_ITEM.get(), "olla");
         info(registration, ClocheModule.BELL_CLOCHE.get(), "bell_cloche");
         info(registration, ClocheModule.SHADE_CLOCHE.get(), "shade_cloche");
         info(registration, ClocheModule.LAMP_CLOCHE.get(), "lamp_cloche");

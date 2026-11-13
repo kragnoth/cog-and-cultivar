@@ -795,6 +795,7 @@ Cultivar seeds of every species (vanilla ones included) plant as **field crops**
 | C1 | Irrigation Channel: open trough fluid network (tank per segment, balanced like Planter Bed plots), pipe-compatible | Water flows along a channel line |
 | C2 | Channel hydrates farmland within 4 (FarmBlock mixin) and counts as "water beside" in `Hydration` | Farmland stays moist with no water block (gametest) |
 | C3 | Archimedes Screw: kinetic, bottom in water, lifts 1 block per segment, stackable, output scales with RPM into channels/pipes | Screw feeds a raised channel field |
+| C0 ✅ | Olla: buried brick pot (4 bricks), filled once with water, keeps vanilla farmland moist within 4 (config) from its own level or the layer below, forever; solid, so the centre stays farmable and nothing flows. Uses the `MoistureSource` hook | Farmland stays moist with no water block (gametest) |
 | C4 | Mulch: soil conditioner (−1 humidity) that also keeps farmland moist for N days without water | Data entry + farmland timer |
 
 **Phase D: Flowering vines (dye gaps)**

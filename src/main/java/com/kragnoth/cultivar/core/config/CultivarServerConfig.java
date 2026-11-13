@@ -16,6 +16,7 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.BooleanValue WATER_SHIFTS_HUMIDITY;
     public static final ModConfigSpec.IntValue CONDITIONER_MAX_STEPS;
     public static final ModConfigSpec.IntValue SHADE_MAX_LIGHT;
+    public static final ModConfigSpec.IntValue OLLA_RADIUS;
     public static final ModConfigSpec.IntValue LAMP_MIN_LIGHT;
     public static final ModConfigSpec.IntValue WORK_BUDGET_PER_TICK;
     public static final ModConfigSpec.IntValue BED_CYCLE;
@@ -112,6 +113,11 @@ public final class CultivarServerConfig {
                 .defineInRange("shadeMaxLight", 3, 0, 15);
         LAMP_MIN_LIGHT = b.comment("A crop under a Lamp Cloche reads light at least this bright. Neither cloche changes real light.")
                 .defineInRange("lampMinLight", 14, 0, 15);
+        b.pop();
+
+        b.push("olla");
+        OLLA_RADIUS = b.comment("How far (horizontally) a filled Olla keeps farmland moist. Vanilla water reaches 4.")
+                .defineInRange("radius", 4, 1, 8);
         b.pop();
 
         b.push("sprinkler");

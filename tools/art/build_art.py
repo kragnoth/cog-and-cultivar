@@ -26,7 +26,7 @@ REPO = os.getcwd()
 ASSETS = 'src/main/resources/assets/cultivar'
 PACK = 'src/main/resources/resourcepacks/excalibur_style'
 DEFAULT_JAR = os.path.expanduser('~/.gradle/caches/neoformruntime/artifacts/minecraft_1.21.1_client.jar')
-SCRIPTS = ['gen_phase1_textures', 'gen_art_pass', 'gen_bloom_textures', 'gen_blight_textures',
+SCRIPTS = ['gen_olla_textures', 'gen_phase1_textures', 'gen_art_pass', 'gen_bloom_textures', 'gen_blight_textures',
            'gen_conditioner_textures', 'gen_cloche_variants']
 
 # Excalibur-only sprite → vanilla 1.21.1 stand-in (similar silhouette; the scripts recolour them anyway).
