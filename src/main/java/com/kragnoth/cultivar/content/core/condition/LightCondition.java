@@ -8,7 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-/** {@code {"type": "cultivar:light", "min": 10, "max": 15, "tolerance": 0.5}} */
+/** {@code {"type": "cultivar:light", "min": 10, "max": 15, "tolerance": 0.5}}. Reads {@link CropLight} (cloches can override). */
 public record LightCondition(int min, int max, double tolerance) implements GrowthCondition {
     public static final MapCodec<LightCondition> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.intRange(0, 15).optionalFieldOf("min", 10).forGetter(LightCondition::min),
@@ -23,7 +23,7 @@ public record LightCondition(int min, int max, double tolerance) implements Grow
 
     @Override
     public GrowthResponse test(GrowthContext context, int strength) {
-        int light = context.level().getRawBrightness(context.pos(), 0);
+        int light = CropLight.at(context.level(), context.pos());
         return ToleranceWindow.accepts(light, min, max, ToleranceWindow.Comparison.EQUAL, tolerance, strength)
                 ? GrowthResponse.FERTILE : GrowthResponse.INFERTILE;
     }

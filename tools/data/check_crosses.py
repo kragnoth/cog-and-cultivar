@@ -3,6 +3,7 @@
 
 A cross needs both parents mature next to the frame and the frame's habitat met, then the child must grow there.
 Light is shared: adjacent blocks differ by at most 1, so each parent's light must be within 1 of the frame's.
+Shade/Lamp Cloches and soil conditioners are ignored on purpose: every cross must work without them.
 Soil is per plant: any shipped soil, shifted by heat (-1), water (+1) and a Bell Cloche (+1), dry farmland -1.
 Run from the repo root: python3 tools/data/check_crosses.py
 """

@@ -18,10 +18,29 @@
     },
     {
       "when": {
-        "cloche": "true"
+        "cloche": "true",
+        "cloche_type": "bell"
       },
       "apply": {
         "model": "cultivar:block/bell_cloche"
+      }
+    },
+    {
+      "when": {
+        "cloche": "true",
+        "cloche_type": "shade"
+      },
+      "apply": {
+        "model": "cultivar:block/shade_cloche"
+      }
+    },
+    {
+      "when": {
+        "cloche": "true",
+        "cloche_type": "lamp"
+      },
+      "apply": {
+        "model": "cultivar:block/lamp_cloche"
       }
     }
   ]

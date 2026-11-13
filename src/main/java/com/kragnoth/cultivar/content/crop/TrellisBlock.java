@@ -63,6 +63,9 @@ public class TrellisBlock extends BaseEntityBlock {
     public static final BooleanProperty CROSS = BooleanProperty.create("cross");
     /** A Bell Cloche is fitted over this trellis (its effect is the {@code bell_cloche} crop_influence entry). */
     public static final BooleanProperty CLOCHE = BooleanProperty.create("cloche");
+    /** Which cloche, while {@link #CLOCHE} is true (states saved before this existed load as bell). */
+    public static final net.minecraft.world.level.block.state.properties.EnumProperty<com.kragnoth.cultivar.content.cloche.ClocheType> CLOCHE_TYPE =
+            net.minecraft.world.level.block.state.properties.EnumProperty.create("cloche_type", com.kragnoth.cultivar.content.cloche.ClocheType.class);
     public static final MapCodec<TrellisBlock> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             TrellisTier.CODEC.fieldOf("tier").forGetter(TrellisBlock::tier),
             propertiesCodec()
@@ -80,7 +83,8 @@ public class TrellisBlock extends BaseEntityBlock {
     public TrellisBlock(TrellisTier tier, Properties properties) {
         super(properties);
         this.tier = tier;
-        registerDefaultState(stateDefinition.any().setValue(CROSS, false).setValue(CLOCHE, false));
+        registerDefaultState(stateDefinition.any().setValue(CROSS, false).setValue(CLOCHE, false)
+                .setValue(CLOCHE_TYPE, com.kragnoth.cultivar.content.cloche.ClocheType.BELL));
     }
 
     public TrellisTier tier() {
@@ -94,7 +98,7 @@ public class TrellisBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(CROSS, CLOCHE);
+        builder.add(CROSS, CLOCHE, CLOCHE_TYPE);
     }
 
     @Override
@@ -271,7 +275,7 @@ public class TrellisBlock extends BaseEntityBlock {
         if (player.isShiftKeyDown() && state.getValue(CLOCHE)) {
             if (!level.isClientSide()) {
                 level.setBlock(pos, state.setValue(CLOCHE, false), UPDATE_ALL);
-                popResource(level, pos, new ItemStack(ClocheModule.BELL_CLOCHE.get()));
+                popResource(level, pos, new ItemStack(state.getValue(CLOCHE_TYPE).item()));
                 level.playSound(null, pos, SoundEvents.GLASS_HIT, SoundSource.BLOCKS, 1f, 1.2f);
                 crop.invalidateInfluence();
             }
@@ -319,7 +323,7 @@ public class TrellisBlock extends BaseEntityBlock {
         List<ItemStack> drops = new ArrayList<>();
         drops.add(new ItemStack(asItem(), state.getValue(CROSS) ? 2 : 1));
         if (state.getValue(CLOCHE)) {
-            drops.add(new ItemStack(ClocheModule.BELL_CLOCHE.get()));
+            drops.add(new ItemStack(state.getValue(CLOCHE_TYPE).item()));
         }
         if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof CropBlockEntity crop) {
             crop.collectBreakDrops(drops::add);

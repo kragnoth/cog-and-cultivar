@@ -11,10 +11,25 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** Fits over a (non-grafting) trellis. Sneak + empty hand on the trellis lifts it off again. */
+/**
+ * Fits over a (non-grafting) trellis. Sneak + empty hand on the trellis lifts it off again. One class for every kind
+ * ({@link ClocheType}); Planter Beds take any of them in their cloche slot.
+ */
 public class BellClocheItem extends Item {
-    public BellClocheItem(Properties properties) {
+    private final ClocheType type;
+
+    public BellClocheItem(ClocheType type, Properties properties) {
         super(properties);
+        this.type = type;
+    }
+
+    public ClocheType type() {
+        return type;
+    }
+
+    /** The trellis state with this cloche fitted. */
+    public BlockState fit(BlockState trellis) {
+        return trellis.setValue(TrellisBlock.CLOCHE, true).setValue(TrellisBlock.CLOCHE_TYPE, type);
     }
 
     @Override
@@ -26,7 +41,7 @@ public class BellClocheItem extends Item {
             return InteractionResult.PASS; // cloches fit single trellises only
         }
         if (!level.isClientSide()) {
-            level.setBlock(ctx.getClickedPos(), state.setValue(TrellisBlock.CLOCHE, true), Block.UPDATE_ALL);
+            level.setBlock(ctx.getClickedPos(), fit(state), Block.UPDATE_ALL);
             level.playSound(null, ctx.getClickedPos(), SoundEvents.GLASS_PLACE, SoundSource.BLOCKS, 1f, 1.1f);
             if (level.getBlockEntity(ctx.getClickedPos()) instanceof CropBlockEntity crop) {
                 crop.invalidateInfluence();

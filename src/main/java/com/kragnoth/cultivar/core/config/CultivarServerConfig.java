@@ -15,6 +15,8 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.BooleanValue WEEDS_ENABLED;
     public static final ModConfigSpec.BooleanValue WATER_SHIFTS_HUMIDITY;
     public static final ModConfigSpec.IntValue CONDITIONER_MAX_STEPS;
+    public static final ModConfigSpec.IntValue SHADE_MAX_LIGHT;
+    public static final ModConfigSpec.IntValue LAMP_MIN_LIGHT;
     public static final ModConfigSpec.IntValue WORK_BUDGET_PER_TICK;
     public static final ModConfigSpec.IntValue BED_CYCLE;
     public static final ModConfigSpec.IntValue BED_TICKS_PER_MB;
@@ -103,6 +105,13 @@ public final class CultivarServerConfig {
         CONDITIONER_MAX_STEPS = b.comment("How far soil conditioners (lime, sulfur dust, compost...) can shift each soil property, in steps either way.",
                         "0 disables conditioners.")
                 .defineInRange("conditionerMaxSteps", 2, 0, 6);
+        b.pop();
+
+        b.push("cloche");
+        SHADE_MAX_LIGHT = b.comment("A crop under a Shade Cloche reads light no brighter than this.")
+                .defineInRange("shadeMaxLight", 3, 0, 15);
+        LAMP_MIN_LIGHT = b.comment("A crop under a Lamp Cloche reads light at least this bright. Neither cloche changes real light.")
+                .defineInRange("lampMinLight", 14, 0, 15);
         b.pop();
 
         b.push("sprinkler");

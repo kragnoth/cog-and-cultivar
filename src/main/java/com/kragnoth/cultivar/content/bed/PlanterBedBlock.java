@@ -99,13 +99,13 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
         // Cloche: cover the trellis above, as if clicked on it.
-        if (stack.getItem() instanceof BellClocheItem && level.getBlockState(above).getBlock() instanceof TrellisBlock) {
+        if (stack.getItem() instanceof BellClocheItem cloche && level.getBlockState(above).getBlock() instanceof TrellisBlock) {
             BlockState t = level.getBlockState(above);
             if (t.getValue(TrellisBlock.CLOCHE) || t.getValue(TrellisBlock.CROSS) || TrellisBlock.hasSegmentAbove(level, above)) {
                 return ItemInteractionResult.FAIL;
             }
             if (!level.isClientSide()) {
-                level.setBlock(above, t.setValue(TrellisBlock.CLOCHE, true), Block.UPDATE_ALL);
+                level.setBlock(above, cloche.fit(t), Block.UPDATE_ALL);
                 level.playSound(null, above, SoundEvents.GLASS_PLACE, SoundSource.BLOCKS, 1f, 1f);
                 stack.consume(1, player);
             }

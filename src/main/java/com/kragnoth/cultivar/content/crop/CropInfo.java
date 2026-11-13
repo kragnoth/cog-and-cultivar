@@ -6,6 +6,8 @@ import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.content.core.genetics.Genetics;
 import com.kragnoth.cultivar.content.core.influence.InfluenceLookup;
 import com.kragnoth.cultivar.content.soil.Amendment;
+import com.kragnoth.cultivar.content.cloche.ClocheType;
+import com.kragnoth.cultivar.content.core.condition.CropLight;
 import com.kragnoth.cultivar.content.soil.SoilAmendments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -57,6 +59,9 @@ public final class CropInfo {
                     }
                 },
                 () -> out.add(Component.translatable("cultivar.info.no_soil").withStyle(ChatFormatting.RED)));
+        if (crop.getLevel() != null) {
+            out.add(lightLine(crop));
+        }
         for (InfluenceLookup.Active active : crop.activeInfluences()) {
             ResourceLocation id = active.id().location();
             out.add(Component.translatableWithFallback("influence." + id.getNamespace() + "." + id.getPath(), id.getPath())
@@ -69,6 +74,18 @@ public final class CropInfo {
                     .withStyle(ChatFormatting.RED));
         }
         return out;
+    }
+
+    /** "Light: 3 (Shade Cloche; 15 outside)": the light growth checks use. */
+    private static Component lightLine(CropBlockEntity crop) {
+        var level = crop.getLevel();
+        int raw = level.getRawBrightness(crop.getBlockPos(), 0);
+        var cloche = ClocheType.fitted(crop.getBlockState());
+        int seen = CropLight.adjust(raw, cloche);
+        if (seen == raw || cloche == null) {
+            return Component.translatable("cultivar.info.light", seen).withStyle(ChatFormatting.DARK_AQUA);
+        }
+        return Component.translatable("cultivar.info.light." + cloche.getSerializedName(), seen, raw).withStyle(ChatFormatting.DARK_AQUA);
     }
 
     public static int growthPercent(CropBlockEntity crop) {
