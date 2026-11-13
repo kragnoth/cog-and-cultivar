@@ -266,8 +266,8 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         BlockState trellis = server.getBlockState(above);
         if (!trellis.getValue(TrellisBlock.CLOCHE) && !trellis.getValue(TrellisBlock.CROSS) && !TrellisBlock.hasSegmentAbove(server, above)) {
             Slot c = equipment(CLOCHE);
-            if (c != null) {
-                trellis = trellis.setValue(TrellisBlock.CLOCHE, true);
+            if (c != null && c.stack().getItem() instanceof com.kragnoth.cultivar.content.cloche.BellClocheItem cloche) {
+                trellis = cloche.fit(trellis);
                 server.setBlock(above, trellis, Block.UPDATE_ALL);
                 c.bed().inventory.extractItem(c.index(), 1, false);
             }
@@ -364,7 +364,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         }
         if (state.getValue(TrellisBlock.CLOCHE)) {
             server.setBlock(above, state.setValue(TrellisBlock.CLOCHE, false), Block.UPDATE_ALL);
-            restock(server, above, new ItemStack(com.kragnoth.cultivar.content.cloche.ClocheModule.BELL_CLOCHE.get()), CLOCHE);
+            restock(server, above, new ItemStack(state.getValue(TrellisBlock.CLOCHE_TYPE).item()), CLOCHE);
             return;
         }
         if (server.getBlockEntity(above) instanceof CropBlockEntity crop && crop.hasPlant()) {

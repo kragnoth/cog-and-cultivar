@@ -141,3 +141,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   `soil_conditioner` registry (humidity too). Stored per soil position in a chunk attachment, survives replanting,
   cleared with the soil. Shown as a dusting inside the trellis (visible under a cloche), ambient dust puffs, and
   Jade/goggle lines; JEI Growing counts soils conditioners can fix. Protocol 5.
+- 2026-11-12: Shade and Lamp Cloches. Bell Cloche variants that cap (3) or raise (14) the light their own crop reads,
+  configurable, without changing world light, so dark and bright parents can sit side by side. New trellis state
+  `cloche_type` (old saves load as bell); Planter Beds take any cloche. Goggles show the light crops read.
+

@@ -1,0 +1,1 @@
+{ "type": "minecraft:crafting_shapeless", "category": "equipment", "ingredients": [{ "item": "cultivar:bell_cloche" }, { "item": "create:electron_tube" }, { "item": "minecraft:glowstone_dust" }], "result": { "id": "cultivar:lamp_cloche", "count": 1 } }
