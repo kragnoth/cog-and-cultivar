@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -52,6 +53,10 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
     public static final MapCodec<FieldCropBlock> CODEC = simpleCodec(FieldCropBlock::new);
     /** Growth mirrored to vanilla's 0–7 crop age, for other mods and vanilla logic that read it. */
     public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
+    /** An upper segment of a tall plant (cane, bamboo...): no block entity, the plant lives in the base below. */
+    public static final BooleanProperty UPPER = BooleanProperty.create("upper");
+    /** Tallest field stack: a base plus three segments (same as a trellis stack). */
+    public static final int MAX_STACK = 4;
     private static final VoxelShape[] SHAPES = new VoxelShape[8];
 
     static {
@@ -62,7 +67,7 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
 
     public FieldCropBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(AGE, 0));
+        registerDefaultState(stateDefinition.any().setValue(AGE, 0).setValue(UPPER, false));
     }
 
     @Override
@@ -72,7 +77,7 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(AGE);
+        builder.add(AGE, UPPER);
     }
 
     @Override
@@ -82,12 +87,29 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPES[state.getValue(AGE)];
+        return state.getValue(UPPER) ? SHAPES[7] : SHAPES[state.getValue(AGE)];
     }
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new FieldCropBlockEntity(pos, state);
+        return state.getValue(UPPER) ? null : new FieldCropBlockEntity(pos, state);
+    }
+
+    /** The base of the field stack {@code pos} belongs to (itself for a single-block plant). */
+    public static BlockPos basePos(BlockGetter level, BlockPos pos) {
+        BlockPos p = pos;
+        for (int i = 1; i < MAX_STACK; i++) {
+            BlockState s = level.getBlockState(p);
+            if (!(s.getBlock() instanceof FieldCropBlock) || !s.getValue(UPPER)) {
+                break;
+            }
+            p = p.below();
+        }
+        return p;
+    }
+
+    public static Optional<FieldCropBlockEntity> baseEntity(BlockGetter level, BlockPos pos) {
+        return level.getBlockEntity(basePos(level, pos)) instanceof FieldCropBlockEntity crop ? Optional.of(crop) : Optional.empty();
     }
 
     /** Stage mapped onto 0–7 (7 exactly when mature). */
@@ -103,6 +125,9 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
 
     @Override
     protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        if (state.getValue(UPPER)) {
+            return level.getBlockState(pos.below()).getBlock() instanceof FieldCropBlock;
+        }
         return level instanceof Level l ? FieldPlanting.isFieldSoil(l, pos.below()) : true;
     }
 
@@ -115,9 +140,19 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
 
     // ---------------------------------------------------------------- ticking
 
+    /** Breaking an upper segment cuts the plant down to below it (yield per segment cut, like cane). */
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!level.isClientSide() && state.getValue(UPPER) && !newState.is(this)) {
+            baseEntity(level, pos.below()).ifPresent(base -> base.cutAt(pos.getY() - base.getBlockPos().getY(),
+                    drop -> popResource(level, pos, drop)));
+        }
+        super.onRemove(state, level, pos, newState, moved);
+    }
+
     @Override
     protected boolean isRandomlyTicking(BlockState state) {
-        return true;
+        return !state.getValue(UPPER);
     }
 
     @Override
@@ -132,8 +167,15 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {
-        if (!(level.getBlockEntity(pos) instanceof FieldCropBlockEntity crop)) {
+        if (!(baseEntity(level, pos).orElse(null) instanceof FieldCropBlockEntity crop)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (FieldTakeover.isTrellis(stack)) {
+            return FieldTakeover.intoTrellis(level, crop, stack, player);
+        }
+        // Cultivar tools (shears, spade, satchel, cuttings) act through their own Item#useOn, not right-click harvest.
+        if (stack.is(com.kragnoth.cultivar.content.crop.TrellisBlock.CROP_TOOLS)) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
         Optional<Fertilizer> fertilizer = FertilizerLookup.forItem(level, stack);
         if (fertilizer.isPresent()) {
@@ -145,7 +187,7 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
                     return ItemInteractionResult.FAIL;
                 }
                 stack.consume(1, player);
-                level.levelEvent(1505, pos, 15); // bone meal particles
+                level.levelEvent(1505, crop.getBlockPos(), 15); // bone meal particles
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
@@ -155,7 +197,7 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
     /** Right-click a ripe plant: harvest by Gain and drop back to its after-harvest stage (replanted in place). */
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!(level.getBlockEntity(pos) instanceof FieldCropBlockEntity crop) || !crop.isMature()) {
+        if (!(baseEntity(level, pos).orElse(null) instanceof FieldCropBlockEntity crop) || !crop.isMature()) {
             return InteractionResult.PASS;
         }
         if (!level.isClientSide()) {
@@ -169,25 +211,24 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
 
     @Override
     public Optional<FieldCropBlockEntity> crop(BlockGetter level, BlockPos pos) {
-        return level.getBlockEntity(pos) instanceof FieldCropBlockEntity crop && crop.plant().hasPlant()
-                ? Optional.of(crop) : Optional.empty();
+        return baseEntity(level, pos).filter(crop -> crop.plant().hasPlant());
     }
 
     @Override
     public BlockPos soilPos(BlockGetter level, BlockPos pos) {
-        return pos.below();
+        return basePos(level, pos).below();
     }
 
     @Override
     public boolean harvestInPlace(Level level, BlockPos pos, Consumer<ItemStack> drops) {
-        return level.getBlockEntity(pos) instanceof FieldCropBlockEntity crop && crop.plant().harvest(drops);
+        return baseEntity(level, pos).map(crop -> crop.plant().harvest(drops)).orElse(false);
     }
 
     // ---------------------------------------------------------------- bone meal (dispensers, other mods)
 
     @Override
     public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
-        return level.getBlockEntity(pos) instanceof FieldCropBlockEntity crop && crop.plant().hasPlant() && !crop.isMature();
+        return baseEntity(level, pos).map(crop -> crop.plant().hasPlant() && !crop.isMature()).orElse(false);
     }
 
     @Override
@@ -197,7 +238,7 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
 
     @Override
     public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
-        if (level.getBlockEntity(pos) instanceof FieldCropBlockEntity crop) {
+        if (baseEntity(level, pos).orElse(null) instanceof FieldCropBlockEntity crop) {
             FertilizerLookup.forItem(level, new ItemStack(Items.BONE_MEAL)).ifPresent(f -> crop.plant().fertilize(f, false));
         }
     }
@@ -221,6 +262,6 @@ public class FieldCropBlock extends BaseEntityBlock implements PlantHolder, Bone
 
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-        return level.getBlockEntity(pos) instanceof FieldCropBlockEntity crop ? crop.plant().comparatorSignal() : 0;
+        return baseEntity(level, pos).map(crop -> crop.plant().comparatorSignal()).orElse(0);
     }
 }

@@ -43,10 +43,17 @@ public class FieldCropBlockEntity extends BlockEntity implements CropView, IHave
         }
 
         @Override
+        public int blocksAvailable() {
+            return FieldCropBlockEntity.this.blocksAvailable();
+        }
+
+        @Override
         public void changed() {
             FieldCropBlockEntity.this.changed();
         }
     });
+    /** Set while this entity adds/removes its own segments, so their removal doesn't cut the plant. */
+    private boolean syncingSegments;
 
     public FieldCropBlockEntity(BlockPos pos, BlockState state) {
         super(FieldCropModule.FIELD_CROP_BE.get(), pos, state);
@@ -84,6 +91,72 @@ public class FieldCropBlockEntity extends BlockEntity implements CropView, IHave
         return worldPosition;
     }
 
+    // ---------------------------------------------------------------- tall plants
+
+    /** The base plus free space (air or this plant's own segments) above it, up to the plant's height. */
+    public int blocksAvailable() {
+        if (level == null || !plant.hasPlant()) {
+            return 1;
+        }
+        int height = Math.min(plant.species().height(), FieldCropBlock.MAX_STACK);
+        int n = 1;
+        for (BlockPos p = worldPosition.above(); n < height; p = p.above(), n++) {
+            BlockState s = level.getBlockState(p);
+            boolean ours = s.getBlock() instanceof FieldCropBlock && s.getValue(FieldCropBlock.UPPER);
+            if (!ours && !s.isAir()) {
+                break;
+            }
+        }
+        return n;
+    }
+
+    /**
+     * An upper segment at {@code segment} (1 = just above the base) was broken: the plant is cut down to fit below
+     * it, yielding a product roll per segment cut if it was ripe, like cutting cane.
+     */
+    public void cutAt(int segment, java.util.function.Consumer<net.minecraft.world.item.ItemStack> drops) {
+        if (syncingSegments || !plant.hasPlant() || level == null) {
+            return;
+        }
+        var species = plant.species();
+        int stage = plant.stage();
+        if (species.blocksAt(stage) <= segment) {
+            return;
+        }
+        int target = stage;
+        while (target > 0 && species.blocksAt(target) > segment) {
+            target--;
+        }
+        if (plant.isMature()) {
+            for (int i = 0; i < species.blocksAt(stage) - segment; i++) {
+                plant.rollProducts(drops, level.random);
+            }
+        }
+        plant.setStage(target);
+    }
+
+    /** Places or removes upper segments so the stack is as tall as the plant. Server side. */
+    private void syncSegments() {
+        int needed = plant.hasPlant() ? Math.min(plant.species().blocksAt(plant.stage()), FieldCropBlock.MAX_STACK) : 1;
+        syncingSegments = true;
+        try {
+            BlockPos p = worldPosition.above();
+            for (int i = 1; i < FieldCropBlock.MAX_STACK; i++, p = p.above()) {
+                BlockState s = level.getBlockState(p);
+                boolean ours = s.getBlock() instanceof FieldCropBlock && s.getValue(FieldCropBlock.UPPER);
+                if (i < needed && s.isAir()) {
+                    level.setBlock(p, FieldCropModule.FIELD_CROP.get().defaultBlockState().setValue(FieldCropBlock.UPPER, true), Block.UPDATE_ALL);
+                } else if (i >= needed && ours) {
+                    level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                } else if (!ours && i >= needed) {
+                    break;
+                }
+            }
+        } finally {
+            syncingSegments = false;
+        }
+    }
+
     // ---------------------------------------------------------------- ticking
 
     /** The shared crop tick steps; weeds and breeding are trellis-only steps, so only growth runs here. */
@@ -98,6 +171,7 @@ public class FieldCropBlockEntity extends BlockEntity implements CropView, IHave
         if (level == null || level.isClientSide()) {
             return;
         }
+        syncSegments();
         BlockState state = getBlockState();
         if (state.getBlock() instanceof FieldCropBlock) {
             int age = FieldCropBlock.ageFor(plant);
@@ -146,6 +220,10 @@ public class FieldCropBlockEntity extends BlockEntity implements CropView, IHave
     private void rerenderOnClient() {
         if (level != null && level.isClientSide()) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
+            BlockPos p = worldPosition.above(); // tall plants are drawn by their segments too
+            for (int i = 1; i < FieldCropBlock.MAX_STACK && level.getBlockState(p).getBlock() instanceof FieldCropBlock; i++, p = p.above()) {
+                level.sendBlockUpdated(p, level.getBlockState(p), level.getBlockState(p), Block.UPDATE_IMMEDIATE);
+            }
         }
     }
 

@@ -36,7 +36,6 @@
   "item.cultivar.lamp_cloche": "Lamp Cloche",
   "cultivar.info.empty": "Empty trellis",
   "cultivar.info.no_soil": "No usable soil below",
-  "cultivar.field.needs_trellis": "%s grows too tall to plant without a trellis",
   "cultivar.field.wrong_soil": "%s won't take root in this soil (see its Growing page in JEI)",
   "cultivar.info.soil": "Soil: %s, %s, %s nutrients",
   "cultivar.info.light": "Light: %s",

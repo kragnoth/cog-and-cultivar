@@ -99,14 +99,6 @@ public final class FieldCropTests {
                     "wheat refuses " + wrong.get().getRegisteredName());
         }
 
-        // Plants taller than a block still need a trellis.
-        BlockPos farmland = new BlockPos(1, 0, 3);
-        h.setBlock(farmland, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7));
-        h.setBlock(farmland.above(), Blocks.AIR);
-        ItemStack cane = CultivarSeedItem.of(Genome.base(plant(h, "minecraft:sugar_cane")));
-        h.assertTrue(FieldPlanting.tryPlant(level, h.absolutePos(farmland), cane, null) == FieldPlanting.Result.REFUSED,
-                "sugar cane needs a trellis");
-        h.assertBlockNotPresent(FieldCropModule.FIELD_CROP.get(), farmland.above());
         h.succeed();
     }
 
@@ -125,6 +117,91 @@ public final class FieldCropTests {
             crop.randomTick(level, level.random);
         }
         h.assertTrue(crop.isMature(), "wheat matures on moist lit farmland");
+        h.succeed();
+    }
+
+    private static FieldCropBlockEntity fieldCrop(GameTestHelper h, BlockPos at, Holder<Plant> plant, int stage, int room) {
+        h.setBlock(at.below(), Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7));
+        for (int i = 1; i < room; i++) {
+            h.setBlock(at.above(i), Blocks.AIR);
+        }
+        h.setBlock(at, FieldCropModule.FIELD_CROP.get());
+        FieldCropBlockEntity crop = (FieldCropBlockEntity) h.getBlockEntity(at);
+        crop.plant().set(Genome.base(plant), stage, false);
+        return crop;
+    }
+
+    /** Tall plants stack field-crop segments like cane; breaking a segment cuts the plant down to below it. */
+    @GameTest(template = "empty")
+    public static void tallFieldCropsStackAndCut(GameTestHelper h) {
+        var level = h.getLevel();
+        Holder<Plant> cane = plant(h, "minecraft:sugar_cane");
+        int mature = cane.value().matureStage();
+        int tall = cane.value().blocksAt(mature);
+        BlockPos base = new BlockPos(1, 1, 1);
+        FieldCropBlockEntity crop = fieldCrop(h, base, cane, mature, tall);
+        for (int i = 1; i < tall; i++) {
+            h.assertTrue(h.getBlockState(base.above(i)).is(FieldCropModule.FIELD_CROP.get())
+                    && h.getBlockState(base.above(i)).getValue(FieldCropBlock.UPPER), "segment " + i + " placed");
+        }
+        level.destroyBlock(h.absolutePos(base.above(tall - 1)), true);
+        h.assertTrue(cane.value().blocksAt(crop.stage()) <= tall - 1, "breaking the top segment cut the plant down");
+        h.assertTrue(h.getBlockState(base).is(FieldCropModule.FIELD_CROP.get()), "the base stays");
+
+        crop.plant().setStage(mature);
+        List<ItemStack> drops = new ArrayList<>();
+        h.assertTrue(FieldCropModule.FIELD_CROP.get().harvestInPlace(level, h.absolutePos(base.above()), drops::add),
+                "harvesting through an upper segment harvests the plant");
+        int after = cane.value().blocksAt(crop.stage());
+        h.assertTrue(!drops.isEmpty() && after < tall, "harvest yields produce and leaves a shorter plant");
+        h.assertBlockNotPresent(FieldCropModule.FIELD_CROP.get(), base.above(after));
+        h.succeed();
+    }
+
+    /** Shears, spade, satchel and a trellis all work on field crops. */
+    @GameTest(template = "empty")
+    public static void toolsWorkOnFieldCrops(GameTestHelper h) {
+        var level = h.getLevel();
+        Holder<Plant> wheat = plant(h, "minecraft:wheat");
+        var player = h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        java.util.function.BiFunction<ItemStack, BlockPos, net.minecraft.world.InteractionResult> use = (stack, pos) -> {
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(pos)),
+                    net.minecraft.core.Direction.UP, h.absolutePos(pos), false);
+            return stack.useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+        };
+
+        // Shears: a cutting, one stage back.
+        BlockPos a = new BlockPos(0, 1, 0);
+        FieldCropBlockEntity clipped = fieldCrop(h, a, wheat, 4, 1);
+        use.apply(new ItemStack(com.kragnoth.cultivar.content.tools.ToolsModule.PRUNING_SHEARS.get()), a);
+        h.assertTrue(clipped.stage() == 3, "shears clip a field crop back a stage");
+
+        // Spade: lift (block goes, soil stays), then set down on other farmland at the same stage.
+        BlockPos b = new BlockPos(2, 1, 0), c = new BlockPos(4, 1, 0);
+        fieldCrop(h, b, wheat, 5, 1);
+        ItemStack spade = new ItemStack(com.kragnoth.cultivar.content.tools.ToolsModule.TRANSPLANTING_SPADE.get());
+        use.apply(spade, b);
+        h.assertBlockNotPresent(FieldCropModule.FIELD_CROP.get(), b);
+        h.assertBlockPresent(Blocks.FARMLAND, b.below());
+        h.setBlock(c.below(), Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7));
+        h.setBlock(c, Blocks.AIR);
+        use.apply(spade, c.below());
+        h.assertTrue(h.getBlockEntity(c) instanceof FieldCropBlockEntity moved && moved.stage() == 5, "spade sets the plant down at its stage");
+
+        // Satchel on a ripe field crop: harvest and gather seed; it stays planted.
+        BlockPos d = new BlockPos(0, 1, 2);
+        FieldCropBlockEntity ripe = fieldCrop(h, d, wheat, wheat.value().matureStage(), 1);
+        use.apply(new ItemStack(com.kragnoth.cultivar.content.tools.ToolsModule.SEED_SATCHEL.get()), d);
+        h.assertTrue(ripe.plant().hasPlant() && !ripe.isMature(), "satchel harvests a ripe field crop");
+
+        // Trellis takeover: the plant moves into the trellis with its growth.
+        BlockPos e = new BlockPos(2, 1, 2);
+        FieldCropBlockEntity field = fieldCrop(h, e, wheat, 4, 1);
+        com.kragnoth.cultivar.content.field.FieldTakeover.intoTrellis(level, field,
+                new ItemStack(com.kragnoth.cultivar.content.crop.CropModule.TIMBER_TRELLIS.get()), player);
+        h.assertTrue(h.getBlockEntity(e) instanceof com.kragnoth.cultivar.content.crop.CropBlockEntity trellis
+                && trellis.hasPlant() && trellis.stage() == 4, "a trellis takes over the field crop at its stage");
         h.succeed();
     }
 }

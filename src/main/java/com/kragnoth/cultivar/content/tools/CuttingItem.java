@@ -48,6 +48,29 @@ public class CuttingItem extends Item {
         Level level = ctx.getLevel();
         ItemStack stack = ctx.getItemInHand();
         Genome genome = stack.get(CoreModule.GENOME.get());
+        if (genome != null && ctx.getClickedFace() == net.minecraft.core.Direction.UP
+                && !(level.getBlockState(ctx.getClickedPos()).getBlock() instanceof com.kragnoth.cultivar.api.crop.PlantHolder)) {
+            // Straight into soil: same take roll; refused soil costs nothing.
+            var check = com.kragnoth.cultivar.content.field.FieldPlanting.check(level, ctx.getClickedPos(), genome, ctx.getPlayer());
+            if (check != com.kragnoth.cultivar.content.field.FieldPlanting.Result.PASS) {
+                if (check == com.kragnoth.cultivar.content.field.FieldPlanting.Result.PLANTED && !level.isClientSide()) {
+                    boolean took = level.random.nextDouble() < takeChance(genome);
+                    if (took) {
+                        com.kragnoth.cultivar.content.field.FieldPlanting.plant(level, ctx.getClickedPos(), genome, START_STAGE,
+                                stack.has(CoreModule.ASSAYED.get()), ctx.getPlayer());
+                    } else {
+                        level.playSound(null, ctx.getClickedPos(), SoundEvents.GRASS_BREAK, SoundSource.BLOCKS, 1f, 1f);
+                        if (ctx.getPlayer() != null) {
+                            ctx.getPlayer().displayClientMessage(Component.translatable("item.cultivar.cutting.failed").withStyle(ChatFormatting.GRAY), true);
+                        }
+                    }
+                    if (ctx.getPlayer() == null || !ctx.getPlayer().getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                }
+                return InteractionResult.sidedSuccess(level.isClientSide());
+            }
+        }
         if (genome == null || TrellisBlock.isSegment(level, ctx.getClickedPos())
                 || !(level.getBlockEntity(ctx.getClickedPos()) instanceof CropBlockEntity crop)
                 || crop.hasPlant() || crop.isCross()) {

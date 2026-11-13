@@ -775,7 +775,7 @@ Cultivar seeds of every species (vanilla ones included) plant as **field crops**
 | A2 ✅ | `cultivar:field_crop` block + BE on the core; plant renderer reuses `CropBakedModel` quads without the frame | A field crop renders and grows by tick |
 | A3 ✅ | Seed placement: a Cultivar seed used on a soil the plant accepts places a field crop; otherwise the action bar says why (shared reason text with goggles) | Planting rules match the trellis for every shipped plant (gametest) |
 | A4 ✅ (no influences/cloches on field crops yet) | Growth, Strength tolerance, Gain/yield drops, conditioners, cloches (fitted on field crops), Sprinkler, influences | Field and trellis crops grow at equal rates on equal soil (gametest) |
-| A5 | No breeding/spread/weeds on field crops; trellis placed over a field crop adopts it | Adopting keeps genome and stage |
+| A5 ✅ | No breeding/spread/weeds on field crops; trellis placed over a field crop adopts it | Adopting keeps genome and stage |
 | A6 | Create: harvester resets to stage 0, deployer plants and harvests, plough leaves field crops alone; Jade/goggles readout | Contraption harvest loop gametest |
 
 **Phase B: Hand farming**
