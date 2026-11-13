@@ -740,13 +740,79 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **2 — Tools & info** (Loupe and Tillers later removed: goggles and hoes cover them) | Spade, Shears, Tiller, Satchel, Loupe (+ goggle merge), Ledger, Assaying Engine (kinetic) (Assay Card dropped) | Full manual breeding loop with diegetic info |
 | **2.5 — Tall crops** ✅ | Plant `height`, auto-stacking trellis segments, sugarcane/cactus/bamboo data (Wall Trellis deferred to Phase 6 content) | A 3-high sugarcane grows on a stacked trellis |
 | **3 — Create farming** ✅ | Harvester override, deployer actions, item attributes (stat filters), comparator/Display Link, **cull loop: Millstone seeds → Seed Meal → fertilizer** | Fully automated plant–harvest–sort loop |
-| **4 — Water** ✅ | One block: the **Sprinkler** (1000 mB water tank, runs only while it has water, 1 mB per N ticks; adds random ticks + occasional BonemealEvent pulses to growables in a 9×9 area, moistens farmland; fed by any NeoForge fluid-capability pipe: Create, Pipez, Modern Dynamics). Cisterns/drip lines/troughs dropped as unnecessary | Sprinkler field fed by Create pipes |
+| **4 — Water** ✅ | One block: the **Sprinkler** (1000 mB water tank, runs only while it has water, 1 mB per N ticks; adds random ticks + occasional BonemealEvent pulses to growables in a 9×9 area, moistens farmland; fed by any NeoForge fluid-capability pipe: Create, Pipez, Modern Dynamics). Cisterns/drip lines dropped; troughs return as the Irrigation Channel in Phase C | Sprinkler field fed by Create pipes |
 | **5 — Climate** ❌ dropped | Temperature added no gameplay; soils, the Sprinkler and the Bell Cloche already cover climate control. Left to addons via the API (see ARCHITECTURE.md "Extending from an addon") | — |
 | **Planter Bed** ✅ | End-stage breeding machine. Self-contained, pipe-fed (soil, ranked seed stock, fertilizer, trellis + cloche supply, 4000 mB water, 9 outputs); touching beds form one plot (shared capabilities, balanced water, plot-wide goggles + comparator). Places fed trellises/cloches itself; redstone strips them back. Breeder beds (grafting frame above) bank newborn children as seeds and re-arm; producer beds plant the best seed, hold mature crops for neighbouring breeders, harvest, and upgrade to better seeds of the same species. Ranking = weighted stats (config) | A self-improving plot fed only by pipes |
 | **Trial Bed** ✅ | Research plot (brass casing): touching Trial Beds grow and cross their stocked seeds for real with every limiter removed (ideal soil host: no requirements, weeds or mutation habitats). Free trellises in a checkerboard: producers plant random stocked species (spending a seed), hold mature to parent, then rotate; frames breed, and a child of a new species records that mutation in the Ledger. Bonus: every N minutes (config, default 5) a roll at a configurable chance (default 5% for a full 9×9, scaled by plot size) discovers a random untested mutation whose parents are both stocked, records parents + child in the plot's Ledger (recipe appears), and spends one seed of each parent. Inputs: seeds + Ledger; output: the Ledger | A 9×9 fills a Ledger over time |
 | **6 — Content** (slimmed) | **Ore-blooms** ✅ (22 blooms incl. 12 low-value stepping stones, data-only, drop `create:crushed_raw_*` and gems), **habitat blight variants** ✅ (9, data-driven `habitat`). Derelict Conservatories ✅ (greenhouse + lean-to ruins, decay processor, loot). Optional: Wall Trellis. Dropped: Brass Apiary, Seed Vault, Livestock Trough/fodder genes, Ore Petals, Brassleaf gating | Pack-ready |
 | **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
 | **7 — Polish** | Excalibur-based asset pass (blooms ✅, blights ✅), sounds ✅ (vanilla/Create events), advancements ✅, Ponder scenes ✅ (spreading, stats, crossbreeding, assaying), JEI ✅ / EMI categories, Jade | Release |
+
+### 6.1 Field farming roadmap (phases A–E, planned 2026-11-13)
+
+The trellis is the breeding half of the mod; these phases build the everyday farming half. Decisions taken:
+Cultivar seeds of every species (vanilla ones included) plant as **field crops** that keep the genome; field crops
+**respect Strength** like trellis crops; ripe vine blossoms can be taken by **shears, Deployers and Saws**.
+
+**Ground rules for every step** (each step is one PR; maintainability over "works for now"):
+- Follow `docs/ARCHITECTURE.md`: one module per feature (`content/<feature>/<Feature>Module` + one line in
+  `CultivarModules`), client code only under `client/`, server-safe ticking, no per-tick world scans.
+- Reuse, don't fork: growth goes through the existing `GrowthCondition`/`GrowthContext`, `Hydration`,
+  `SoilAmendments`, `CropLight` and influence lookup; stats through the genome engine; Create support through
+  `HarvesterMovementBehaviourMixin` and the deployer hooks. Where a shared piece needs a change, change it in place
+  (with its tests) rather than adding a parallel path.
+- Data-driven first: anything a pack maker might tune is a datapack registry, tag or server config, documented in
+  `PACKMAKERS.md`.
+- Each PR carries its own lang, JEI page, tooltips, recipes, art as a `tools/art/gen_*.py` script run through
+  `build_art.py` (both styles), gametests, and spec/parity-audit lines. Bump the network protocol when synced data
+  changes. CI green on both Create versions before merge.
+
+**Phase A: Field crops (no trellis)**
+
+| Step | Scope | Done when |
+|---|---|---|
+| A1 | Extract the crop core shared by trellis and field crops (genome, stage, growth tick, drops, conditions) out of `CropBlockEntity` behind a small interface, with no behaviour change | Existing gametests pass unchanged |
+| A2 | `cultivar:field_crop` block + BE on the core; plant renderer reuses `CropBakedModel` quads without the frame | A field crop renders and grows by tick |
+| A3 | Seed placement: a Cultivar seed used on a soil the plant accepts places a field crop; otherwise the action bar says why (shared reason text with goggles) | Planting rules match the trellis for every shipped plant (gametest) |
+| A4 | Growth, Strength tolerance, Gain/yield drops, conditioners, cloches (fitted on field crops), Sprinkler, influences | Field and trellis crops grow at equal rates on equal soil (gametest) |
+| A5 | No breeding/spread/weeds on field crops; trellis placed over a field crop adopts it | Adopting keeps genome and stage |
+| A6 | Create: harvester resets to stage 0, deployer plants and harvests, plough leaves field crops alone; Jade/goggles readout | Contraption harvest loop gametest |
+
+**Phase B: Hand farming**
+
+| Step | Scope | Done when |
+|---|---|---|
+| B1 | Right-click harvest + replant on field crops, trellis crops and vanilla `CropBlock`s (config `farming.rightClickHarvest`) | Works for all three; respects Fortune-free drops |
+| B2 | Scythe (wood/iron/brass): 3×3/3×3/5×5 harvest + replant, durability | Deployer-usable |
+| B3 | Dibber: plants a row of 3–5 from satchel/offhand, sneak for one | Uses the A3 placement path |
+| B4 | Watering Can (+ brass tier): fill at water, moisten farmland and give random-tick bursts in 3×3/5×5 | Shares the Sprinkler's tick-burst helper |
+| B5 | Scarecrow: no trampling or mob crop damage within 8 blocks (tag-driven entity list) | Trample gametest |
+
+**Phase C: Irrigation without water blocks**
+
+| Step | Scope | Done when |
+|---|---|---|
+| C1 | Irrigation Channel: open trough fluid network (tank per segment, balanced like Planter Bed plots), pipe-compatible | Water flows along a channel line |
+| C2 | Channel hydrates farmland within 4 (FarmBlock mixin) and counts as "water beside" in `Hydration` | Farmland stays moist with no water block (gametest) |
+| C3 | Archimedes Screw: kinetic, bottom in water, lifts 1 block per segment, stackable, output scales with RPM into channels/pipes | Screw feeds a raised channel field |
+| C4 | Mulch: soil conditioner (−1 humidity) that also keeps farmland moist for N days without water | Data entry + farmland timer |
+
+**Phase D: Flowering vines (dye gaps)**
+
+| Step | Scope | Done when |
+|---|---|---|
+| D1 | Vine block on the plant registry (`growth: vine`): climbs walls/trellises, slow spread up and sideways, flowering stage | One vine climbs and flowers |
+| D2 | Blossom harvest by shears, Deployer and Saw; resets to leafy; blossoms craft or mill to dye | Contraption saw harvest gametest |
+| D3 | Seven vines: Ivy Bloom (green), Hops (lime), Morning Glory (cyan), Wisteria (purple, hangs), Ash Creeper (gray), Cinnamon Vine (brown), Nightshade (black); art script | Each colour obtainable |
+| D4 | Breeding: vines cross on trellises into the mutation tree; `check_crosses.py` covers them | Checker green |
+
+**Phase E: Automation sweep**
+
+| Step | Scope | Done when |
+|---|---|---|
+| E1 | Audit every crop-like block against harvester, deployer, plough, saw, drill | Gametest per block × contraption |
+| E2 | Ponder scenes: field crops, hand tools, channels + screw, vines | Lang check green |
+| E3 | Balance pass (`sim_breeding.py` + growth rates) and release notes | Tagged minor version |
 
 ---
 
