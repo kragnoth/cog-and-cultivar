@@ -452,15 +452,18 @@ Keep the 6 stats and the diploid model. Re-skin the presentation:
 
 ### 3.6 Soil Conditioning (improvement over AgriCraft)
 
-In AgriCraft, soil properties are fixed per block. Make them **mutable per position**:
-- A **chunk attachment** (`AttachmentType`, serialised) maps `BlockPos → SoilDelta {humidity ±, acidity ±, nutrients ±, decayTimer}`. It holds sparse entries for conditioned soil only.
-- **Effective soil = base soil (datapack) + delta, clamped to the scale.**
-- Sources of change:
-  - Irrigation, drip lines and mist raise humidity. Drought and nether conditions lower it.
-  - **Lime** (crushed limestone or Create's crushed calcite) raises alkalinity. **Sulfur / ash / blight residue** raises acidity.
-  - Compost, manure and fertilizers raise nutrients. **Each harvest consumes nutrients** (optional crop rotation; nitrogen-fixer plants restore them).
-- Deltas decay toward base over time (lazy evaluation on read, using the stored game time).
-- The Climate Gauge and Loupe show effective values.
+In AgriCraft, soil properties are fixed per block. Here they are **mutable per position** (shipped):
+- A **chunk attachment** (`cultivar:soil_amendments`, serialised with the chunk) maps `BlockPos → Amendment {acidity, nutrients, humidity}` steps. Sparse: only conditioned soil has an entry, and only chunks with entries carry the attachment.
+- **Effective soil = base soil (datapack) + environment (water, heat, cloche: `Hydration`) + amendment, clamped to the scale.** Growth checks, goggles, Jade and JEI all read the same values.
+- **Conditioners** are a datapack registry (`cultivar/soil_conditioner/<id>.json`: `items`, `acidity`, `nutrients`, `humidity` steps, each -3..3). Shipped:
+  - **Agricultural Lime** (+1 alkaline): Millstone on calcite (2) or Create limestone (1 + 50%).
+  - **Sulfur Dust** (+1 acidic): Millstone on gunpowder (2); ties into the Brimstone Puff.
+  - **Compost** (+1 nutrients): Mixer with dirt, bone meal and rotten flesh (3), or dirt, two seed meal and leaves (2); hand-craft fallback (1).
+- Used on the soil block or on any segment of the trellis standing on it (a `RightClickBlock` handler, so deployers work). Each property's total is capped at `soil.conditionerMaxSteps` (server config, default 2, 0 disables); opposite conditioners cancel. A use that changes nothing is refused and costs nothing.
+- The amendment belongs to the soil: it survives trellis break/replant and is cleared when the soil block is broken (player break, explosion) or a Planter Bed's fill changes.
+- **Visual indicator:** a dusting quad on the floor of the trellis (one layer per amended property: white lime, yellow sulfur, dark compost crumbs with leaf bits; also lean, wet and dry for datapack conditioners; denser at 2+ steps), visible through a Bell Cloche; a faint coloured dust puff off any amended soil within two chunks (so bare soil shows it too); an "Amended: ..." line in Jade (soil block and crop) and goggles.
+- Sync: `soil_amendments` payload per chunk on `ChunkWatchEvent.Sent` and on change; the client copy is keyed by dimension and chunk and is safe to read from meshing threads.
+- Not done (yet): decay toward base over time, harvests consuming nutrients, and blight residue as an acidifier. `check_crosses.py` stays strict (no conditioners), so every cross remains breedable without them.
 
 This turns the strength-tolerance system from "find the right block" into an engineering problem, which suits Create.
 

@@ -10,6 +10,7 @@ import com.kragnoth.cultivar.api.plant.Mutation;
 import com.kragnoth.cultivar.api.plant.Plant;
 import com.kragnoth.cultivar.api.plant.Weed;
 import com.kragnoth.cultivar.api.soil.Soil;
+import com.kragnoth.cultivar.api.soil.SoilConditioner;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +23,7 @@ import net.neoforged.neoforge.registries.RegistryBuilder;
  * stats, growth-condition types, plant-modifier types. Addons register into them with a DeferredRegister.
  *
  * <p><b>Datapack registries</b> (JSON under {@code data/<namespace>/cultivar/<registry>/}) hold <i>content</i>:
- * plants, soils, mutations, weeds, fertilizers. They reload with datapacks, are synced to clients on join,
+ * plants, soils, mutations, weeds, fertilizers, soil conditioners. They reload with datapacks, are synced to clients on join,
  * and can be added or overridden by modpacks without code.
  */
 public final class CultivarRegistries {
@@ -41,6 +42,7 @@ public final class CultivarRegistries {
     public static final ResourceKey<Registry<Weed>> WEED = key("weed");
     public static final ResourceKey<Registry<Fertilizer>> FERTILIZER = key("fertilizer");
     public static final ResourceKey<Registry<CropInfluence>> CROP_INFLUENCE = key("crop_influence");
+    public static final ResourceKey<Registry<SoilConditioner>> SOIL_CONDITIONER = key("soil_conditioner");
 
     // ---- static registry instances ----
     public static final Registry<Stat> STAT = new RegistryBuilder<>(STAT_KEY).sync(true).create();

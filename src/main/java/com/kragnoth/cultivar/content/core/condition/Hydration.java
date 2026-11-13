@@ -25,6 +25,7 @@ import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
  *   <li>one more step wetter under a Bell Cloche (on the trellis standing on the soil);</li>
  *   <li>one step drier if a lit heat source ({@code #cultivar:soil_heaters}: a burning Blaze Burner, lit campfire,
  *       magma block) sits beside or under it;</li>
+ *   <li>plus any humidity steps from soil conditioners ({@link com.kragnoth.cultivar.content.soil.SoilAmendments});</li>
  *   <li>steps add up and clamp at arid / flooded; with no water or heat, unwatered farmland reads one step drier.</li>
  * </ul>
  * A handful of block reads and a pure function of world state, so the server's growth checks and the client's goggle
@@ -34,8 +35,10 @@ public final class Hydration {
     private Hydration() {}
 
     public static SoilLevels.Humidity effective(BlockGetter level, BlockPos soilPos, SoilLevels.Humidity base) {
+        SoilLevels.Humidity[] all = SoilLevels.Humidity.values();
+        int amended = com.kragnoth.cultivar.content.soil.SoilAmendments.get(level, soilPos).humidity();
         if (CultivarServerConfig.SPEC.isLoaded() && !CultivarServerConfig.WATER_SHIFTS_HUMIDITY.get()) {
-            return base;
+            return all[Math.clamp(base.ordinal() + amended, 0, all.length - 1)];
         }
         boolean wet = false;
         BlockState host = level.getBlockState(soilPos);
@@ -59,7 +62,7 @@ public final class Hydration {
         if (above.hasProperty(TrellisBlock.CLOCHE) && above.getValue(TrellisBlock.CLOCHE)) {
             shift += 1;
         }
-        SoilLevels.Humidity[] all = SoilLevels.Humidity.values();
+        shift += amended;
         return all[Math.clamp(base.ordinal() + shift, 0, all.length - 1)];
     }
 

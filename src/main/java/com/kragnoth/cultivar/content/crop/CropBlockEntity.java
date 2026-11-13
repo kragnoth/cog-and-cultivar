@@ -2,6 +2,7 @@ package com.kragnoth.cultivar.content.crop;
 
 import net.minecraft.world.level.BlockGetter;
 import com.kragnoth.cultivar.content.core.condition.Hydration;
+import com.kragnoth.cultivar.content.soil.SoilAmendments;
 import com.kragnoth.cultivar.api.soil.SoilLevels;
 
 import com.kragnoth.cultivar.Cultivar;
@@ -147,15 +148,27 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         return activeInfluences;
     }
 
-    /** Soil values as conditions see them: humidity shifted by nearby water (see {@link Hydration}). */
+    /** Soil values as conditions see them: humidity shifted by nearby water, heat, cloches and conditioners (see {@link Hydration}). */
     public Optional<SoilLevels.Humidity> humidity() {
         return soil().map(s -> Hydration.effective(level, worldPosition.below(), s.humidity()));
     }
 
+    /** Acidity after soil conditioners (see {@link SoilAmendments}). */
+    public Optional<SoilLevels.Acidity> acidity() {
+        return soil().map(s -> SoilAmendments.acidity(level, worldPosition.below(), s.acidity()));
+    }
+
+    /** Nutrients after soil conditioners (see {@link SoilAmendments}). */
+    public Optional<SoilLevels.Nutrients> nutrients() {
+        return soil().map(s -> SoilAmendments.nutrients(level, worldPosition.below(), s.nutrients()));
+    }
+
     private GrowthContext growthContext(Optional<Soil> soil) {
+        BlockPos soilPos = worldPosition.below();
         return new GrowthContext(level, worldPosition, soil,
-                soil.map(s -> Hydration.effective(level, worldPosition.below(), s.humidity())),
-                soil.map(Soil::acidity), soil.map(Soil::nutrients));
+                soil.map(s -> Hydration.effective(level, soilPos, s.humidity())),
+                soil.map(s -> SoilAmendments.acidity(level, soilPos, s.acidity())),
+                soil.map(s -> SoilAmendments.nutrients(level, soilPos, s.nutrients())));
     }
 
     // ---------------------------------------------------------------- hardiness
@@ -266,9 +279,14 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         if (level == null) {
             return Optional.empty();
         }
-        BlockState under = level.getBlockState(worldPosition.below());
+        return soilAt(level, worldPosition.below());
+    }
+
+    /** The Cultivar soil at {@code pos}: the block itself, or what a soil host (Planter Bed, Trial Bed) holds. */
+    public static Optional<Soil> soilAt(Level level, BlockPos pos) {
+        BlockState under = level.getBlockState(pos);
         BlockState below = under.getBlock() instanceof com.kragnoth.cultivar.api.soil.SoilHost host
-                ? host.hostedSoil(level, worldPosition.below()) : under;
+                ? host.hostedSoil(level, pos) : under;
         if (below == null) {
             return Optional.empty();
         }

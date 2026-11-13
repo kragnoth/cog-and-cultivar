@@ -4,7 +4,10 @@ import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.plant.Plant;
 import com.kragnoth.cultivar.api.plant.PlantRender;
 import com.kragnoth.cultivar.api.plant.Weed;
+import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.content.crop.CropBlockEntity;
+import com.kragnoth.cultivar.content.soil.Amendment;
+import com.kragnoth.cultivar.content.soil.SoilAmendments;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -40,13 +43,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CropBakedModel extends BakedModelWrapper<BakedModel> {
     private static final ModelProperty<Visual> VISUAL = new ModelProperty<>();
 
-    /** What to draw inside the frame; either part may be null. */
-    private record Visual(@Nullable ResourceLocation plant, PlantRender.Shape shape, boolean model, @Nullable ResourceLocation weed) {}
+    /** What to draw inside the frame; plant and weed may be null, soil overlays may be empty. */
+    private record Visual(@Nullable ResourceLocation plant, PlantRender.Shape shape, boolean model, @Nullable ResourceLocation weed,
+                          List<ResourceLocation> soilOverlays) {}
 
     private record Key(ResourceLocation texture, PlantRender.Shape shape) {}
 
     private final Map<Key, List<BakedQuad>> cache = new ConcurrentHashMap<>();
     private final Map<ResourceLocation, List<BakedQuad>> modelCache = new ConcurrentHashMap<>();
+    private final Map<ResourceLocation, BakedQuad> floorCache = new ConcurrentHashMap<>();
     private final Map<ResourceLocation, Boolean> greyscale = new ConcurrentHashMap<>();
 
     public CropBakedModel(BakedModel original) {
@@ -91,10 +96,11 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
                 weedTex = weed.textures().get(i);
             }
         }
-        if (plantTex == null && weedTex == null) {
+        List<ResourceLocation> overlays = segment == 0 ? soilOverlays(crop.getBlockPos().below()) : List.of();
+        if (plantTex == null && weedTex == null && overlays.isEmpty()) {
             return modelData;
         }
-        return modelData.derive().with(VISUAL, new Visual(plantTex, shape, model, weedTex)).build();
+        return modelData.derive().with(VISUAL, new Visual(plantTex, shape, model, weedTex, overlays)).build();
     }
 
     @Override
@@ -113,6 +119,11 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
         }
         if (visual.weed() != null) {
             out.addAll(cache.computeIfAbsent(new Key(visual.weed(), PlantRender.Shape.HASH), CropBakedModel::bake));
+        }
+        for (int i = 0; i < visual.soilOverlays().size(); i++) {
+            ResourceLocation tex = visual.soilOverlays().get(i);
+            int layer = i;
+            out.add(floorCache.computeIfAbsent(tex.withSuffix("_l" + layer), k -> floor(tex, 0.012f + 0.004f * layer)));
         }
         return out;
     }
@@ -166,6 +177,51 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
                 return true;
             }
         });
+    }
+
+    // ---------------------------------------------------------------- soil conditioner overlay
+
+    /**
+     * Dusting on the soil inside the frame, one layer per amended property ({@code block/amendment/<kind>_<1|2>}),
+     * so a conditioned soil reads at a glance even under a cloche. The trellis is the only thing drawn there, so
+     * the overlay sits on the floor of the trellis block rather than on (any mod's) soil model.
+     */
+    private static List<ResourceLocation> soilOverlays(BlockPos soilPos) {
+        var level = Minecraft.getInstance().level;
+        if (level == null) {
+            return List.of();
+        }
+        Amendment a = SoilAmendments.client(level.dimension(), soilPos);
+        if (a.isEmpty()) {
+            return List.of();
+        }
+        List<ResourceLocation> out = new ArrayList<>(3);
+        overlay(out, a.acidity(), "alkaline", "acidic");
+        overlay(out, a.nutrients(), "rich", "lean");
+        overlay(out, a.humidity(), "wet", "dry");
+        return out;
+    }
+
+    private static void overlay(List<ResourceLocation> out, int steps, String up, String down) {
+        if (steps != 0) {
+            out.add(Cultivar.id("block/amendment/" + (steps > 0 ? up : down) + "_" + Math.min(2, Math.abs(steps))));
+        }
+    }
+
+    /** An up-facing quad covering the block floor at height {@code y}. */
+    private static BakedQuad floor(ResourceLocation texture, float y) {
+        TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(texture);
+        QuadBakingVertexConsumer b = new QuadBakingVertexConsumer();
+        b.setSprite(sprite);
+        b.setDirection(Direction.UP);
+        b.setShade(true);
+        b.setHasAmbientOcclusion(false);
+        float u0 = sprite.getU0(), u1 = sprite.getU1(), v0 = sprite.getV0(), v1 = sprite.getV1();
+        vertex(b, 0, y, 0, u0, v0, 0, 1, 0);
+        vertex(b, 0, y, 1, u0, v1, 0, 1, 0);
+        vertex(b, 1, y, 1, u1, v1, 0, 1, 0);
+        vertex(b, 1, y, 0, u1, v0, 0, 1, 0);
+        return b.bakeQuad();
     }
 
     // ---------------------------------------------------------------- quad building

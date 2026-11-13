@@ -1,11 +1,12 @@
 package com.kragnoth.cultivar.content.crop;
 
 import com.kragnoth.cultivar.api.genetics.Genome;
-import com.kragnoth.cultivar.api.soil.Soil;
 import com.kragnoth.cultivar.api.soil.SoilLevels;
 import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.content.core.genetics.Genetics;
 import com.kragnoth.cultivar.content.core.influence.InfluenceLookup;
+import com.kragnoth.cultivar.content.soil.Amendment;
+import com.kragnoth.cultivar.content.soil.SoilAmendments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -47,7 +48,14 @@ public final class CropInfo {
         } else {
             out.add(Component.translatable("cultivar.info.empty").withStyle(ChatFormatting.DARK_GRAY));
         }
-        crop.soil().ifPresentOrElse(soil -> out.add(soilLine(soil, crop.humidity().orElse(soil.humidity()))),
+        crop.soil().ifPresentOrElse(soil -> {
+                    out.add(soilLine(crop.humidity().orElse(soil.humidity()), crop.acidity().orElse(soil.acidity()),
+                            crop.nutrients().orElse(soil.nutrients())));
+                    Amendment amendment = SoilAmendments.get(crop.getLevel(), crop.getBlockPos().below());
+                    if (!amendment.isEmpty()) {
+                        out.add(SoilAmendments.describe(amendment));
+                    }
+                },
                 () -> out.add(Component.translatable("cultivar.info.no_soil").withStyle(ChatFormatting.RED)));
         for (InfluenceLookup.Active active : crop.activeInfluences()) {
             ResourceLocation id = active.id().location();
@@ -72,11 +80,11 @@ public final class CropInfo {
         return mature == 0 ? 100 : 100 * crop.stage() / mature;
     }
 
-    private static MutableComponent soilLine(Soil soil, SoilLevels.Humidity humidity) {
+    public static MutableComponent soilLine(SoilLevels.Humidity humidity, SoilLevels.Acidity acidity, SoilLevels.Nutrients nutrients) {
         return Component.translatable("cultivar.info.soil",
                 level("humidity", humidity.getSerializedName()),
-                level("acidity", soil.acidity().getSerializedName()),
-                level("nutrients", soil.nutrients().getSerializedName())).withStyle(ChatFormatting.DARK_AQUA);
+                level("acidity", acidity.getSerializedName()),
+                level("nutrients", nutrients.getSerializedName())).withStyle(ChatFormatting.DARK_AQUA);
     }
 
     private static Component level(String kind, String value) {

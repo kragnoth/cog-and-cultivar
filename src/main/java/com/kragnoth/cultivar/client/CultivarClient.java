@@ -33,6 +33,7 @@ public final class CultivarClient {
             AssayClientModule::new,
             com.kragnoth.cultivar.client.bed.BedClientModule::new,
             com.kragnoth.cultivar.client.tooltip.TooltipClientModule::new,
+            com.kragnoth.cultivar.client.soil.SoilClientModule::new,
             com.kragnoth.cultivar.client.ponder.PonderClientModule::new
     );
 
