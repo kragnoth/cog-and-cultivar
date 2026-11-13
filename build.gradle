@@ -4,7 +4,21 @@ plugins {
     id 'net.neoforged.moddev' version '2.0.141'
 }
 
-version = mod_version
+// Auto version: <mod_version_base>.<commits since the base was last changed in gradle.properties>.
+// Builds without git history (source zip, shallow clone) fall back to patch 0 with a -nogit suffix.
+def git = { List<String> args ->
+    try {
+        def proc = (['git'] + args).execute(null, rootDir)
+        def out = proc.text.trim()
+        proc.waitFor() == 0 && out ? out : null
+    } catch (ignored) {
+        null
+    }
+}
+def versionBump = git(['log', '-n', '1', '--format=%H', '-G', '^mod_version_base=', '--', 'gradle.properties'])
+def versionPatch = versionBump ? git(['rev-list', '--count', "${versionBump}..HEAD"]) : null
+version = versionPatch != null ? "${mod_version_base}.${versionPatch}" : "${mod_version_base}.0-nogit"
+ext.mod_version = version
 group = mod_group_id
 
 base {
@@ -111,7 +125,7 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
             mod_id                 : mod_id,
             mod_name               : mod_name,
             mod_license            : mod_license,
-            mod_version            : mod_version,
+            mod_version            : project.version,
             mod_authors            : mod_authors,
             mod_description        : mod_description
     ]

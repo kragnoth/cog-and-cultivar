@@ -22,6 +22,8 @@ jobs:
       CREATE: -Pcreate_version=${{ matrix.create }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # full history: build.gradle derives the version patch from it
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
