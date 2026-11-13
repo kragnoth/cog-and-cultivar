@@ -6,6 +6,7 @@ import com.kragnoth.cultivar.api.plant.PlantRender;
 import com.kragnoth.cultivar.api.plant.Weed;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.content.crop.CropBlockEntity;
+import com.kragnoth.cultivar.content.field.FieldCropBlockEntity;
 import com.kragnoth.cultivar.content.soil.Amendment;
 import com.kragnoth.cultivar.content.soil.SoilAmendments;
 import net.minecraft.client.Minecraft;
@@ -60,6 +61,18 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
 
     @Override
     public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData modelData) {
+        // A field crop: the plant alone, standing on the soil (always single-block).
+        if (level.getBlockEntity(pos) instanceof FieldCropBlockEntity field) {
+            Genome genome = field.genome();
+            if (genome == null || genome.species().value().render().isEmpty()) {
+                return modelData;
+            }
+            PlantRender render = genome.species().value().render().get();
+            boolean model = render.usesModels();
+            ResourceLocation tex = model ? render.modelFor(field.stage(), genome.species().value().stages())
+                    : render.textureFor(field.stage(), genome.species().value().stages());
+            return modelData.derive().with(VISUAL, new Visual(tex, render.shape(), model, null, soilOverlays(pos.below()))).build();
+        }
         // Segments of a stacked trellis draw their share of the plant rooted at the base.
         if (!(CropBlockEntity.resolve(level, pos).orElse(null) instanceof CropBlockEntity crop)) {
             return modelData;

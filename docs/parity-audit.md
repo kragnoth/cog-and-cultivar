@@ -147,3 +147,9 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 - 2026-11-13: roadmap A1. Plant logic extracted to `PlantCore`; `PlantHolder`/`CropView` API; environment hooks
   (`HumidityModifier`, `LightModifier`, `MoistureSource` + farmland mixin); crop tick steps; shared `PlotTracker`
   for beds; module command hub; `checkModuleBoundaries`. No gameplay change. See `docs/EXTENSION_POINTS.md`.
+- 2026-11-13: field crops (roadmap A2–A4). Cultivar seeds plant straight on a soil whose properties suit them
+  (Strength widens it, Hardy takes any soil); taller-than-one-block plants still need a trellis. Grow by the shared
+  tick steps (growth only: no breeding, spread or blight), right-click harvest + replant, seed + produce when broken
+  ripe, fertilizer/bone meal (dispensers too), pop off when the soil goes, vanilla `age` 0–7 mirror, maintains
+  farmland, `#minecraft:crops`, Create harvester via PlantHolder, Jade/goggles readout.
+

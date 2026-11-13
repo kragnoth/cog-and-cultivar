@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.GrassColor;
 
-/** Wraps every trellis blockstate model with {@link CropBakedModel}. */
+/** Wraps every trellis and field-crop blockstate model with {@link CropBakedModel}. */
 public final class CropClientModule implements ClientModule {
     @Override
     public String id() {
@@ -52,19 +52,22 @@ public final class CropClientModule implements ClientModule {
                 return -1;
             }
             int age = 7;
-            if (level != null && pos != null && CropBlockEntity.resolve(level, pos).orElse(null) instanceof CropBlockEntity crop && crop.genome() != null) {
+            com.kragnoth.cultivar.api.crop.CropView crop = level == null || pos == null ? null
+                    : level.getBlockEntity(pos) instanceof com.kragnoth.cultivar.content.field.FieldCropBlockEntity field ? field
+                    : CropBlockEntity.resolve(level, pos).orElse(null);
+            if (crop != null && crop.genome() != null) {
                 int stages = crop.genome().species().value().stages();
                 age = stages <= 1 ? 7 : crop.stage() * 7 / (stages - 1);
             }
             return (age * 32) << 16 | (255 - age * 8) << 8 | age * 4;
-        }, CropModule.TIMBER_TRELLIS.get(), CropModule.IRON_TRELLIS.get());
+        }, CropModule.TIMBER_TRELLIS.get(), CropModule.IRON_TRELLIS.get(), com.kragnoth.cultivar.content.field.FieldCropModule.FIELD_CROP.get());
     }
 
     private static void wrapModels(ModelEvent.ModifyBakingResult event) {
         event.getModels().replaceAll((location, model) -> {
             var id = location.id();
             boolean trellisBlockState = id.getNamespace().equals(Cultivar.MOD_ID)
-                    && id.getPath().endsWith("_trellis")
+                    && (id.getPath().endsWith("_trellis") || id.getPath().equals("field_crop"))
                     && !"inventory".equals(location.variant());
             return trellisBlockState ? new CropBakedModel(model) : model;
         });
