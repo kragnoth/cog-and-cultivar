@@ -28,6 +28,7 @@ public final class CultivarModules {
             AssayModule::new,
             IrrigationModule::new,
             com.kragnoth.cultivar.content.soil.SoilModule::new,
+            com.kragnoth.cultivar.content.field.FieldCropModule::new,
             PlanterBedModule::new,
             com.kragnoth.cultivar.content.trial.TrialModule::new,
             PackToolsModule::new,

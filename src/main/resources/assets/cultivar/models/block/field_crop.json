@@ -1,0 +1,1 @@
+{ "render_type": "minecraft:cutout", "ambientocclusion": false, "textures": { "particle": "minecraft:block/wheat_stage7" }, "elements": [] }

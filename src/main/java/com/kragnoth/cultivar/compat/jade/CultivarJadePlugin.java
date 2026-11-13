@@ -27,6 +27,7 @@ public final class CultivarJadePlugin implements IWailaPlugin {
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(CropProvider.INSTANCE, TrellisBlock.class);
+        registration.registerBlockComponent(CropProvider.INSTANCE, com.kragnoth.cultivar.content.field.FieldCropBlock.class);
         registration.registerBlockComponent(SoilProvider.INSTANCE, Block.class);
     }
 
@@ -43,7 +44,7 @@ public final class CultivarJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-            if (accessor.getBlock() instanceof TrellisBlock) {
+            if (accessor.getBlock() instanceof TrellisBlock || accessor.getBlock() instanceof com.kragnoth.cultivar.content.field.FieldCropBlock) {
                 return;
             }
             Amendment amendment = SoilAmendments.get(accessor.getLevel(), accessor.getPosition());
@@ -65,6 +66,15 @@ public final class CultivarJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            if (accessor.getBlockEntity() instanceof com.kragnoth.cultivar.content.field.FieldCropBlockEntity field && field.plant().hasPlant()) {
+                tooltip.add(CropInfo.lines(CropInfo.Subject.simple(field.plant(), accessor.getLevel(), accessor.getPosition(),
+                        accessor.getBlockState())).getFirst());
+                Amendment amendment = SoilAmendments.get(accessor.getLevel(), accessor.getPosition().below());
+                if (!amendment.isEmpty()) {
+                    tooltip.add(SoilAmendments.describe(amendment));
+                }
+                return;
+            }
             if (!(CropBlockEntity.resolve(accessor.getLevel(), accessor.getPosition()).orElse(null) instanceof CropBlockEntity crop)) {
                 return;
             }
