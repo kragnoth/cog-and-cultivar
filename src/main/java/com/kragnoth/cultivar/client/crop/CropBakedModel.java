@@ -6,6 +6,7 @@ import com.kragnoth.cultivar.api.plant.PlantRender;
 import com.kragnoth.cultivar.api.plant.Weed;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.content.crop.CropBlockEntity;
+import com.kragnoth.cultivar.content.field.FieldCropBlock;
 import com.kragnoth.cultivar.content.field.FieldCropBlockEntity;
 import com.kragnoth.cultivar.content.soil.Amendment;
 import com.kragnoth.cultivar.content.soil.SoilAmendments;
@@ -61,46 +62,21 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
 
     @Override
     public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData modelData) {
-        // A field crop: the plant alone, standing on the soil (always single-block).
-        if (level.getBlockEntity(pos) instanceof FieldCropBlockEntity field) {
-            Genome genome = field.genome();
-            if (genome == null || genome.species().value().render().isEmpty()) {
+        // A field crop: the plant alone, standing on the soil; tall ones stack field-crop segments like cane.
+        if (state.getBlock() instanceof FieldCropBlock) {
+            BlockPos base = FieldCropBlock.basePos(level, pos);
+            if (!(level.getBlockEntity(base) instanceof FieldCropBlockEntity field) || field.genome() == null) {
                 return modelData;
             }
-            PlantRender render = genome.species().value().render().get();
-            boolean model = render.usesModels();
-            ResourceLocation tex = model ? render.modelFor(field.stage(), genome.species().value().stages())
-                    : render.textureFor(field.stage(), genome.species().value().stages());
-            return modelData.derive().with(VISUAL, new Visual(tex, render.shape(), model, null, soilOverlays(pos.below()))).build();
+            Visual v = plantVisual(field.genome(), field.stage(), pos.getY() - base.getY(), null,
+                    pos.equals(base) ? soilOverlays(base.below()) : List.of());
+            return v == null ? modelData : modelData.derive().with(VISUAL, v).build();
         }
         // Segments of a stacked trellis draw their share of the plant rooted at the base.
         if (!(CropBlockEntity.resolve(level, pos).orElse(null) instanceof CropBlockEntity crop)) {
             return modelData;
         }
         int segment = pos.getY() - crop.getBlockPos().getY();
-        ResourceLocation plantTex = null;
-        PlantRender.Shape shape = PlantRender.Shape.HASH;
-        boolean model = false;
-        Genome genome = crop.genome();
-        if (genome != null) {
-            Plant plant = genome.species().value();
-            if (plant.render().isPresent()) {
-                PlantRender render = plant.render().get();
-                model = render.usesModels();
-                shape = render.shape();
-                if (plant.height() <= 1) {
-                    if (segment == 0) {
-                        plantTex = model ? render.modelFor(crop.stage(), plant.stages()) : render.textureFor(crop.stage(), plant.stages());
-                    }
-                } else {
-                    double fill = (crop.stage() + 1) * plant.height() / (double) plant.stages() - segment;
-                    if (fill > 0) {
-                        boolean top = segment == plant.height() - 1;
-                        plantTex = top ? render.forTopFill(Math.min(1.0, fill)) : render.forFill(Math.min(1.0, fill));
-                    }
-                }
-            }
-        }
         ResourceLocation weedTex = null;
         if (crop.weed() != null && segment == 0) {
             Weed weed = crop.weed().value();
@@ -110,10 +86,43 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
             }
         }
         List<ResourceLocation> overlays = segment == 0 ? soilOverlays(crop.getBlockPos().below()) : List.of();
-        if (plantTex == null && weedTex == null && overlays.isEmpty()) {
-            return modelData;
+        Visual v = plantVisual(crop.genome(), crop.stage(), segment, weedTex, overlays);
+        return v == null ? modelData : modelData.derive().with(VISUAL, v).build();
+    }
+
+    /**
+     * What one block of a plant shows: single-block plants draw at segment 0 only; tall plants fill each segment by
+     * growth (the top segment with its own top textures). Shared by trellis stacks and field-crop stacks.
+     */
+    @Nullable
+    private static Visual plantVisual(@Nullable Genome genome, int stage, int segment, @Nullable ResourceLocation weedTex,
+                                      List<ResourceLocation> overlays) {
+        ResourceLocation plantTex = null;
+        PlantRender.Shape shape = PlantRender.Shape.HASH;
+        boolean model = false;
+        if (genome != null) {
+            Plant plant = genome.species().value();
+            if (plant.render().isPresent()) {
+                PlantRender render = plant.render().get();
+                model = render.usesModels();
+                shape = render.shape();
+                if (plant.height() <= 1) {
+                    if (segment == 0) {
+                        plantTex = model ? render.modelFor(stage, plant.stages()) : render.textureFor(stage, plant.stages());
+                    }
+                } else {
+                    double fill = (stage + 1) * plant.height() / (double) plant.stages() - segment;
+                    if (fill > 0) {
+                        boolean top = segment == plant.height() - 1;
+                        plantTex = top ? render.forTopFill(Math.min(1.0, fill)) : render.forFill(Math.min(1.0, fill));
+                    }
+                }
+            }
         }
-        return modelData.derive().with(VISUAL, new Visual(plantTex, shape, model, weedTex, overlays)).build();
+        if (plantTex == null && weedTex == null && overlays.isEmpty()) {
+            return null;
+        }
+        return new Visual(plantTex, shape, model, weedTex, overlays);
     }
 
     @Override

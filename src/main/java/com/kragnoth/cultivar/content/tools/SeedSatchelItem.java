@@ -122,6 +122,13 @@ public class SeedSatchelItem extends Item {
     public static boolean gatherSeeds(CropBlockEntity crop, net.minecraft.util.RandomSource random,
                                       java.util.function.Consumer<ItemStack> drops,
                                       java.util.function.UnaryOperator<ItemStack> bag) {
+        return gatherSeeds(crop.plant(), random, drops, bag);
+    }
+
+    /** As above for any plant (trellis or field crop). */
+    public static boolean gatherSeeds(com.kragnoth.cultivar.content.crop.plant.PlantCore crop, net.minecraft.util.RandomSource random,
+                                      java.util.function.Consumer<ItemStack> drops,
+                                      java.util.function.UnaryOperator<ItemStack> bag) {
         Genome genome = crop.genome();
         if (genome == null || !crop.harvest(drops)) {
             return false;
@@ -315,6 +322,10 @@ public class SeedSatchelItem extends Item {
         if (clicked.is(Blocks.COMPOSTER) && ctx.isSecondaryUseActive()) {
             return cullIntoComposter(ctx, clicked);
         }
+        InteractionResult field = useOnField(ctx);
+        if (field != InteractionResult.PASS) {
+            return field;
+        }
         if (!(CropBlockEntity.resolve(level, ctx.getClickedPos()).orElse(null) instanceof CropBlockEntity crop)) {
             return InteractionResult.PASS;
         }
@@ -344,6 +355,43 @@ public class SeedSatchelItem extends Item {
         crop.plant(seed.get().get(CoreModule.GENOME.get()), seed.get());
         level.playSound(null, ctx.getClickedPos(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1f, 1f);
         return InteractionResult.CONSUME;
+    }
+
+    /** Field crops: gather from a ripe one like a trellis crop; plant the next seed onto bare soil. */
+    private InteractionResult useOnField(UseOnContext ctx) {
+        Level level = ctx.getLevel();
+        ItemStack satchel = ctx.getItemInHand();
+        var field = com.kragnoth.cultivar.content.field.FieldCropBlock.baseEntity(level, ctx.getClickedPos())
+                .filter(f -> level.getBlockState(ctx.getClickedPos()).getBlock() instanceof com.kragnoth.cultivar.content.field.FieldCropBlock);
+        if (field.isPresent()) {
+            if (!field.get().isMature()) {
+                return InteractionResult.PASS;
+            }
+            if (!level.isClientSide()) {
+                BlockPos at = field.get().getBlockPos();
+                boolean deployer = ctx.getPlayer() instanceof net.neoforged.neoforge.common.util.FakePlayer || ctx.getPlayer() == null;
+                gatherSeeds(field.get().plant(), level.random, drop -> Block.popResource(level, at, drop),
+                        seed -> deployer ? seed : seed.copyWithCount(seed.getCount() - insert(satchel, seed)));
+                level.playSound(null, at, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1f, 1f);
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
+        if (ctx.getClickedFace() != net.minecraft.core.Direction.UP || contents(satchel).entries().isEmpty()) {
+            return InteractionResult.PASS;
+        }
+        if (level.isClientSide()) {
+            return com.kragnoth.cultivar.content.field.FieldPlanting.isFieldSoil(level, ctx.getClickedPos())
+                    ? InteractionResult.SUCCESS : InteractionResult.PASS;
+        }
+        Optional<ItemStack> seed = takeOne(satchel);
+        if (seed.isEmpty()) {
+            return InteractionResult.PASS;
+        }
+        var result = com.kragnoth.cultivar.content.field.FieldPlanting.tryPlant(level, ctx.getClickedPos(), seed.get(), ctx.getPlayer());
+        if (result != com.kragnoth.cultivar.content.field.FieldPlanting.Result.PLANTED) {
+            insert(satchel, seed.get()); // not planted: back in the bag
+        }
+        return result == com.kragnoth.cultivar.content.field.FieldPlanting.Result.PASS ? InteractionResult.PASS : InteractionResult.CONSUME;
     }
 
     /** Sneak-use on a composter: composts the worst non-keeper seeds until the composter is full. */

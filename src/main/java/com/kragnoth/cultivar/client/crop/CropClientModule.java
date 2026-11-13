@@ -53,7 +53,8 @@ public final class CropClientModule implements ClientModule {
             }
             int age = 7;
             com.kragnoth.cultivar.api.crop.CropView crop = level == null || pos == null ? null
-                    : level.getBlockEntity(pos) instanceof com.kragnoth.cultivar.content.field.FieldCropBlockEntity field ? field
+                    : state.getBlock() instanceof com.kragnoth.cultivar.content.field.FieldCropBlock
+                            ? com.kragnoth.cultivar.content.field.FieldCropBlock.baseEntity(level, pos).orElse(null)
                     : CropBlockEntity.resolve(level, pos).orElse(null);
             if (crop != null && crop.genome() != null) {
                 int stages = crop.genome().species().value().stages();

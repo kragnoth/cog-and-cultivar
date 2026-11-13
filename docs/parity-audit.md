@@ -155,4 +155,8 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 - 2026-11-13: Olla. 4 bricks; fill once with a water bucket/bottle; keeps farmland within 4 blocks moist (same box
   as vanilla water: its level or the layer above it), never runs dry, no fluid. Bury it under the field to keep the
   centre plantable. The moisture mixin now only scans when vanilla finds no water.
+- 2026-11-13: field crop completion. Tall plants (cane, bamboo, cactus...) grow as stacked field-crop segments;
+  breaking a segment cuts the plant below it (a product roll per segment if ripe); harvesting through any segment
+  works. Shears, Transplanting Spade, Seed Satchel and Cuttings work on field crops and bare soil. A trellis used on
+  a field crop takes the plant over (genome, growth, assay flag).
 

@@ -2,6 +2,8 @@ package com.kragnoth.cultivar.content.tools;
 
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.content.crop.CropBlockEntity;
+import com.kragnoth.cultivar.content.field.FieldCropBlock;
+import com.kragnoth.cultivar.content.field.FieldPlanting;
 import com.kragnoth.cultivar.content.crop.CultivarSeedItem;
 import com.kragnoth.cultivar.content.crop.TrellisBlock;
 import com.mojang.serialization.Codec;
@@ -41,6 +43,10 @@ public class TransplantingSpadeItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         Level level = ctx.getLevel();
+        InteractionResult field = useOnField(ctx);
+        if (field != InteractionResult.PASS) {
+            return field;
+        }
         if (!(CropBlockEntity.resolve(level, ctx.getClickedPos()).orElse(null) instanceof CropBlockEntity crop)
                 || ctx.getLevel().getBlockState(ctx.getClickedPos()).getValue(TrellisBlock.CROSS)) {
             return InteractionResult.PASS;
@@ -64,6 +70,35 @@ public class TransplantingSpadeItem extends Item {
                 level.playSound(null, ctx.getClickedPos(), SoundEvents.ROOTED_DIRT_PLACE, SoundSource.BLOCKS, 1f, 1f);
             }
             return InteractionResult.sidedSuccess(level.isClientSide());
+        }
+        return InteractionResult.PASS;
+    }
+
+    /** Lifts a field crop (the block goes; the soil stays), or sets the held plant down on bare soil. */
+    private InteractionResult useOnField(UseOnContext ctx) {
+        Level level = ctx.getLevel();
+        ItemStack stack = ctx.getItemInHand();
+        Held held = stack.get(ToolsModule.SPADE_PLANT.get());
+        var field = FieldCropBlock.baseEntity(level, ctx.getClickedPos())
+                .filter(f -> level.getBlockState(ctx.getClickedPos()).getBlock() instanceof FieldCropBlock);
+        if (held == null && field.isPresent() && field.get().plant().hasPlant()) {
+            if (!level.isClientSide()) {
+                var f = field.get();
+                f.plant().uproot().ifPresent(u -> stack.set(ToolsModule.SPADE_PLANT.get(), new Held(u.genome(), u.stage(), u.assayed())));
+                level.removeBlock(f.getBlockPos(), false);
+                level.playSound(null, f.getBlockPos(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.BLOCKS, 1f, 1f);
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide());
+        }
+        if (held != null && ctx.getClickedFace() == net.minecraft.core.Direction.UP) {
+            var result = FieldPlanting.plant(level, ctx.getClickedPos(), held.genome(), held.stage(), held.assayed(), ctx.getPlayer());
+            if (result == FieldPlanting.Result.PLANTED && !level.isClientSide()) {
+                stack.remove(ToolsModule.SPADE_PLANT.get());
+                if (ctx.getPlayer() != null) {
+                    stack.hurtAndBreak(1, ctx.getPlayer(), net.minecraft.world.entity.LivingEntity.getSlotForHand(ctx.getHand()));
+                }
+            }
+            return result == FieldPlanting.Result.PASS ? InteractionResult.PASS : InteractionResult.sidedSuccess(level.isClientSide());
         }
         return InteractionResult.PASS;
     }
