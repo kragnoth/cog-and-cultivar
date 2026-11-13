@@ -137,6 +137,10 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
     }
 
     public void setSoil(@Nullable BlockState soil) {
+        if (level != null && soil != this.soil) {
+            // New or emptied soil: conditioners applied to the old fill don't carry over.
+            com.kragnoth.cultivar.content.soil.SoilAmendments.clear(level, worldPosition);
+        }
         this.soil = soil;
         setChanged();
         if (level != null) {

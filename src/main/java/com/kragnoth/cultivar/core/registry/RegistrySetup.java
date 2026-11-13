@@ -36,5 +36,7 @@ public final class RegistrySetup {
         event.dataPackRegistry(CultivarRegistries.WEED, Weed.CODEC, Weed.CODEC);
         event.dataPackRegistry(CultivarRegistries.FERTILIZER, Fertilizer.CODEC, Fertilizer.CODEC);
         event.dataPackRegistry(CultivarRegistries.CROP_INFLUENCE, CropInfluence.CODEC, CropInfluence.CODEC);
+        event.dataPackRegistry(CultivarRegistries.SOIL_CONDITIONER, com.kragnoth.cultivar.api.soil.SoilConditioner.CODEC,
+                com.kragnoth.cultivar.api.soil.SoilConditioner.CODEC);
     }
 }

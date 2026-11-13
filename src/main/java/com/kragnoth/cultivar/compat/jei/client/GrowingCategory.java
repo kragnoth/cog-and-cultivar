@@ -25,18 +25,18 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * What a plant needs to grow, and which soils give it: its seeds (Cultivar's and the mod's own), the soils that work
- * as-is, the soils that work once shifted by water, a Bell Cloche or heat, and the requirement lines. Computed at
+ * as-is, the soils that work once shifted by water, a Bell Cloche, heat or soil conditioners, and the requirement lines. Computed at
  * base Strength, so a fresh seed grows on everything listed.
  */
 final class GrowingCategory implements IRecipeCategory<GrowingCategory.Growing> {
     record Growing(Holder<Plant> plant, List<ItemStack> seeds, List<ItemStack> asIs, List<ItemStack> shifted) {
-        static Growing of(Holder<Plant> plant, Iterable<Soil> soils) {
+        static Growing of(Holder<Plant> plant, Iterable<Soil> soils, SoilMatch.Reach reach) {
             List<ItemStack> seeds = new ArrayList<>();
             seeds.add(MutationCategory.seed(plant));
             plant.value().seeds().ifPresent(set -> set.forEach(i -> seeds.add(new ItemStack(i.value()))));
             List<ItemStack> asIs = new ArrayList<>(), shifted = new ArrayList<>();
             for (Soil soil : soils) {
-                var fit = SoilMatch.fit(plant.value().requirements(), soil, 1);
+                var fit = SoilMatch.fit(plant.value().requirements(), soil, 1, reach);
                 if (fit == SoilMatch.Fit.NO) {
                     continue;
                 }

@@ -182,8 +182,16 @@ public final class CultivarJeiPlugin implements IModPlugin {
         var access = level.registryAccess();
         GROWING.clear();
         var soilList = access.registryOrThrow(CultivarRegistries.SOIL).stream().toList();
+        var conditioners = access.registryOrThrow(CultivarRegistries.SOIL_CONDITIONER).stream().toList();
+        var reach = com.kragnoth.cultivar.content.core.condition.SoilMatch.Reach.of(conditioners,
+                com.kragnoth.cultivar.content.soil.SoilAmendments.maxSteps());
         access.registryOrThrow(CultivarRegistries.PLANT).holders()
-                .forEach(h -> GROWING.add(GrowingCategory.Growing.of(h, soilList)));
+                .forEach(h -> GROWING.add(GrowingCategory.Growing.of(h, soilList, reach)));
+        // Every conditioner item (datapacks can add any) gets an info page spelling out what it shifts.
+        for (var c : conditioners) {
+            Component text = conditionerInfo(c);
+            c.items().forEach(item -> registration.addIngredientInfo(item.value(), text));
+        }
         registration.addRecipes(GrowingCategory.TYPE, List.copyOf(GROWING));
         registration.addRecipes(SOILS, access.registryOrThrow(CultivarRegistries.SOIL).stream().map(SoilPage::new).toList());
         registration.addRecipes(BLIGHTS, access.registryOrThrow(CultivarRegistries.WEED).entrySet().stream()
@@ -201,6 +209,12 @@ public final class CultivarJeiPlugin implements IModPlugin {
         info(registration, LedgerModule.LEDGER.get(), "botanical_ledger");
         info(registration, CropModule.TIMBER_TRELLIS.get(), "trellis");
         info(registration, CropModule.IRON_TRELLIS.get(), "trellis");
+    }
+
+    private static Component conditionerInfo(com.kragnoth.cultivar.api.soil.SoilConditioner c) {
+        var steps = new com.kragnoth.cultivar.content.soil.Amendment(c.acidity(), c.nutrients(), c.humidity());
+        return Component.translatable("jei.cultivar.info.conditioner", com.kragnoth.cultivar.content.soil.SoilAmendments.steps(steps),
+                com.kragnoth.cultivar.content.soil.SoilAmendments.maxSteps());
     }
 
     private static void info(IRecipeRegistration registration, ItemLike item, String key) {

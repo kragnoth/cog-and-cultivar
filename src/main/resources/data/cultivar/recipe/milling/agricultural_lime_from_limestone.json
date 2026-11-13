@@ -1,0 +1,1 @@
+{"type":"create:milling","ingredients":[{"item":"create:limestone"}],"processing_time":100,"results":[{"id":"cultivar:agricultural_lime"},{"id":"cultivar:agricultural_lime","chance":0.5}]}

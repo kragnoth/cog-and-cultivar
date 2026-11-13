@@ -1,6 +1,6 @@
 # Pack-maker guide: adding crops and mutations
 
-Cog & Cultivar is data-driven: every plant, soil, mutation, weed, fertilizer and crop influence is a datapack
+Cog & Cultivar is data-driven: every plant, soil, mutation, weed, fertilizer, soil conditioner and crop influence is a datapack
 JSON file. The mod ships two tools so you don't have to write those by hand from scratch.
 
 ## 1. Export what's in your pack
@@ -92,10 +92,22 @@ Copy `cultivar_scaffold/` into `<world>/datapacks/` (or a global-datapack mod's 
 contents of `cultivar_scaffold/data/` into `kubejs/data/` instead; that loads for every world and needs no
 `pack.mcmeta`.
 
-Then leave and rejoin the world (or restart the server). Plants, mutations, soils, blights and fertilizers are
+Then leave and rejoin the world (or restart the server). Plants, mutations, soils, blights, fertilizers and soil conditioners are
 datapack registries, which Minecraft reads when a world loads; `/reload` does not refresh them.
 Everything is plain JSON, so keep editing it by hand from here. Field reference: `docs/design-spec.md` §2 and the
 shipped files under `data/minecraft/cultivar/` in the mod jar.
+
+## Soil conditioners
+
+Any item can amend soil. Add `data/<ns>/cultivar/soil_conditioner/<id>.json`:
+
+```json
+{ "items": "#c:dusts/ash", "acidity": -1, "humidity": -1 }
+```
+
+`acidity` (+ is alkaline), `nutrients` (+ is richer) and `humidity` (+ is wetter) are steps per use, -3 to 3. Each
+property's total on a block is capped by the server config `soil.conditionerMaxSteps` (default 2). JEI lists the
+item's effect and counts soils it can bring into range on each plant's Growing page.
 
 ## Tips
 

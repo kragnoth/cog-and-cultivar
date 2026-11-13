@@ -14,6 +14,7 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.DoubleValue GROWTH_MULTIPLIER;
     public static final ModConfigSpec.BooleanValue WEEDS_ENABLED;
     public static final ModConfigSpec.BooleanValue WATER_SHIFTS_HUMIDITY;
+    public static final ModConfigSpec.IntValue CONDITIONER_MAX_STEPS;
     public static final ModConfigSpec.IntValue WORK_BUDGET_PER_TICK;
     public static final ModConfigSpec.IntValue BED_CYCLE;
     public static final ModConfigSpec.IntValue BED_TICKS_PER_MB;
@@ -96,6 +97,12 @@ public final class CultivarServerConfig {
                 .define("consumesSeeds", true);
         TRIAL_HOLD_CYCLES = b.comment("Half-second cycles a mature producer stays (to parent crosses) before rotating to another species.")
                 .defineInRange("holdCycles", 120, 1, 100_000);
+        b.pop();
+
+        b.push("soil");
+        CONDITIONER_MAX_STEPS = b.comment("How far soil conditioners (lime, sulfur dust, compost...) can shift each soil property, in steps either way.",
+                        "0 disables conditioners.")
+                .defineInRange("conditionerMaxSteps", 2, 0, 6);
         b.pop();
 
         b.push("sprinkler");

@@ -3,6 +3,9 @@ package com.kragnoth.cultivar.compat.jade;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.content.crop.CropBlockEntity;
 import com.kragnoth.cultivar.content.crop.CropInfo;
+import com.kragnoth.cultivar.content.soil.Amendment;
+import com.kragnoth.cultivar.content.soil.SoilAmendments;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.network.chat.Component;
 import java.util.List;
 import com.kragnoth.cultivar.content.crop.TrellisBlock;
@@ -24,6 +27,30 @@ public final class CultivarJadePlugin implements IWailaPlugin {
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(CropProvider.INSTANCE, TrellisBlock.class);
+        registration.registerBlockComponent(SoilProvider.INSTANCE, Block.class);
+    }
+
+    /** Any soil block (or Planter Bed) a conditioner has been used on. */
+    enum SoilProvider implements IBlockComponentProvider {
+        INSTANCE;
+
+        private static final ResourceLocation UID = Cultivar.id("soil_amendment");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            if (accessor.getBlock() instanceof TrellisBlock) {
+                return;
+            }
+            Amendment amendment = SoilAmendments.get(accessor.getLevel(), accessor.getPosition());
+            if (!amendment.isEmpty()) {
+                tooltip.add(SoilAmendments.describe(amendment));
+            }
+        }
     }
 
     enum CropProvider implements IBlockComponentProvider {
@@ -44,6 +71,10 @@ public final class CultivarJadePlugin implements IWailaPlugin {
             // Compact on purpose: the full readout lives in Create goggles.
             List<Component> lines = CropInfo.lines(crop);
             tooltip.add(lines.getFirst());
+            Amendment amendment = SoilAmendments.get(accessor.getLevel(), crop.getBlockPos().below());
+            if (!amendment.isEmpty()) {
+                tooltip.add(SoilAmendments.describe(amendment));
+            }
             if (crop.weed() != null) {
                 tooltip.add(lines.getLast());
             }

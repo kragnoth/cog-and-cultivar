@@ -136,3 +136,8 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   show stats only for crops grown from assayed seeds/cuttings/satchel entries, spade-moved known crops, or clones of
   known parents; new cross children read "Stats unknown". Seeds and cuttings from a known crop stay assayed.
   `requireAssay = false` shows everything as before. Protocol 4.
+- 2026-11-12: soil conditioners (spec §3.6). Agricultural Lime, Sulfur Dust and Compost (Create milling/mixing)
+  shift a soil block's acidity or nutrients a step per use, capped at ±2 (`soil.conditionerMaxSteps`); datapack
+  `soil_conditioner` registry (humidity too). Stored per soil position in a chunk attachment, survives replanting,
+  cleared with the soil. Shown as a dusting inside the trellis (visible under a cloche), ambient dust puffs, and
+  Jade/goggle lines; JEI Growing counts soils conditioners can fix. Protocol 5.
