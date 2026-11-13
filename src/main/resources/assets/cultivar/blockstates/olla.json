@@ -1,0 +1,1 @@
+{ "variants": { "filled=false": { "model": "cultivar:block/olla" }, "filled=true": { "model": "cultivar:block/olla_filled" } } }

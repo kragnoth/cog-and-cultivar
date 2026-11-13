@@ -10,11 +10,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Lets registered {@link MoistureSource}s keep farmland moist without a water block in reach. */
+/** Lets registered {@link MoistureSource}s keep farmland moist without a water block in reach (checked only when vanilla finds no water). */
 @Mixin(FarmBlock.class)
 public abstract class FarmBlockMoistureMixin {
-    @Inject(method = "isNearWater", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "isNearWater", at = @At("RETURN"), cancellable = true)
     private static void cultivar$moistureSources(LevelReader level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (cir.getReturnValueZ()) {
+            return; // vanilla water found: no need to scan for anything else
+        }
         for (MoistureSource source : CultivarEnvironment.moistureSources()) {
             if (source.keepsMoist(level, pos)) {
                 cir.setReturnValue(true);

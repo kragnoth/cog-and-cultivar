@@ -152,4 +152,7 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   tick steps (growth only: no breeding, spread or blight), right-click harvest + replant, seed + produce when broken
   ripe, fertilizer/bone meal (dispensers too), pop off when the soil goes, vanilla `age` 0–7 mirror, maintains
   farmland, `#minecraft:crops`, Create harvester via PlantHolder, Jade/goggles readout.
+- 2026-11-13: Olla. 4 bricks; fill once with a water bucket/bottle; keeps farmland within 4 blocks moist (same box
+  as vanilla water: its level or the layer above it), never runs dry, no fluid. Bury it under the field to keep the
+  centre plantable. The moisture mixin now only scans when vanilla finds no water.
 
