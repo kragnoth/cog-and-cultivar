@@ -18,17 +18,21 @@ A NeoForge 1.21.1 crop-genetics and breeding mod for steampunk/dieselpunk worlds
 Every plant, soil and mutation is datapack JSON. `/cultivar export` dumps every crop in your pack and ships a
 scaffold script that drafts plants and mutations for you. See [docs/PACKMAKERS.md](docs/PACKMAKERS.md).
 
-## Vanilla-style resource pack
+## Art styles
 
-The built-in art is kitbashed from the Excalibur resource pack. For players without Excalibur,
-`tools/art/build_vanilla_pack.py` rebuilds every Excalibur-based texture from vanilla 1.21.1 textures
-instead (same designs, palettes lifted for vanilla's brighter look):
+The default textures are kitbashed from vanilla Minecraft. An Excalibur-style set (kitbashed from the Excalibur
+resource pack, used with the author's permission) ships inside the jar as a built-in resource pack: turn on
+**Cog & Cultivar: Excalibur Style** in Options → Resource Packs, above Excalibur.
+
+Both sets are built by one script from the same designs (`tools/art/gen_*.py`):
 
 ```fish
-python3 tools/art/build_vanilla_pack.py ~/.gradle/caches/neoformruntime/artifacts/minecraft_1.21.1_client.jar
+python3 tools/art/build_art.py --excalibur ~/path/to/excalibur/assets/minecraft/textures
 ```
 
-It writes `build/cog_and_cultivar_vanilla_style.zip`; drop it in `resourcepacks/` above the mod.
+It defaults to the vanilla 1.21.1 client jar in the Gradle cache (`--vanilla <jar>` to override) and rewrites
+`assets/cultivar/textures` (vanilla style) and `resourcepacks/excalibur_style` (only the textures that differ).
+Excalibur-derived art (everything under `resourcepacks/excalibur_style`) is not covered by the MIT license.
 
 ## Building
 

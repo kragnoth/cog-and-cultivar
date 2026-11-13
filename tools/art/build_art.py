@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Builds "Cog & Cultivar: Vanilla Style", a resource pack that replaces every Excalibur-kitbashed texture with one
-kitbashed from vanilla Minecraft instead, for players who don't run Excalibur.
+"""Builds all kitbashed textures twice from the same art scripts:
 
-It reruns the mod's own art scripts against the vanilla client textures (same file layout), so the designs match
-the built-in art one for one. Excalibur ships a few sprites vanilla 1.21.1 lacks (numbered variants, 1.21.4+ plants);
-ALIASES points those at the closest vanilla sprite with a similar silhouette. Hand-tuned palettes were picked for
-Excalibur's dark, low-contrast range, so GRADE lifts them toward vanilla's brighter, punchier look; anything ramped
-from a vanilla source is left as is so it keeps matching vanilla items.
+  * vanilla style (the default, shipped in assets/cultivar/textures): every script is run against the vanilla 1.21.1
+    client textures. Excalibur-only sprites are mapped to close vanilla stand-ins (ALIASES), hand-picked palettes
+    are lifted toward vanilla's brighter look (GRADE), and flat vanilla glass frames are redrawn as brass (POLISH);
+  * Excalibur style (optional): the same scripts run against the Excalibur resource pack (used with permission;
+    not MIT, see README). Only textures that differ from the vanilla build go into the built-in resource pack
+    resourcepacks/excalibur_style, which players pick from the Resource Packs screen.
 
 Usage (from the repo root):
-  python3 tools/art/build_vanilla_pack.py <minecraft 1.21.1 client jar> [out.zip]
+  python3 tools/art/build_art.py [--vanilla <minecraft 1.21.1 client jar>] [--excalibur <excalibur textures dir>]
+Without --excalibur only the vanilla (default) art is rebuilt.
 """
 import colorsys
 import glob
@@ -21,10 +22,10 @@ import tempfile
 import zipfile
 from PIL import Image
 
-JAR = sys.argv[1]
-OUT_ZIP = os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else 'build/cog_and_cultivar_vanilla_style.zip')
 REPO = os.getcwd()
 ASSETS = 'src/main/resources/assets/cultivar'
+PACK = 'src/main/resources/resourcepacks/excalibur_style'
+DEFAULT_JAR = os.path.expanduser('~/.gradle/caches/neoformruntime/artifacts/minecraft_1.21.1_client.jar')
 SCRIPTS = ['gen_phase1_textures', 'gen_art_pass', 'gen_bloom_textures', 'gen_blight_textures',
            'gen_conditioner_textures', 'gen_cloche_variants']
 
@@ -97,56 +98,78 @@ def grade(path, gain, sat, contrast):
     im.save(path)
 
 
-def main():
-    tmp = tempfile.mkdtemp(prefix='cc_vanilla_')
-    src = os.path.join(tmp, 'textures')
-    with zipfile.ZipFile(JAR) as z:
-        for n in z.namelist():
-            if n.startswith('assets/minecraft/textures/') and n.endswith('.png'):
-                dst = os.path.join(src, n[len('assets/minecraft/textures/'):])
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-                with open(dst, 'wb') as f:
-                    f.write(z.read(n))
-    for alias, real in ALIASES.items():
-        shutil.copy(f'{src}/{real}.png', f'{src}/{alias}.png')
-
+def run_scripts(textures_src, vanilla):
+    """Runs every art script in a scratch copy of the assets; returns {relative texture path: png bytes} written."""
+    tmp = tempfile.mkdtemp(prefix='cc_art_')
     work = os.path.join(tmp, 'work')
     for sub in ('textures', 'models', 'blockstates'):
         shutil.copytree(f'{REPO}/{ASSETS}/{sub}', f'{work}/{ASSETS}/{sub}')
     shutil.copytree(f'{REPO}/tools', f'{work}/tools')
-    before = {p: open(p, 'rb').read() for p in glob.glob(f'{REPO}/{ASSETS}/textures/**/*.png', recursive=True)}
-
+    tex = f'{work}/{ASSETS}/textures'
+    stamp = {p: os.stat(p).st_mtime_ns for p in glob.glob(f'{tex}/**/*.png', recursive=True)}
+    cwd, argv = os.getcwd(), sys.argv
     os.chdir(work)
-    argv = sys.argv
-    for name in SCRIPTS:
-        sys.argv = [name, src] + ([f'{ASSETS}/textures'] if name == 'gen_phase1_textures' else [])
-        runpy.run_path(f'tools/art/{name}.py', run_name='__main__')
-    sys.argv = argv
+    try:
+        for name in SCRIPTS:
+            sys.argv = [name, textures_src] + ([f'{ASSETS}/textures'] if name == 'gen_phase1_textures' else [])
+            runpy.run_path(f'tools/art/{name}.py', run_name='__main__')
+        if vanilla:
+            for pattern, (gain, sat, contrast) in GRADE.items():
+                for p in glob.glob(f'{ASSETS}/textures/{pattern}.png'):
+                    grade(p, gain, sat, contrast)
+            for name, fix in POLISH.items():
+                fix(f'{ASSETS}/textures/{name}.png')
+    finally:
+        os.chdir(cwd)
+        sys.argv = argv
+    out = {}
+    for p in glob.glob(f'{tex}/**/*.png', recursive=True):
+        if stamp.get(p) != os.stat(p).st_mtime_ns:
+            out[os.path.relpath(p, tex)] = open(p, 'rb').read()
+    shutil.rmtree(tmp)
+    return out
 
-    for pattern, (gain, sat, contrast) in GRADE.items():
-        for p in glob.glob(f'{ASSETS}/textures/{pattern}.png'):
-            grade(p, gain, sat, contrast)
 
-    for name, fix in POLISH.items():
-        fix(f'{ASSETS}/textures/{name}.png')
+def vanilla_textures(jar):
+    tmp = tempfile.mkdtemp(prefix='cc_vanilla_')
+    with zipfile.ZipFile(jar) as z:
+        for n in z.namelist():
+            if n.startswith('assets/minecraft/textures/') and n.endswith('.png'):
+                dst = os.path.join(tmp, n[len('assets/minecraft/textures/'):])
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                with open(dst, 'wb') as f:
+                    f.write(z.read(n))
+    for alias, real in ALIASES.items():
+        shutil.copy(f'{tmp}/{real}.png', f'{tmp}/{alias}.png')
+    return tmp
 
-    changed = []
-    for p in sorted(glob.glob(f'{ASSETS}/textures/**/*.png', recursive=True)):
-        if open(p, 'rb').read() != before.get(f'{REPO}/{p}'):
-            changed.append(p)
-    os.chdir(REPO)
-    os.makedirs(os.path.dirname(OUT_ZIP), exist_ok=True)
-    with zipfile.ZipFile(OUT_ZIP, 'w', zipfile.ZIP_DEFLATED) as z:
-        z.writestr('pack.mcmeta', '{\n  "pack": {\n    "pack_format": 34,\n    "description": '
-                   '"Cog & Cultivar in vanilla style: Excalibur-based art redone from vanilla textures"\n  }\n}\n')
-        icon = Image.open(f'{work}/{ASSETS}/textures/item/seed_satchel_dial.png').convert('RGBA').resize((128, 128), Image.NEAREST)
-        buf = __import__('io').BytesIO()
-        icon.save(buf, 'PNG')
-        z.writestr('pack.png', buf.getvalue())
-        for p in changed:
-            z.write(f'{work}/{p}', p[len('src/main/resources/'):])
-    print(f'{len(changed)} textures -> {OUT_ZIP}')
-    print('WORK', work)
+
+def write(root, files):
+    for rel, data in files.items():
+        dst = f'{root}/{rel}'
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        with open(dst, 'wb') as f:
+            f.write(data)
+
+
+def main():
+    args = dict(zip(sys.argv[1::2], sys.argv[2::2]))
+    src = vanilla_textures(args.get('--vanilla', DEFAULT_JAR))
+    vanilla = run_scripts(src, vanilla=True)
+    shutil.rmtree(src)
+    write(f'{ASSETS}/textures', vanilla)
+    print(f'vanilla style: {len(vanilla)} textures -> {ASSETS}/textures')
+    if '--excalibur' in args:
+        exc = run_scripts(args['--excalibur'], vanilla=False)
+        differs = {rel: data for rel, data in exc.items() if vanilla.get(rel) != data}
+        shutil.rmtree(f'{PACK}/assets', ignore_errors=True)
+        write(f'{PACK}/assets/cultivar/textures', differs)
+        with open(f'{PACK}/pack.mcmeta', 'w') as f:
+            f.write('{\n  "pack": {\n    "pack_format": 34,\n    "description": '
+                    '"Cog & Cultivar art kitbashed from Excalibur. Best with the Excalibur resource pack."\n  }\n}\n')
+        icon = Image.open(f'{PACK}/assets/cultivar/textures/item/seed_satchel_dial.png').convert('RGBA')
+        icon.resize((128, 128), Image.NEAREST).save(f'{PACK}/pack.png')
+        print(f'excalibur style: {len(differs)} textures -> {PACK}')
 
 
 main()

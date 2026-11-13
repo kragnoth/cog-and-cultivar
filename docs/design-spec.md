@@ -615,6 +615,8 @@ The original AgriCraft-derived notes below are kept for reference.
 
 ## 4. Graphics & Audio Direction — Excalibur base
 
+> **Shipping (2026-11-12):** the default textures are now built from vanilla sources by the same scripts (`tools/art/build_art.py`: stand-in sprites, palettes lifted for vanilla's brightness, brass leading redrawn on glass). The Excalibur-kitbashed set described below ships as the built-in resource pack "Cog & Cultivar: Excalibur Style" (`resourcepacks/excalibur_style`, off by default).
+
 You have the author's permission to use the Excalibur pack as a base. These rules keep new assets consistent with it and with Create.
 
 **Source:** Excalibur V26.3_01 (Maffhew), pulled from Modrinth (`excal`). All picks below are confirmed present at 16×16 in `assets/minecraft/textures/`. The pack's public licence is CC BY-NC-ND 3.0, so keep the author's written permission on file and credit "Excalibur by Maffhew" in the mod description and credits.
