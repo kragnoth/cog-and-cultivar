@@ -1,6 +1,6 @@
 package com.kragnoth.cultivar.compat.create;
 
-import com.kragnoth.cultivar.content.crop.CropBlockEntity;
+import com.kragnoth.cultivar.api.crop.PlantHolder;
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.function.BiConsumer;
 
 /**
- * Bridge between Create's Mechanical Harvester and Cultivar crops.
+ * Bridge between Create's Mechanical Harvester and every Cultivar {@link PlantHolder}.
  * Called from {@code HarvesterMovementBehaviourMixin} before Create's own crop logic.
  */
 public final class CultivarHarvesting {
@@ -20,12 +20,11 @@ public final class CultivarHarvesting {
      *         Seed Satchel (by hand or on a Deployer), so harvester lines don't flood storage.
      */
     public static boolean tryHarvest(MovementContext context, BlockPos pos, BiConsumer<MovementContext, ItemStack> drop) {
-        if (!(context.world.getBlockEntity(pos) instanceof CropBlockEntity)) {
+        if (!(context.world.getBlockState(pos).getBlock() instanceof PlantHolder holder)) {
             return false;
         }
-        // A harvester passing a tall crop's upper segment harvests the plant rooted at the base.
-        CropBlockEntity crop = CropBlockEntity.resolve(context.world, pos).orElseThrow();
-        crop.harvest(stack -> drop.accept(context, stack));
+        // Any plant holder (trellis segments resolve to their root; field crops next) harvests in place.
+        holder.harvestInPlace(context.world, pos, stack -> drop.accept(context, stack));
         return true;
     }
 }

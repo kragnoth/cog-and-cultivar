@@ -144,4 +144,6 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 - 2026-11-12: Shade and Lamp Cloches. Bell Cloche variants that cap (3) or raise (14) the light their own crop reads,
   configurable, without changing world light, so dark and bright parents can sit side by side. New trellis state
   `cloche_type` (old saves load as bell); Planter Beds take any cloche. Goggles show the light crops read.
-
+- 2026-11-13: roadmap A1. Plant logic extracted to `PlantCore`; `PlantHolder`/`CropView` API; environment hooks
+  (`HumidityModifier`, `LightModifier`, `MoistureSource` + farmland mixin); crop tick steps; shared `PlotTracker`
+  for beds; module command hub; `checkModuleBoundaries`. No gameplay change. See `docs/EXTENSION_POINTS.md`.

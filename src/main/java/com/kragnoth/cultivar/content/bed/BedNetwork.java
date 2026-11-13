@@ -1,19 +1,14 @@
 package com.kragnoth.cultivar.content.bed;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayDeque;
+import com.kragnoth.cultivar.core.plot.PlotTracker;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Touching Planter Beds (sideways, same height) form one plot: every bed's capabilities see the whole plot's
@@ -26,29 +21,7 @@ public final class BedNetwork {
     private BedNetwork() {}
 
     public static List<PlanterBedBlockEntity> members(PlanterBedBlockEntity origin) {
-        Level level = origin.getLevel();
-        if (level == null) {
-            return List.of(origin);
-        }
-        List<PlanterBedBlockEntity> out = new ArrayList<>();
-        Set<BlockPos> seen = new HashSet<>();
-        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
-        queue.add(origin.getBlockPos());
-        seen.add(origin.getBlockPos());
-        while (!queue.isEmpty() && out.size() < MAX_BEDS) {
-            BlockPos p = queue.poll();
-            if (!level.isLoaded(p) || !(level.getBlockEntity(p) instanceof PlanterBedBlockEntity bed)) {
-                continue;
-            }
-            out.add(bed);
-            for (Direction d : Direction.Plane.HORIZONTAL) {
-                BlockPos n = p.relative(d);
-                if (seen.add(n)) {
-                    queue.add(n);
-                }
-            }
-        }
-        return out;
+        return PlotTracker.flood(origin, PlanterBedBlockEntity.class, MAX_BEDS);
     }
 
     /** Item view over the whole plot: slots are each bed's automation slots, end to end. */

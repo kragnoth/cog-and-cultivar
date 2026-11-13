@@ -3,7 +3,6 @@ package com.kragnoth.cultivar.content.soil;
 import com.kragnoth.cultivar.api.CultivarRegistries;
 import com.kragnoth.cultivar.api.soil.SoilConditioner;
 import com.kragnoth.cultivar.api.soil.SoilLevels;
-import com.kragnoth.cultivar.content.crop.CropBlockEntity;
 import com.kragnoth.cultivar.core.config.CultivarServerConfig;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -127,7 +126,7 @@ public final class SoilAmendments {
      */
     public static Result tryApply(Level level, BlockPos soilPos, ItemStack stack, @Nullable Player player) {
         Optional<SoilConditioner> found = conditionerFor(level, stack);
-        if (found.isEmpty() || CropBlockEntity.soilAt(level, soilPos).isEmpty()) {
+        if (found.isEmpty() || com.kragnoth.cultivar.content.core.lookup.SoilLookup.at(level, soilPos).isEmpty()) {
             return Result.PASS;
         }
         SoilConditioner c = found.get();

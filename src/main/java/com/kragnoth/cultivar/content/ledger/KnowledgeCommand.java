@@ -29,7 +29,7 @@ final class KnowledgeCommand {
     private KnowledgeCommand() {}
 
     static LiteralArgumentBuilder<CommandSourceStack> build() {
-        return Commands.literal("cultivar").then(Commands.literal("knowledge").requires(s -> s.hasPermission(2))
+        return Commands.literal("knowledge").requires(s -> s.hasPermission(2))
                 .then(Commands.literal("grant").then(Commands.argument("players", EntityArgument.players())
                         .then(Commands.literal("all").executes(c -> change(c, true, all(c))))
                         .then(Commands.argument("plant", ResourceLocationArgument.id()).suggests(KnowledgeCommand::suggest)
@@ -39,7 +39,7 @@ final class KnowledgeCommand {
                         .then(Commands.argument("plant", ResourceLocationArgument.id()).suggests(KnowledgeCommand::suggest)
                                 .executes(c -> change(c, false, List.of(plant(c)))))))
                 .then(Commands.literal("list").then(Commands.argument("player", EntityArgument.player())
-                        .executes(KnowledgeCommand::list))));
+                        .executes(KnowledgeCommand::list)));
     }
 
     private static int change(CommandContext<CommandSourceStack> c, boolean grant, Collection<ResourceKey<Plant>> plants)

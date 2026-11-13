@@ -81,9 +81,12 @@ public final class CropInfo {
         var level = crop.getLevel();
         int raw = level.getRawBrightness(crop.getBlockPos(), 0);
         var cloche = ClocheType.fitted(crop.getBlockState());
-        int seen = CropLight.adjust(raw, cloche);
-        if (seen == raw || cloche == null) {
+        int seen = CropLight.adjust(level, crop.getBlockPos(), raw);
+        if (seen == raw) {
             return Component.translatable("cultivar.info.light", seen).withStyle(ChatFormatting.DARK_AQUA);
+        }
+        if (cloche == null) { // shifted by an addon's LightModifier
+            return Component.translatable("cultivar.info.light.shifted", seen, raw).withStyle(ChatFormatting.DARK_AQUA);
         }
         return Component.translatable("cultivar.info.light." + cloche.getSerializedName(), seen, raw).withStyle(ChatFormatting.DARK_AQUA);
     }

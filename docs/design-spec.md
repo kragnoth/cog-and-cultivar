@@ -771,7 +771,7 @@ Cultivar seeds of every species (vanilla ones included) plant as **field crops**
 
 | Step | Scope | Done when |
 |---|---|---|
-| A1 | Extract the crop core shared by trellis and field crops (genome, stage, growth tick, drops, conditions) out of `CropBlockEntity` behind a small interface, with no behaviour change | Existing gametests pass unchanged |
+| A1 ✅ | Extract the crop core shared by trellis and field crops (genome, stage, growth tick, drops, conditions) out of `CropBlockEntity` behind a small interface, with no behaviour change | Existing gametests pass unchanged |
 | A2 | `cultivar:field_crop` block + BE on the core; plant renderer reuses `CropBakedModel` quads without the frame | A field crop renders and grows by tick |
 | A3 | Seed placement: a Cultivar seed used on a soil the plant accepts places a field crop; otherwise the action bar says why (shared reason text with goggles) | Planting rules match the trellis for every shipped plant (gametest) |
 | A4 | Growth, Strength tolerance, Gain/yield drops, conditioners, cloches (fitted on field crops), Sprinkler, influences | Field and trellis crops grow at equal rates on equal soil (gametest) |

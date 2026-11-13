@@ -6,7 +6,8 @@
   "mixins": [
     "BushBlockInvoker",
     "StemBlockAccessor",
-    "HarvesterMovementBehaviourMixin"
+    "HarvesterMovementBehaviourMixin",
+    "FarmBlockMoistureMixin"
   ],
   "client": [],
   "injectors": {

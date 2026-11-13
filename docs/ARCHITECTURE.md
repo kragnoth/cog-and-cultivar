@@ -40,6 +40,11 @@ A feature is a `CultivarModule` (common) plus, optionally, a `ClientModule` (cli
 
 Optional integrations implement `shouldLoad()` with `ModList.get().isLoaded(...)` and keep every class reference to the other mod out of the module class itself.
 
+Cross-feature effects go through API hooks rather than imports. A module that changes a crop's
+environment registers a `HumidityModifier`, `LightModifier` or `MoistureSource` with `CultivarEnvironment` in
+`onConstruct`; a block that holds a plant implements `PlantHolder` and builds on `PlantCore`. Layering is checked
+by `checkModuleBoundaries` (see `docs/EXTENSION_POINTS.md`).
+
 ## Data vs code
 
 | Kind | Where | Changes need |
@@ -100,3 +105,9 @@ Storyboards live in `client/ponder/CultivarScenes.java`; their structures in `as
 (`tools/ponder/gen_ponder_schematics.py`). Ponder reads text from lang keys `cultivar.ponder.<scene>.header` and
 `.text_N`, numbered in the order texts are created, so after editing a scene run
 `python3 tools/ponder/ponder_lang.py` (CI fails if the lang is stale). Keep each `.text("...")` a single literal.
+
+## Alpha additions
+
+- Modules add `/cultivar` subcommands through `CultivarModule.registerCommands`; the root is registered once in `Cultivar`.
+- Per-tick crop behaviour is a `content.crop.tick.CropTickPhase`; see `docs/EXTENSION_POINTS.md`.
+- Plot-style machines use `core.plot.PlotTracker`.

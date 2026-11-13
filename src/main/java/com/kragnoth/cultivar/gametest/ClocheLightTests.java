@@ -44,8 +44,8 @@ public final class ClocheLightTests {
         h.runAfterDelay(5, () -> {  // let the light engine settle
             BlockPos s = h.absolutePos(shaded), l = h.absolutePos(lit), n = h.absolutePos(plain);
             h.assertTrue(level.getRawBrightness(s, 0) >= 13, "real light beside glowstone is bright");
-            h.assertTrue(CropLight.at(level, s) <= CropLight.shadeMax(), "shaded crop reads dark");
-            h.assertTrue(CropLight.at(level, l) >= CropLight.lampMin(), "lamp crop reads bright");
+            h.assertTrue(CropLight.at(level, s) <= com.kragnoth.cultivar.content.cloche.ClocheEnvironment.shadeMax(), "shaded crop reads dark");
+            h.assertTrue(CropLight.at(level, l) >= com.kragnoth.cultivar.content.cloche.ClocheEnvironment.lampMin(), "lamp crop reads bright");
             h.assertTrue(CropLight.at(level, n) == level.getRawBrightness(n, 0), "plain neighbour reads real light");
             var dark = new LightCondition(0, 7, 0);
             var ctx = new GrowthContext(level, s, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());

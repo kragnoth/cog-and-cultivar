@@ -1,5 +1,6 @@
 package com.kragnoth.cultivar;
 
+import com.kragnoth.cultivar.api.CultivarRegistries;
 import com.kragnoth.cultivar.core.config.CultivarServerConfig;
 import com.kragnoth.cultivar.core.datagen.CultivarDataGen;
 import com.kragnoth.cultivar.core.module.CultivarModule;
@@ -8,12 +9,14 @@ import com.kragnoth.cultivar.core.network.CultivarNetwork;
 import com.kragnoth.cultivar.core.registry.RegistrySetup;
 import com.kragnoth.cultivar.core.work.ServerWorkQueue;
 import com.mojang.logging.LogUtils;
+import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -23,7 +26,7 @@ import java.util.function.Supplier;
 /** Common (both sides) entry point. Client-only setup lives in {@code client.CultivarClient}. */
 @Mod(Cultivar.MOD_ID)
 public final class Cultivar {
-    public static final String MOD_ID = "cultivar";
+    public static final String MOD_ID = CultivarRegistries.NAMESPACE;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     private static List<CultivarModule> modules = List.of();
@@ -47,6 +50,13 @@ public final class Cultivar {
             loaded.add(module);
         }
         modules = List.copyOf(loaded);
+        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent e) -> {
+            var root = Commands.literal(MOD_ID);
+            for (CultivarModule module : modules) {
+                module.registerCommands(root);
+            }
+            e.getDispatcher().register(root);
+        });
         LOGGER.info("Loaded modules: {}", modules.stream().map(CultivarModule::id).toList());
     }
 

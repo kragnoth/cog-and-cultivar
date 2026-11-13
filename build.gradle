@@ -164,7 +164,42 @@ tasks.register('checkSidedness') {
         }
     }
 }
-tasks.named('check') { dependsOn 'checkSidedness' }
+// Layering rules that keep features pluggable. See docs/EXTENSION_POINTS.md.
+//   api/**          -> only api/ (plus Minecraft, NeoForge, DFU, JDK): addons compile against it alone
+//   content/core/** -> api/, core/ and content/core/ only: shared rules never reach into a feature module
+//   core/**         -> content/core/ at most (the module list and datagen bootstraps may wire features in)
+tasks.register('checkModuleBoundaries') {
+    group = 'verification'
+    description = 'Fails if a package imports across a layering boundary (api purity, core independence).'
+    def root = file("src/main/java/com/kragnoth/${mod_id}")
+    def base = "com.kragnoth.${mod_id}"
+    inputs.dir(root)
+    doLast {
+        def offenders = []
+        root.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+            if (!f.name.endsWith('.java')) return
+            def rel = root.toPath().relativize(f.toPath()).toString().replace('\\', '/')
+            f.eachLine { line, n ->
+                def m = line =~ /^\s*import\s+(?:static\s+)?${java.util.regex.Pattern.quote(base)}\.([\w.]+);/
+                def refs = m.find() ? [m.group(1)] : []
+                (line =~ /${java.util.regex.Pattern.quote(base)}\.([a-z_]+(?:\.[a-z_]+)*)\.[A-Z]/).each { refs << it[1] + '.X' }
+                refs.each { String target ->
+                    def t = target.replace('.', '/')
+                    boolean bad = false
+                    if (rel.startsWith('api/')) bad = !t.startsWith('api/')
+                    else if (rel.startsWith('content/core/')) bad = t.startsWith('content/') && !t.startsWith('content/core/') || t.startsWith('client/') || t.startsWith('compat/')
+                    else if (rel.startsWith('core/') && !rel.startsWith('core/module/') && !rel.startsWith('core/datagen/')) bad = t.startsWith('content/') && !t.startsWith('content/core/') || t.startsWith('compat/')
+                    if (bad) offenders << "${rel}:${n} -> ${target}"
+                }
+            }
+        }
+        if (offenders) {
+            throw new GradleException("Module boundary violations:\n  " + offenders.unique().join('\n  '))
+        }
+    }
+}
+
+tasks.named('check') { dependsOn 'checkSidedness', 'checkModuleBoundaries' }
 
 idea {
     module {

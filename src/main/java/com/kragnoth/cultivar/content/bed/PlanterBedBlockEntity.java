@@ -31,6 +31,8 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.kragnoth.cultivar.core.plot.PlotTracker;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,7 +58,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
                 return TrellisBlock.genomeFor(stack, level).isPresent();
             }
             return switch (slot) {
-                case FERTILIZER -> CropBlockEntity.fertilizerFor(level, stack).isPresent();
+                case FERTILIZER -> com.kragnoth.cultivar.content.core.lookup.FertilizerLookup.forItem(level, stack).isPresent();
                 case TRELLIS -> stack.getItem() instanceof net.minecraft.world.item.BlockItem bi && bi.getBlock() instanceof TrellisBlock;
                 case CLOCHE -> stack.getItem() instanceof com.kragnoth.cultivar.content.cloche.BellClocheItem;
                 default -> true;
@@ -121,8 +123,8 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
     private boolean syncedWater;
     private int cooldown;
     private int ticksSinceDrain;
-    private List<PlanterBedBlockEntity> network;
-    private long networkTick = Long.MIN_VALUE;
+    private final PlotTracker<PlanterBedBlockEntity> tracker =
+            new PlotTracker<>(this, PlanterBedBlockEntity.class, BedNetwork.MAX_BEDS, b -> b.tracker);
     /** This bed's trellis is a grafting frame the bed keeps re-arming (set when it sees a cross above). */
     private boolean breeding;
     /** Cycles the crop above has been held mature for a neighbouring breeder. */
@@ -161,46 +163,17 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
 
     /** The plot this bed belongs to, recomputed at most once per game tick. */
     public List<PlanterBedBlockEntity> cachedNetwork() {
-        long now = level == null ? 0 : level.getGameTime();
-        if (network == null || networkTick != now) {
-            // One flood fill per plot per tick: share the result with every member.
-            List<PlanterBedBlockEntity> members = BedNetwork.members(this);
-            for (PlanterBedBlockEntity bed : members) {
-                bed.network = members;
-                bed.networkTick = now;
-            }
-        }
-        return network;
+        return tracker.members();
     }
-
-    private boolean plotPowered;
-    private long poweredTick = Long.MIN_VALUE;
 
     /** True if any bed in the plot has a redstone signal: the plot strips down and dumps everything. */
     public boolean isPlotPowered() {
-        long now = level == null ? 0 : level.getGameTime();
-        if (poweredTick != now) {
-            boolean powered = false;
-            List<PlanterBedBlockEntity> plot = cachedNetwork();
-            for (PlanterBedBlockEntity bed : plot) {
-                if (bed.level != null && bed.level.hasNeighborSignal(bed.worldPosition)) {
-                    powered = true;
-                    break;
-                }
-            }
-            for (PlanterBedBlockEntity bed : plot) {
-                bed.plotPowered = powered;
-                bed.poweredTick = now;
-            }
-        }
-        return plotPowered;
+        return tracker.isPowered();
     }
 
     /** A neighbour changed (maybe redstone): re-check the plot's power on the next query. */
     void invalidatePower() {
-        for (PlanterBedBlockEntity bed : cachedNetwork()) {
-            bed.poweredTick = Long.MIN_VALUE;
-        }
+        tracker.invalidatePower();
     }
 
     public boolean isBreeding() {
@@ -382,7 +355,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
             return;
         }
         for (PlanterBedBlockEntity bed : cachedNetwork()) {
-            Optional<Fertilizer> fert = CropBlockEntity.fertilizerFor(server, bed.inventory.getStackInSlot(FERTILIZER));
+            Optional<Fertilizer> fert = com.kragnoth.cultivar.content.core.lookup.FertilizerLookup.forItem(server, bed.inventory.getStackInSlot(FERTILIZER));
             if (fert.isPresent()) {
                 if (crop.fertilize(server, random, fert.get())) {
                     bed.inventory.extractItem(FERTILIZER, 1, false);

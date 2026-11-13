@@ -2,14 +2,11 @@ package com.kragnoth.cultivar.content.packtools;
 
 import com.kragnoth.cultivar.core.module.CultivarModule;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 /**
  * Pack-maker tooling. {@code /cultivar export [samples]} (op level 2) writes {@code cultivar_export/} in the
@@ -22,13 +19,12 @@ public final class PackToolsModule implements CultivarModule {
     }
 
     @Override
-    public void onConstruct(IEventBus modBus, ModContainer container) {
-        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent e) -> e.getDispatcher().register(Commands.literal("cultivar")
+    public void registerCommands(LiteralArgumentBuilder<CommandSourceStack> root) {
+        root.then(Commands.literal("export")
                 .requires(s -> s.hasPermission(2))
-                .then(Commands.literal("export")
-                        .executes(ctx -> export(ctx, 200))
-                        .then(Commands.argument("samples", IntegerArgumentType.integer(1, 10_000))
-                                .executes(ctx -> export(ctx, IntegerArgumentType.getInteger(ctx, "samples")))))));
+                .executes(ctx -> export(ctx, 200))
+                .then(Commands.argument("samples", IntegerArgumentType.integer(1, 10_000))
+                        .executes(ctx -> export(ctx, IntegerArgumentType.getInteger(ctx, "samples")))));
     }
 
     private static int export(CommandContext<CommandSourceStack> ctx, int samples) {
