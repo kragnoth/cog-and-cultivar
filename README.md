@@ -18,6 +18,18 @@ A NeoForge 1.21.1 crop-genetics and breeding mod for steampunk/dieselpunk worlds
 Every plant, soil and mutation is datapack JSON. `/cultivar export` dumps every crop in your pack and ships a
 scaffold script that drafts plants and mutations for you. See [docs/PACKMAKERS.md](docs/PACKMAKERS.md).
 
+## Vanilla-style resource pack
+
+The built-in art is kitbashed from the Excalibur resource pack. For players without Excalibur,
+`tools/art/build_vanilla_pack.py` rebuilds every Excalibur-based texture from vanilla 1.21.1 textures
+instead (same designs, palettes lifted for vanilla's brighter look):
+
+```fish
+python3 tools/art/build_vanilla_pack.py ~/.gradle/caches/neoformruntime/artifacts/minecraft_1.21.1_client.jar
+```
+
+It writes `build/cog_and_cultivar_vanilla_style.zip`; drop it in `resourcepacks/` above the mod.
+
 ## Building
 
 ```fish
