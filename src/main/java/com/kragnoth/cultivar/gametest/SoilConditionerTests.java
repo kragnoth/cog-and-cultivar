@@ -88,7 +88,12 @@ public final class SoilConditionerTests {
     @GameTest(template = "empty")
     public static void humidityAmendmentShiftsHydration(GameTestHelper h) {
         var level = h.getLevel();
-        BlockPos soil = new BlockPos(0, 0, 0);
+        // Inside the test area, boxed in stone: water or heat from a neighbouring test must not sit beside it.
+        BlockPos soil = new BlockPos(1, 1, 1);
+        h.setBlock(soil.below(), Blocks.STONE);
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+            h.setBlock(soil.relative(d), Blocks.STONE);
+        }
         h.setBlock(soil, Blocks.DIRT);
         BlockPos abs = h.absolutePos(soil);
         SoilAmendments.set(level, abs, new Amendment(0, 0, -1));

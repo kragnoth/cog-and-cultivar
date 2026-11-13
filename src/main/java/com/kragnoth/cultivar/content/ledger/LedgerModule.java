@@ -3,6 +3,8 @@ package com.kragnoth.cultivar.content.ledger;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.core.module.CultivarModule;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
@@ -11,7 +13,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -66,7 +67,11 @@ public final class LedgerModule implements CultivarModule {
         });
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerRespawnEvent e) -> sync(e));
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerChangedDimensionEvent e) -> sync(e));
-        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent e) -> e.getDispatcher().register(KnowledgeCommand.build()));
+    }
+
+    @Override
+    public void registerCommands(LiteralArgumentBuilder<CommandSourceStack> root) {
+        root.then(KnowledgeCommand.build());
     }
 
     @Override

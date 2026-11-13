@@ -39,6 +39,7 @@
   "cultivar.info.light": "Light: %s",
   "cultivar.info.light.shade": "Light: %s (Shade Cloche; %s outside)",
   "cultivar.info.light.lamp": "Light: %s (Lamp Cloche; %s outside)",
+  "cultivar.info.light.shifted": "Light: %s (%s outside)",
   "influence.cultivar.beehive": "Pollinated (beehive)",
   "influence.cultivar.bell_cloche": "Under cloche",
   "item.cultivar.botanical_ledger": "Botanical Ledger",

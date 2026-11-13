@@ -1,6 +1,8 @@
 package com.kragnoth.cultivar.core.module;
 
 import com.kragnoth.cultivar.core.datagen.DataBootstraps;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.commands.CommandSourceStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -35,6 +37,12 @@ public interface CultivarModule {
 
     /** Register network payloads. The registrar is already versioned with the mod-wide protocol. */
     default void registerPayloads(PayloadRegistrar registrar) {}
+
+    /**
+     * Contribute subcommands to the shared root command (named after the mod id). Add your own literal with its own
+     * permission {@code requires}; the root itself carries none. Called once per command registration.
+     */
+    default void registerCommands(LiteralArgumentBuilder<CommandSourceStack> root) {}
 
     /** Datagen only: contribute datapack-registry entries (plants, soils, mutations...). */
     default void bootstrapData(DataBootstraps data) {}

@@ -35,6 +35,8 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.kragnoth.cultivar.core.plot.PlotTracker;
+
 import java.util.*;
 
 /**
@@ -112,8 +114,8 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
     private int cooldown;
     private int heldCycles;
     private boolean needsSync;
-    private List<TrialBedBlockEntity> plot;
-    private long plotTick = Long.MIN_VALUE;
+    private final PlotTracker<TrialBedBlockEntity> tracker =
+            new PlotTracker<>(this, TrialBedBlockEntity.class, MAX_BEDS, b -> b.tracker);
 
     public TrialBedBlockEntity(BlockPos pos, BlockState state) {
         super(TrialModule.TRIAL_BED_BE.get(), pos, state);
@@ -122,65 +124,16 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
     // ---------------------------------------------------------------- plot
 
     public List<TrialBedBlockEntity> plot() {
-        long now = level == null ? 0 : level.getGameTime();
-        if (plot == null || plotTick != now) {
-            List<TrialBedBlockEntity> members = flood();
-            for (TrialBedBlockEntity bed : members) {
-                bed.plot = members;
-                bed.plotTick = now;
-            }
-        }
-        return plot;
+        return tracker.members();
     }
-
-    private List<TrialBedBlockEntity> flood() {
-        if (level == null) {
-            return List.of(this);
-        }
-        List<TrialBedBlockEntity> out = new ArrayList<>();
-        Set<BlockPos> seen = new HashSet<>(List.of(worldPosition));
-        ArrayDeque<BlockPos> queue = new ArrayDeque<>(List.of(worldPosition));
-        while (!queue.isEmpty() && out.size() < MAX_BEDS) {
-            BlockPos p = queue.poll();
-            if (!level.isLoaded(p) || !(level.getBlockEntity(p) instanceof TrialBedBlockEntity bed)) {
-                continue;
-            }
-            out.add(bed);
-            for (Direction d : Direction.Plane.HORIZONTAL) {
-                if (seen.add(p.relative(d))) {
-                    queue.add(p.relative(d));
-                }
-            }
-        }
-        return out;
-    }
-
-    private boolean plotPowered;
-    private long poweredTick = Long.MIN_VALUE;
 
     /** Redstone on any trial bed pauses the plot and opens its seed stock to pipes. */
     public boolean isPlotPowered() {
-        long now = level == null ? 0 : level.getGameTime();
-        if (poweredTick != now) {
-            boolean powered = false;
-            for (TrialBedBlockEntity bed : plot()) {
-                if (bed.level != null && bed.level.hasNeighborSignal(bed.worldPosition)) {
-                    powered = true;
-                    break;
-                }
-            }
-            for (TrialBedBlockEntity bed : plot()) {
-                bed.plotPowered = powered;
-                bed.poweredTick = now;
-            }
-        }
-        return plotPowered;
+        return tracker.isPowered();
     }
 
     void invalidatePower() {
-        for (TrialBedBlockEntity bed : plot()) {
-            bed.poweredTick = Long.MIN_VALUE;
-        }
+        tracker.invalidatePower();
     }
 
     /** Comparator: how much of the plant registry the plot's Ledger has recorded. */

@@ -34,6 +34,7 @@ public final class ClocheModule implements CultivarModule {
 
     @Override
     public void onConstruct(IEventBus modBus, ModContainer container) {
+        ClocheEnvironment.register();
         ITEMS.register(modBus);
         modBus.addListener((BuildCreativeModeTabContentsEvent event) -> {
             if (event.getTabKey() == CoreModule.TAB.getKey()) {

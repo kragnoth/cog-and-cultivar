@@ -59,7 +59,7 @@ import java.util.Optional;
  * vanilla seed) = plant; empty hand on mature = harvest; hoe on weeds = clear; sneak + empty hand on a
  * grafting frame = take the cross piece back.
  */
-public class TrellisBlock extends BaseEntityBlock {
+public class TrellisBlock extends BaseEntityBlock implements com.kragnoth.cultivar.api.crop.PlantHolder {
     public static final BooleanProperty CROSS = BooleanProperty.create("cross");
     /** A Bell Cloche is fitted over this trellis (its effect is the {@code bell_cloche} crop_influence entry). */
     public static final BooleanProperty CLOCHE = BooleanProperty.create("cloche");
@@ -146,6 +146,21 @@ public class TrellisBlock extends BaseEntityBlock {
         return depth;
     }
 
+    @Override
+    public java.util.Optional<CropBlockEntity> crop(BlockGetter level, BlockPos pos) {
+        return CropBlockEntity.resolve(level, pos).filter(CropBlockEntity::hasPlant);
+    }
+
+    @Override
+    public boolean harvestInPlace(Level level, BlockPos pos, java.util.function.Consumer<ItemStack> drops) {
+        return CropBlockEntity.resolve(level, pos).map(crop -> crop.harvest(drops)).orElse(false);
+    }
+
+    @Override
+    public BlockPos soilPos(BlockGetter level, BlockPos pos) {
+        return CropBlockEntity.resolve(level, pos).map(BlockEntity::getBlockPos).orElse(pos).below();
+    }
+
     public static boolean isSegment(BlockGetter level, BlockPos pos) {
         return level.getBlockState(pos.below()).getBlock() instanceof TrellisBlock;
     }
@@ -225,7 +240,7 @@ public class TrellisBlock extends BaseEntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
         // Fertilizers (datapack registry: bone meal, seed meal...) push growth or trigger a cross.
-        var fertilizer = CropBlockEntity.fertilizerFor(level, stack);
+        var fertilizer = com.kragnoth.cultivar.content.core.lookup.FertilizerLookup.forItem(level, stack);
         if (fertilizer.isPresent()) {
             if (level instanceof ServerLevel server && crop.fertilize(server, server.random, fertilizer.get())) {
                 stack.consume(1, player);

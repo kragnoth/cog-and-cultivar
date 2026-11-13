@@ -1,15 +1,13 @@
 package com.kragnoth.cultivar.content.soil;
 
 import com.kragnoth.cultivar.Cultivar;
+import com.kragnoth.cultivar.api.crop.PlantHolder;
 import com.kragnoth.cultivar.content.core.CoreModule;
-import com.kragnoth.cultivar.content.crop.CropBlockEntity;
-import com.kragnoth.cultivar.content.crop.TrellisBlock;
 import com.kragnoth.cultivar.core.module.CultivarModule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -22,7 +20,6 @@ import net.neoforged.neoforge.event.level.ChunkWatchEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -56,6 +53,9 @@ public final class SoilModule implements CultivarModule {
 
     @Override
     public void onConstruct(IEventBus modBus, ModContainer container) {
+        // Humidity steps from conditioners apply even when environmental humidity shifts are switched off.
+        com.kragnoth.cultivar.api.environment.CultivarEnvironment.addHumidityModifier(
+                com.kragnoth.cultivar.api.environment.HumidityModifier.amendment((level, soilPos) -> SoilAmendments.get(level, soilPos).humidity()));
         ITEMS.register(modBus);
         ATTACHMENTS.register(modBus);
         modBus.addListener((BuildCreativeModeTabContentsEvent e) -> {
@@ -90,13 +90,13 @@ public final class SoilModule implements CultivarModule {
                 (payload, context) -> SoilAmendments.receive(context.player().level(), payload));
     }
 
-    /** Conditioner on a soil block, or on a trellis (any segment): amend the soil under the plant. */
+    /** Conditioner on a soil block, or on any plant holder (trellis segment, field crop): amend the soil under the plant. */
     private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         Level level = event.getLevel();
         BlockPos pos = event.getPos();
         BlockPos soilPos = pos;
-        if (level.getBlockState(pos).getBlock() instanceof TrellisBlock) {
-            soilPos = CropBlockEntity.resolve(level, pos).map(BlockEntity::getBlockPos).orElse(pos).below();
+        if (level.getBlockState(pos).getBlock() instanceof PlantHolder holder) {
+            soilPos = holder.soilPos(level, pos);
         }
         SoilAmendments.Result result = SoilAmendments.tryApply(level, soilPos, event.getItemStack(), event.getEntity());
         if (result != SoilAmendments.Result.PASS) {

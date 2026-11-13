@@ -1,7 +1,6 @@
 package com.kragnoth.cultivar.content.irrigation;
 
 import com.kragnoth.cultivar.Cultivar;
-import com.kragnoth.cultivar.content.crop.TrellisBlock;
 import com.kragnoth.cultivar.core.config.CultivarServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -142,7 +141,7 @@ public class SprinklerBlockEntity extends BlockEntity implements com.simibubi.cr
         Block b = state.getBlock();
         return b instanceof BonemealableBlock || b instanceof BushBlock || b instanceof SugarCaneBlock || b instanceof CactusBlock
                 || b instanceof ChorusFlowerBlock || b instanceof GrowingPlantBlock || b instanceof VineBlock
-                || b instanceof TrellisBlock || state.is(GROWABLES);
+                || b instanceof com.kragnoth.cultivar.api.crop.PlantHolder || state.is(GROWABLES);
     }
 
     @Override
