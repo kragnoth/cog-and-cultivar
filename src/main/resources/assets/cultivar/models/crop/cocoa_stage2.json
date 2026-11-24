@@ -2,19 +2,89 @@
   "ambientocclusion": false,
   "textures": {
     "particle": "minecraft:block/cocoa_stage2",
-    "pod": "minecraft:block/cocoa_stage2"
+    "pod": "minecraft:block/cocoa_stage2",
+    "log": "minecraft:block/jungle_log",
+    "log_top": "minecraft:block/jungle_log_top"
   },
   "elements": [
     {
       "from": [
+        6,
+        0,
+        11
+      ],
+      "to": [
+        10,
+        16,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#log",
+          "uv": [
+            6,
+            0,
+            10,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#log",
+          "uv": [
+            6,
+            0,
+            10,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#log",
+          "uv": [
+            6,
+            0,
+            10,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#log",
+          "uv": [
+            6,
+            0,
+            10,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#log_top",
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#log_top",
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "from": [
         4.0,
         4,
-        4.0
+        3
       ],
       "to": [
         12.0,
         13,
-        12.0
+        11
       ],
       "faces": {
         "north": {
@@ -75,87 +145,33 @@
     },
     {
       "from": [
-        6,
+        8,
         13,
-        8
+        7
       ],
       "to": [
-        10,
-        16,
-        8
+        8,
+        17,
+        11
       ],
-      "rotation": {
-        "origin": [
-          8,
-          8,
-          8
-        ],
-        "axis": "y",
-        "angle": 45,
-        "rescale": true
-      },
-      "shade": false,
       "faces": {
-        "north": {
+        "west": {
+          "texture": "#pod",
           "uv": [
-            12,
-            0,
             16,
+            0,
+            12,
             4
-          ],
-          "texture": "#pod"
+          ]
         },
-        "south": {
+        "east": {
+          "texture": "#pod",
           "uv": [
             12,
             0,
             16,
             4
-          ],
-          "texture": "#pod"
-        }
-      }
-    },
-    {
-      "from": [
-        6,
-        13,
-        8
-      ],
-      "to": [
-        10,
-        16,
-        8
-      ],
-      "rotation": {
-        "origin": [
-          8,
-          8,
-          8
-        ],
-        "axis": "y",
-        "angle": -45,
-        "rescale": true
-      },
-      "shade": false,
-      "faces": {
-        "north": {
-          "uv": [
-            12,
-            0,
-            16,
-            4
-          ],
-          "texture": "#pod"
-        },
-        "south": {
-          "uv": [
-            12,
-            0,
-            16,
-            4
-          ],
-          "texture": "#pod"
+          ]
         }
       }
     }

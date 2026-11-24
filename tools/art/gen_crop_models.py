@@ -85,10 +85,15 @@ for i, h in enumerate((4, 8, 12, 16)):
 for i, (w, h, side_uv, top_uv) in enumerate(((4, 5, [11, 4, 15, 9], [0, 0, 4, 4]),
                                              (6, 7, [9, 4, 15, 11], [0, 0, 6, 6]),
                                              (8, 9, [8, 4, 16, 13], [0, 0, 8, 8]))):  # vanilla cocoa UVs
-    top = 13
-    pod = box([8 - w / 2, top - h, 8 - w / 2], [8 + w / 2, top, 8 + w / 2], "#pod", "#pod", side_uv=side_uv, top_uv=top_uv)
-    model(f'cocoa_stage{i}', {"pod": f"minecraft:block/cocoa_stage{i}"},
-          [pod] + plane_pair("#pod", top, top + 3, [12, 0, 16, 4], half=2))
+    # Like vanilla, the pod hangs off wood: a thin jungle-log post at the back, the pod against its front face and
+    # vanilla's stem plane running from the pod's top into the post.
+    top, back = 13, 11
+    post = box([6, 0, back], [10, 16, back + 4], "#log", "#log_top", side_uv=[6, 0, 10, 16], top_uv=[6, 6, 10, 10])
+    pod = box([8 - w / 2, top - h, back - w], [8 + w / 2, top, back], "#pod", "#pod", side_uv=side_uv, top_uv=top_uv)
+    stem = {"from": [8, top, back - 4], "to": [8, top + 4, back],
+            "faces": {"west": {"texture": "#pod", "uv": [16, 0, 12, 4]}, "east": {"texture": "#pod", "uv": [12, 0, 16, 4]}}}
+    model(f'cocoa_stage{i}', {"pod": f"minecraft:block/cocoa_stage{i}", "log": "minecraft:block/jungle_log",
+                              "log_top": "minecraft:block/jungle_log_top"}, [post, pod, stem])
 
 # Glow berries: cave vines hang from the top bar; ripe stage uses the lit texture.
 for i, rows in enumerate((6, 11, 16)):
