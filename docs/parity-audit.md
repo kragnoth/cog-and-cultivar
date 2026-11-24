@@ -159,4 +159,13 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
   breaking a segment cuts the plant below it (a product roll per segment if ripe); harvesting through any segment
   works. Shears, Transplanting Spade, Seed Satchel and Cuttings work on field crops and bare soil. A trellis used on
   a field crop takes the plant over (genome, growth, assay flag).
+- 2026-11-24: in-game test commands (op 2, under vanilla `/test` like Creative Engineering's demos):
+  `/test cultivar [filter]` runs every Cultivar game test live in the current world/modpack (registers and ticks
+  vanilla's runner itself, so it works outside dev; noon during the run; failures get a click to teleport);
+  `/test cultivarshowcase` builds a signed gallery (every plant at every stage as field crops, ripe on trellises,
+  blights, cloches, conditioner dusting, Olla reach, grafting frame, machines, chests of every item) with random
+  ticks paused; `/test cultivarclear` removes plots and the showcase and restores time and ticks;
+  `/test cultivarchecklist` lists the by-eye checks, click to set each up; `/test cultivaraudit` (client) checks
+  models, textures, plant/blight/overlay sprites, names, Create tooltips, Ponder scene builds, JEI pages and the
+  creative tab, writing logs/cultivar-audit.txt.
 
