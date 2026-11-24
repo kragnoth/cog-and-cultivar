@@ -271,6 +271,7 @@ public class TrellisBlock extends BaseEntityBlock implements com.kragnoth.cultiv
         if (genome.isPresent() && !state.getValue(CROSS) && !crop.hasPlant()) {
             if (!level.isClientSide() && crop.plant(genome.get(), stack)) {
                 level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1f, 1f);
+                CropInfo.warnAfterPlanting(crop.plant(), player);
                 stack.consume(1, player);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());

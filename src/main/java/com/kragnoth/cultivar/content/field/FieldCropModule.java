@@ -52,7 +52,9 @@ public final class FieldCropModule implements CultivarModule {
             return;
         }
         FieldPlanting.Result result = FieldPlanting.tryPlant(event.getLevel(), event.getPos(), event.getItemStack(), event.getEntity());
-        if (result != FieldPlanting.Result.PASS) {
+        if (result == FieldPlanting.Result.PASS) {
+            FieldPlanting.hintNotSoil(event.getLevel(), event.getPos(), event.getItemStack(), event.getEntity());
+        } else {
             event.setCanceled(true);
             event.setCancellationResult(result == FieldPlanting.Result.PLANTED
                     ? InteractionResult.sidedSuccess(event.getLevel().isClientSide()) : InteractionResult.CONSUME);

@@ -228,21 +228,46 @@ public final class PlantCore {
         if (genome == null) {
             return;
         }
-        Plant plant = species();
         switch (response(ideal)) {
-            case KILL -> set(null, 0, false);
-            case LETHAL -> setStage(stage - 1);
+            case KILL -> {
+                puff(12);
+                set(null, 0, false);
+            }
+            case LETHAL -> {
+                puff(4); // a visible cue across the field that this plant is in trouble
+                setStage(stage - 1);
+            }
             case FERTILE -> {
-                if (stage < plant.matureStage() && plant.blocksAt(stage + 1) <= host.blocksAvailable()) {
-                    double chance = GrowthMath.growthChance(plant, stat(CoreModule.GROWTH.getKey()),
-                            soil().map(Soil::growthModifier).orElse(1f), CultivarServerConfig.GROWTH_MULTIPLIER.get(), host.influence());
-                    if (random.nextDouble() < chance) {
-                        setStage(stage + 1);
-                    }
+                if (hasRoomToGrow() && random.nextDouble() < growthChance()) {
+                    setStage(stage + 1);
                 }
             }
             case INFERTILE -> { }
         }
+    }
+
+    /** Grey smoke at the plant (server side): it is withering or dying. */
+    private void puff(int count) {
+        if (host.level() instanceof net.minecraft.server.level.ServerLevel server) {
+            BlockPos p = host.rootPos();
+            server.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, p.getX() + 0.5, p.getY() + 0.4, p.getZ() + 0.5,
+                    count, 0.25, 0.25, 0.25, 0.01);
+        }
+    }
+
+    /** Not yet ripe and the holder has room for the next stage (tall plants need trellis segments or air above). */
+    public boolean hasRoomToGrow() {
+        return genome != null && stage < species().matureStage() && species().blocksAt(stage + 1) <= host.blocksAvailable();
+    }
+
+    /** Chance one random tick advances a stage when conditions are met (soil, Growth stat, config, influences). */
+    public double growthChance() {
+        if (genome == null) {
+            return 0;
+        }
+        double multiplier = CultivarServerConfig.SPEC.isLoaded() ? CultivarServerConfig.GROWTH_MULTIPLIER.get() : 1.0;
+        return GrowthMath.growthChance(species(), stat(CoreModule.GROWTH.getKey()), soil().map(Soil::growthModifier).orElse(1f),
+                multiplier, host.influence());
     }
 
     /**

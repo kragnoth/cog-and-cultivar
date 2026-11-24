@@ -1,5 +1,8 @@
 package com.kragnoth.cultivar.content.field;
 
+import com.kragnoth.cultivar.content.crop.CropInfo;
+import com.kragnoth.cultivar.content.crop.plant.PlantStatus;
+
 import com.kragnoth.cultivar.api.condition.GrowthCondition;
 import com.kragnoth.cultivar.api.condition.GrowthResponse;
 import com.kragnoth.cultivar.api.crop.PlantHolder;
@@ -21,6 +24,7 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Planting a Cultivar seed straight on soil. Like a vanilla seed, it only takes on soil it can grow in: the plant's
@@ -68,6 +72,7 @@ public final class FieldPlanting {
             if (level.getBlockEntity(target) instanceof FieldCropBlockEntity crop) {
                 crop.plant().set(genome, stage, assayed);
                 crop.plant().clampToSpace();
+                CropInfo.warnAfterPlanting(crop.plant(), player);
             }
             level.playSound(null, target, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1f, 1f);
         }
@@ -83,11 +88,44 @@ public final class FieldPlanting {
                 || !isFieldSoil(level, soilPos) || !level.getBlockState(soilPos.above()).canBeReplaced()) {
             return Result.PASS;
         }
-        return soilAccepts(level, soilPos.above(), genome) ? Result.PLANTED : refuse(level, player, "cultivar.field.wrong_soil", genome);
+        Optional<Component> problem = soilProblem(level, soilPos.above(), genome);
+        if (problem.isEmpty()) {
+            return Result.PLANTED;
+        }
+        if (player != null && !level.isClientSide()) {
+            player.displayClientMessage(Component.translatable("cultivar.field.wrong_soil", CultivarSeedItem.plantName(genome),
+                    problem.get()).withStyle(ChatFormatting.YELLOW), true);
+        }
+        return Result.REFUSED;
+    }
+
+    /**
+     * A Cultivar seed used on bare ground that isn't a Cultivar soil (grass, dirt, sand...): say what it needs instead
+     * of doing nothing. Only for plain ground with free space above, so clicking chests or machines stays silent.
+     */
+    public static void hintNotSoil(Level level, BlockPos pos, ItemStack stack, @Nullable Player player) {
+        if (player == null || level.isClientSide() || !(stack.getItem() instanceof CultivarSeedItem)) {
+            return;
+        }
+        var state = level.getBlockState(pos);
+        boolean ground = state.is(net.minecraft.tags.BlockTags.DIRT) || state.is(net.minecraft.tags.BlockTags.SAND)
+                || state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) || state.is(net.minecraft.world.level.block.Blocks.GRAVEL);
+        if (ground && !(state.getBlock() instanceof PlantHolder) && !(state.getBlock() instanceof SoilHost)
+                && SoilLookup.at(level, pos).isEmpty() && level.getBlockState(pos.above()).canBeReplaced()) {
+            player.displayClientMessage(Component.translatable("cultivar.field.not_soil").withStyle(ChatFormatting.YELLOW), true);
+        }
     }
 
     /** The plant's soil requirements as they would apply at {@code cropPos} (no block placed yet). */
     public static boolean soilAccepts(Level level, BlockPos cropPos, Genome genome) {
+        return soilProblem(level, cropPos, genome).isEmpty();
+    }
+
+    /**
+     * Why {@code genome} wouldn't take root at {@code cropPos} ("✘ Humidity: wet or wetter (here: dry)"), or empty if
+     * its soil requirements are met. Light and other conditions don't stop planting, so they aren't reported here.
+     */
+    public static Optional<Component> soilProblem(Level level, BlockPos cropPos, Genome genome) {
         PlantCore probe = new PlantCore(new PlantCore.Host() {
             @Override
             public Level level() {
@@ -105,16 +143,19 @@ public final class FieldPlanting {
         probe.set(genome, 0, false);
         var soil = probe.soil();
         if (soil.isEmpty()) {
-            return false;
+            return Optional.of(Component.translatable("cultivar.info.no_soil"));
         }
-        List<GrowthCondition> needs = probe.requirements().stream().filter(GrowthCondition::isSoilProperty).toList();
-        return GrowthCondition.testAll(needs, probe.context(soil), probe.strength()) == GrowthResponse.FERTILE;
-    }
-
-    private static Result refuse(Level level, @Nullable Player player, String key, Genome genome) {
-        if (player != null && !level.isClientSide()) {
-            player.displayClientMessage(Component.translatable(key, CultivarSeedItem.plantName(genome)).withStyle(ChatFormatting.YELLOW), true);
+        var ctx = probe.context(soil);
+        for (GrowthCondition c : probe.requirements()) {
+            if (c.isSoilProperty()) {
+                GrowthResponse r = c.test(ctx, probe.strength());
+                if (r != GrowthResponse.FERTILE) {
+                    return CropInfo.requirementLine(new PlantStatus.Check(c, r, c.current(ctx)))
+                            .map(line -> (Component) Component.literal(line.getString().strip()))
+                            .or(() -> Optional.of(Component.literal("?")));
+                }
+            }
         }
-        return Result.REFUSED;
+        return Optional.empty();
     }
 }

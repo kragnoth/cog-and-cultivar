@@ -29,6 +29,22 @@ public record BiomeCondition(HolderSet<Biome> biomes, boolean blacklist, int ign
     }
 
     @Override
+    public java.util.Optional<net.minecraft.network.chat.Component> describe() {
+        String what = biomes.unwrapKey().map(t -> "#" + t.location())
+                .orElseGet(() -> biomes.stream().map(h -> h.unwrapKey().map(k -> k.location().getPath()).orElse("?"))
+                        .limit(3).collect(java.util.stream.Collectors.joining(", ")) + (biomes.size() > 3 ? ", ..." : ""));
+        return java.util.Optional.of(net.minecraft.network.chat.Component.translatable(
+                blacklist ? "cultivar.condition.biome.not" : "cultivar.condition.biome", what));
+    }
+
+    @Override
+    public java.util.Optional<net.minecraft.network.chat.Component> current(GrowthContext context) {
+        return context.level().getBiome(context.pos()).unwrapKey()
+                .map(k -> net.minecraft.network.chat.Component.translatableWithFallback(
+                        "biome." + k.location().getNamespace() + "." + k.location().getPath(), k.location().getPath()));
+    }
+
+    @Override
     public GrowthResponse test(GrowthContext context, int strength) {
         if (strength >= ignoreAtStrength) {
             return GrowthResponse.FERTILE;

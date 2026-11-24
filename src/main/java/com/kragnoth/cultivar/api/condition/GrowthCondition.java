@@ -15,7 +15,9 @@ public interface GrowthCondition {
     GrowthConditionType<?> type();
 
     /**
-     * Tests the condition. Server-side only. Must be cheap and must not load chunks or mutate the world.
+     * Tests the condition. Must be cheap, read-only, and must not load chunks or mutate the world. Growth runs it on the
+     * server; readouts (goggles, Jade, planting hints) also run it on the client with synced state, so it should read
+     * only what clients have too (blocks, light, biome, synced attachments).
      *
      * @param strength the crop's expressed strength stat; higher strength widens tolerance
      */
@@ -27,6 +29,22 @@ public interface GrowthCondition {
      */
     default boolean isSoilProperty() {
         return false;
+    }
+
+    /**
+     * What this requirement asks for, for readouts and seed tooltips ("Light 9+", "Humidity: wet or wetter"). Empty
+     * when it asks for nothing worth showing (e.g. any light). Defaults to the condition type's name, translated as
+     * {@code condition.<namespace>.<path>}.
+     */
+    default java.util.Optional<net.minecraft.network.chat.Component> describe() {
+        var id = CultivarRegistries.GROWTH_CONDITION_TYPE.getKey(type());
+        return java.util.Optional.of(id == null ? net.minecraft.network.chat.Component.literal("?")
+                : net.minecraft.network.chat.Component.translatableWithFallback("condition." + id.getNamespace() + "." + id.getPath(), id.getPath()));
+    }
+
+    /** What this spot currently has for this requirement ("4", "moist"), shown next to a failing one. Optional. */
+    default java.util.Optional<net.minecraft.network.chat.Component> current(GrowthContext context) {
+        return java.util.Optional.empty();
     }
 
     /** Combined response of a list of conditions (worst wins; empty list is fertile). */

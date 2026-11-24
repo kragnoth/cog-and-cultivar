@@ -29,6 +29,25 @@ public final class CultivarJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(CropProvider.INSTANCE, TrellisBlock.class);
         registration.registerBlockComponent(CropProvider.INSTANCE, com.kragnoth.cultivar.content.field.FieldCropBlock.class);
         registration.registerBlockComponent(SoilProvider.INSTANCE, Block.class);
+        registration.registerBlockComponent(OllaProvider.INSTANCE, com.kragnoth.cultivar.content.irrigation.OllaBlock.class);
+    }
+
+    /** Olla: filled or not, and how much farmland it keeps moist (the goggles readout minus the title Jade shows). */
+    enum OllaProvider implements IBlockComponentProvider {
+        INSTANCE;
+
+        private static final ResourceLocation UID = Cultivar.id("olla");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            var lines = com.kragnoth.cultivar.content.irrigation.OllaBlock.readout(accessor.getLevel(), accessor.getPosition(), accessor.getBlockState());
+            lines.subList(1, lines.size()).forEach(tooltip::add);
+        }
     }
 
     /** Any soil block (or Planter Bed) a conditioner has been used on. */
@@ -70,26 +89,24 @@ public final class CultivarJadePlugin implements IWailaPlugin {
                     .filter(f -> accessor.getBlock() instanceof com.kragnoth.cultivar.content.field.FieldCropBlock && f.plant().hasPlant());
             if (fieldCrop.isPresent()) {
                 var field = fieldCrop.get();
-                tooltip.add(CropInfo.lines(CropInfo.Subject.simple(field.plant(), accessor.getLevel(), field.getBlockPos(),
-                        field.getBlockState())).getFirst());
-                Amendment amendment = SoilAmendments.get(accessor.getLevel(), field.getBlockPos().below());
-                if (!amendment.isEmpty()) {
-                    tooltip.add(SoilAmendments.describe(amendment));
-                }
+                CropInfo.lines(CropInfo.Subject.simple(field.plant(), accessor.getLevel(), field.getBlockPos(), field.getBlockState()),
+                        CropInfo.Detail.BRIEF).forEach(tooltip::add);
                 return;
             }
             if (!(CropBlockEntity.resolve(accessor.getLevel(), accessor.getPosition()).orElse(null) instanceof CropBlockEntity crop)) {
                 return;
             }
-            // Compact on purpose: the full readout lives in Create goggles.
-            List<Component> lines = CropInfo.lines(crop);
-            tooltip.add(lines.getFirst());
-            Amendment amendment = SoilAmendments.get(accessor.getLevel(), crop.getBlockPos().below());
-            if (!amendment.isEmpty()) {
-                tooltip.add(SoilAmendments.describe(amendment));
-            }
-            if (crop.weed() != null) {
-                tooltip.add(lines.getLast());
+            // Brief on purpose (name, what's wrong, why): the full readout lives in Create goggles.
+            if (crop.hasPlant() || crop.isCross()) {
+                CropInfo.lines(crop, CropInfo.Detail.BRIEF).forEach(tooltip::add);
+            } else {
+                Amendment amendment = SoilAmendments.get(accessor.getLevel(), crop.getBlockPos().below());
+                if (!amendment.isEmpty()) {
+                    tooltip.add(SoilAmendments.describe(amendment));
+                }
+                if (crop.weed() != null) {
+                    tooltip.add(CropInfo.lines(crop).getLast()); // the blight line
+                }
             }
         }
     }

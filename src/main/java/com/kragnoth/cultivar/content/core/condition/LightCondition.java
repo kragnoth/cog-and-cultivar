@@ -22,6 +22,20 @@ public record LightCondition(int min, int max, double tolerance) implements Grow
     }
 
     @Override
+    public java.util.Optional<net.minecraft.network.chat.Component> describe() {
+        if (min <= 0 && max >= 15) {
+            return java.util.Optional.empty();
+        }
+        String key = min <= 0 ? "cultivar.condition.light.max" : max >= 15 ? "cultivar.condition.light.min" : "cultivar.condition.light.range";
+        return java.util.Optional.of(net.minecraft.network.chat.Component.translatable(key, min <= 0 ? max : min, max));
+    }
+
+    @Override
+    public java.util.Optional<net.minecraft.network.chat.Component> current(GrowthContext context) {
+        return java.util.Optional.of(net.minecraft.network.chat.Component.literal(String.valueOf(CropLight.at(context.level(), context.pos()))));
+    }
+
+    @Override
     public GrowthResponse test(GrowthContext context, int strength) {
         int light = CropLight.at(context.level(), context.pos());
         return ToleranceWindow.accepts(light, min, max, ToleranceWindow.Comparison.EQUAL, tolerance, strength)

@@ -66,11 +66,20 @@ public class CultivarSeedItem extends Item {
         }
         if (!statsVisible(stack)) {
             tooltip.add(Component.translatable("item.cultivar.seed.unassayed").withStyle(ChatFormatting.DARK_GRAY));
-            return;
+        } else {
+            var expression = Genetics.current();
+            CoreModule.STATS.getEntries().forEach(stat -> tooltip.add(Component.translatable(
+                    "stat.cultivar." + stat.getId().getPath()).append(": " + Genetics.expressed(genome, stat.getKey(), expression))
+                    .withStyle(ChatFormatting.GRAY)));
         }
-        var expression = Genetics.current();
-        CoreModule.STATS.getEntries().forEach(stat -> tooltip.add(Component.translatable(
-                "stat.cultivar." + stat.getId().getPath()).append(": " + Genetics.expressed(genome, stat.getKey(), expression))
-                .withStyle(ChatFormatting.GRAY)));
+        // What the species needs: not genetic, so shown whether or not the seed is assayed.
+        List<Component> needs = new java.util.ArrayList<>();
+        for (var condition : genome.species().value().requirements()) {
+            condition.describe().ifPresent(what -> needs.add(Component.literal("  ").append(what).withStyle(ChatFormatting.DARK_AQUA)));
+        }
+        if (!needs.isEmpty()) {
+            tooltip.add(Component.translatable("item.cultivar.seed.needs").withStyle(ChatFormatting.GRAY));
+            tooltip.addAll(needs);
+        }
     }
 }

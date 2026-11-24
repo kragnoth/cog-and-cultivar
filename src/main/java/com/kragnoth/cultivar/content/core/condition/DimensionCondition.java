@@ -35,6 +35,18 @@ public record DimensionCondition(List<ResourceKey<Level>> dimensions, boolean bl
     }
 
     @Override
+    public java.util.Optional<net.minecraft.network.chat.Component> describe() {
+        String what = dimensions.stream().map(k -> k.location().getPath()).collect(java.util.stream.Collectors.joining(", "));
+        return java.util.Optional.of(net.minecraft.network.chat.Component.translatable(
+                blacklist ? "cultivar.condition.dimension.not" : "cultivar.condition.dimension", what));
+    }
+
+    @Override
+    public java.util.Optional<net.minecraft.network.chat.Component> current(GrowthContext context) {
+        return java.util.Optional.of(net.minecraft.network.chat.Component.literal(context.level().dimension().location().getPath()));
+    }
+
+    @Override
     public GrowthResponse test(GrowthContext context, int strength) {
         if (strength >= ignoreAtStrength) {
             return GrowthResponse.FERTILE;

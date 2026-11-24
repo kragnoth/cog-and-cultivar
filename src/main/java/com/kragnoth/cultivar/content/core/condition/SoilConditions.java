@@ -18,6 +18,25 @@ import java.util.Optional;
 public final class SoilConditions {
     private SoilConditions() {}
 
+    /** A soil level's display name: {@code cultivar.soil.<kind>.<value>} ("very low"). */
+    public static net.minecraft.network.chat.MutableComponent levelName(String kind, net.minecraft.util.StringRepresentable value) {
+        String v = value.getSerializedName();
+        return net.minecraft.network.chat.Component.translatableWithFallback("cultivar.soil." + kind + "." + v,
+                v.replace('_', ' ').toLowerCase(java.util.Locale.ROOT));
+    }
+
+    /** "Humidity: wet or wetter" and the like. */
+    static java.util.Optional<net.minecraft.network.chat.Component> describe(String kind, net.minecraft.util.StringRepresentable value,
+                                                                             ToleranceWindow.Comparison comparison) {
+        return java.util.Optional.of(net.minecraft.network.chat.Component.translatable(
+                "cultivar.condition." + kind + "." + comparison.getSerializedName(), levelName(kind, value)));
+    }
+
+    static <E extends net.minecraft.util.StringRepresentable> java.util.Optional<net.minecraft.network.chat.Component> current(
+            String kind, java.util.Optional<E> actual) {
+        return actual.map(a -> levelName(kind, a));
+    }
+
     static <E extends Enum<E>> GrowthResponse test(Optional<E> actual, E target, ToleranceWindow.Comparison comparison,
                                                     double tolerance, int strength) {
         return actual.filter(a -> ToleranceWindow.accepts(a.ordinal(), target.ordinal(), comparison, tolerance, strength))
@@ -40,6 +59,16 @@ public final class SoilConditions {
         @Override
         public GrowthConditionType<?> type() {
             return CoreConditions.HUMIDITY.get();
+        }
+
+        @Override
+        public java.util.Optional<net.minecraft.network.chat.Component> describe() {
+            return SoilConditions.describe("humidity", value, comparison);
+        }
+
+        @Override
+        public java.util.Optional<net.minecraft.network.chat.Component> current(GrowthContext context) {
+            return SoilConditions.current("humidity", context.humidity());
         }
 
         @Override
@@ -67,6 +96,16 @@ public final class SoilConditions {
         }
 
         @Override
+        public java.util.Optional<net.minecraft.network.chat.Component> describe() {
+            return SoilConditions.describe("acidity", value, comparison);
+        }
+
+        @Override
+        public java.util.Optional<net.minecraft.network.chat.Component> current(GrowthContext context) {
+            return SoilConditions.current("acidity", context.acidity());
+        }
+
+        @Override
         public GrowthResponse test(GrowthContext context, int strength) {
             return SoilConditions.test(context.acidity(), value, comparison, tolerance, strength);
         }
@@ -88,6 +127,16 @@ public final class SoilConditions {
         @Override
         public GrowthConditionType<?> type() {
             return CoreConditions.NUTRIENTS.get();
+        }
+
+        @Override
+        public java.util.Optional<net.minecraft.network.chat.Component> describe() {
+            return SoilConditions.describe("nutrients", value, comparison);
+        }
+
+        @Override
+        public java.util.Optional<net.minecraft.network.chat.Component> current(GrowthContext context) {
+            return SoilConditions.current("nutrients", context.nutrients());
         }
 
         @Override
