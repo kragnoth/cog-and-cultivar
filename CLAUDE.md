@@ -9,4 +9,4 @@
 - Do not launch the game or a headless client unless Joe explicitly asks for a full compile and load-up.
 - Joe uses fish shell on CachyOS: give shell commands in fish syntax.
 - Architecture rules: `docs/ARCHITECTURE.md` (module pattern, server-safety, performance). New features = new module + one line in `CultivarModules`.
-- Work on feature branches and open PRs; CI must pass (build + sidedness check, datagen staleness, dedicated-server game tests).
+- Branches and PRs only for major roadmap phases; smaller changes go straight to main. CI (build + sidedness check, datagen staleness, dedicated-server game tests) must pass before a phase PR merges; don't sit waiting on CI after pushing.
