@@ -185,7 +185,8 @@ public final class CropTests {
         CropBlockEntity crop = (CropBlockEntity) h.getBlockEntity(base);
         crop.plant(Genome.base(cane), 5);
         crop.clampToSpace();
-        h.assertTrue(crop.stage() == 1 && crop.segmentsMissing() == 2, "one trellis holds one block of cane");
+        h.assertTrue(cane.value().blocksAt(crop.stage()) == 1 && cane.value().blocksAt(crop.stage() + 1) == 2
+                && crop.segmentsMissing() == 2, "one trellis holds one block of cane, grown as far as one block goes");
 
         h.setBlock(base.above(), CropModule.TIMBER_TRELLIS.get());
         h.setBlock(base.above(2), CropModule.IRON_TRELLIS.get());
@@ -197,9 +198,9 @@ public final class CropTests {
         crop.uproot();
         crop.plant(Genome.base(cane), 5);
         h.setBlock(base.above(2), Blocks.AIR);
-        h.assertTrue(crop.stage() == 3, "removing the top segment shrinks the cane to fit two blocks");
+        h.assertTrue(cane.value().blocksAt(crop.stage()) == 2 && !crop.isMature(), "removing the top segment shrinks the cane to fit two blocks");
         h.setBlock(base.above(), Blocks.AIR);
-        h.assertTrue(crop.stage() == 1, "and to one block");
+        h.assertTrue(cane.value().blocksAt(crop.stage()) == 1, "and to one block");
         h.succeed();
     }
 

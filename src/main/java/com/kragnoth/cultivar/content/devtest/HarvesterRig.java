@@ -5,10 +5,9 @@ import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.plant.Plant;
 import com.kragnoth.cultivar.content.crop.CropBlockEntity;
 import com.kragnoth.cultivar.content.crop.CropModule;
+import com.kragnoth.cultivar.content.crop.plant.PlantCore;
 import com.kragnoth.cultivar.content.field.FieldCropBlockEntity;
 import com.kragnoth.cultivar.content.field.FieldCropModule;
-import com.kragnoth.cultivar.content.irrigation.IrrigationModule;
-import com.kragnoth.cultivar.content.irrigation.OllaBlock;
 import com.simibubi.create.content.contraptions.glue.SuperGlueEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,35 +16,47 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * {@code /test cultivarharvester}: a standard Create rotation farm, built from real parts so it exercises the whole
- * chain. A small water wheel (fed by falling water) drives shafts and gearboxes under the field into a Mechanical
- * Bearing facing up at its centre; the bearing turns a glued andesite-casing arm with Mechanical Harvesters on both
- * sides. The field around it is ripe wheat: field crops on the west half, trellis crops on the east, plus two tall
- * field cane stacks. Buried filled Ollas keep the farmland moist. Random ticks stay on, so harvested crops regrow and
- * get harvested again.
+ * {@code /test cultivarharvester}: a grid of Create rotation-farm stations covering every registered plant.
  *
- * <p>Layout (relative to the bearing, y = crop level): soil y-1, drivetrain y-2, arm along +x at y 0.
+ * <p>Each station: Creative Motor -> Mechanical Bearing (facing up) -> a glued arm of andesite casing with three
+ * Mechanical Harvesters on each side and two barrels on top, so produce goes into the contraption's storage (Create's
+ * default) and anything that can't fit falls to the ground. Around it, a disc of ripe crops split into four quadrants,
+ * one plant per quadrant, alternating field crops and trellises (stacked for tall plants). A sign names the plants.
+ *
+ * <p>Random ticks are paused so nothing grows, withers or dies off-soil while you look; {@code /test cultivarharvester
+ * regrow} sets every station crop ripe again for another pass. {@code /test cultivarclear} removes it all.
  */
 final class HarvesterRig {
-    private static final int RADIUS = 3;
+    private static final int ARM = 3;
+    private static final int SPACING = 10;
+    private static final int COLUMNS = 4;
+    private static final double REACH_SQ = 12.9; // crops out to where the outermost harvester reaches
+
     @Nullable
     private static ServerLevel builtIn;
     @Nullable
     private static AABB bounds;
+    private static int savedTickSpeed = -1;
+    private static final List<BlockPos> crops = new ArrayList<>();
 
     private HarvesterRig() {}
 
@@ -56,91 +67,128 @@ final class HarvesterRig {
     static int build(CommandSourceStack source) {
         ServerLevel level = source.getLevel();
         clear(source, false);
-        // Centre 9 blocks in front of the player (east), at their feet level.
-        BlockPos c = BlockPos.containing(source.getPosition()).offset(9, 0, 0);
+        List<Holder.Reference<Plant>> plants = level.registryAccess().registryOrThrow(CultivarRegistries.PLANT).holders()
+                .sorted((a, b) -> a.key().location().toString().compareTo(b.key().location().toString())).toList();
+        int stations = (plants.size() + 3) / 4;
+        int rows = (stations + COLUMNS - 1) / COLUMNS;
+        // First station centre 6 blocks east of the player; the grid runs east (x) and south (z).
+        BlockPos origin = BlockPos.containing(source.getPosition()).offset(6, 0, 0);
         builtIn = level;
-        bounds = new AABB(c.getX() - 10, c.getY() - 3, c.getZ() - 6, c.getX() + 6, c.getY() + 5, c.getZ() + 6);
+        bounds = new AABB(origin.getX() - 5, origin.getY() - 3, origin.getZ() - 5,
+                origin.getX() + COLUMNS * SPACING - 5, origin.getY() + 6, origin.getZ() + rows * SPACING - 5);
 
-        // Ground: stone, farmland under the crop disc, air above.
-        for (BlockPos p : BlockPos.betweenClosed(c.offset(-10, -3, -6), c.offset(6, 5, 6))) {
-            int dy = p.getY() - c.getY();
+        var rule = level.getGameRules().getRule(GameRules.RULE_RANDOMTICKING);
+        if (rule.get() != 0) {
+            savedTickSpeed = rule.get();
+            rule.set(0, level.getServer());
+        }
+        for (BlockPos p : box()) {
+            int dy = p.getY() - origin.getY();
             level.setBlock(p, dy < 0 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
         }
-        // Drivetrain: wheel (-7,0,0) -> shaft -> gearbox (-5,0,0) -> down -> gearbox (-5,-2,0) -> shafts -> gearbox (0,-2,0) -> up.
-        BlockState shaftX = create("shaft").setValue(BlockStateProperties.AXIS, Direction.Axis.X);
-        BlockState gearbox = create("gearbox").setValue(BlockStateProperties.AXIS, Direction.Axis.Z);
-        level.setBlock(c.offset(-7, 0, 0), create("water_wheel").setValue(BlockStateProperties.FACING, Direction.EAST), Block.UPDATE_ALL);
-        level.setBlock(c.offset(-6, 0, 0), shaftX, Block.UPDATE_ALL);
-        level.setBlock(c.offset(-5, 0, 0), gearbox, Block.UPDATE_ALL);
-        level.setBlock(c.offset(-5, -1, 0), create("shaft").setValue(BlockStateProperties.AXIS, Direction.Axis.Y), Block.UPDATE_ALL);
-        level.setBlock(c.offset(-5, -2, 0), gearbox, Block.UPDATE_ALL);
-        for (int x = -4; x <= -1; x++) {
-            level.setBlock(c.offset(x, -2, 0), shaftX, Block.UPDATE_ALL);
-        }
-        level.setBlock(c.offset(0, -2, 0), gearbox, Block.UPDATE_ALL);
-
-        // Crops first (not where the arm will be), then the arm, so assembly only picks up the arm.
-        Holder<Plant> wheat = plant(level, "minecraft:wheat"), cane = plant(level, "minecraft:sugar_cane");
-        for (int dx = -RADIUS - 1; dx <= RADIUS + 1; dx++) {
-            for (int dz = -RADIUS - 1; dz <= RADIUS + 1; dz++) {
-                boolean arm = Math.abs(dz) <= 1 && dx >= 0 && dx <= RADIUS;
-                if (arm || dx * dx + dz * dz > (RADIUS + 0.6) * (RADIUS + 0.6)) {
-                    continue;
-                }
-                BlockPos at = c.offset(dx, 0, dz);
-                level.setBlock(at.below(), Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7), Block.UPDATE_ALL);
-                if ((dx == -2 && dz == 2) || (dx == -2 && dz == -2)) {
-                    field(level, at, cane, cane.value().matureStage());
-                } else if (dx < 0) {
-                    field(level, at, wheat, wheat.value().matureStage());
-                } else {
-                    level.setBlock(at, CropModule.TIMBER_TRELLIS.get().defaultBlockState(), Block.UPDATE_ALL);
-                    if (level.getBlockEntity(at) instanceof CropBlockEntity crop) {
-                        crop.plant(Genome.base(wheat), wheat.value().matureStage());
-                    }
-                }
+        for (int s = 0; s < stations; s++) {
+            BlockPos c = origin.offset((s % COLUMNS) * SPACING, 0, (s / COLUMNS) * SPACING);
+            List<Holder<Plant>> four = new ArrayList<>();
+            for (int q = 0; q < 4; q++) {
+                four.add(plants.get(Math.min(plants.size() - 1, s * 4 + q)));
             }
+            station(level, c, four);
         }
-        // Filled Ollas under the field keep every farmland block moist (4-block reach from the layer below).
-        for (int[] o : new int[][]{{2, 2}, {-2, 2}, {2, -2}, {-2, -2}}) {
-            level.setBlock(c.offset(o[0], -2, o[1]), IrrigationModule.OLLA.get().defaultBlockState().setValue(OllaBlock.FILLED, true), Block.UPDATE_ALL);
-        }
-
-        // Bearing facing up, arm of andesite casing along +x, harvesters on both sides (one side always leads).
-        level.setBlock(c.below(), create("mechanical_bearing").setValue(BlockStateProperties.FACING, Direction.UP), Block.UPDATE_ALL);
-        for (int x = 0; x <= RADIUS; x++) {
-            level.setBlock(c.offset(x, 0, 0), create("andesite_casing"), Block.UPDATE_ALL);
-        }
-        for (int x = 1; x <= RADIUS; x++) {
-            level.setBlock(c.offset(x, 0, 1), create("mechanical_harvester").setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH), Block.UPDATE_ALL);
-            level.setBlock(c.offset(x, 0, -1), create("mechanical_harvester").setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH), Block.UPDATE_ALL);
-        }
-        level.addFreshEntity(new SuperGlueEntity(level, SuperGlueEntity.span(c, c.offset(RADIUS, 0, 0))));
-
-        // Water last: a source above the wheel's south side falls past it; glass keeps it from spreading.
-        for (BlockPos g : new BlockPos[]{c.offset(-8, 1, 1), c.offset(-6, 1, 1), c.offset(-7, 1, 2), c.offset(-7, 1, 0),
-                c.offset(-8, 0, 1), c.offset(-6, 0, 1), c.offset(-7, 0, 2)}) {
-            level.setBlock(g, Blocks.GLASS.defaultBlockState(), Block.UPDATE_ALL);
-        }
-        level.setBlock(c.offset(-7, 1, 1), Blocks.WATER.defaultBlockState(), Block.UPDATE_ALL);
-
-        source.sendSuccess(() -> Component.literal("Harvester rotation farm built east of you: water wheel -> shafts and gearboxes "
-                + "under the field -> Mechanical Bearing at the centre. The arm assembles once the wheel turns. West half: field wheat "
-                + "(+2 cane stacks); east half: trellis wheat. Expect produce on the ground and crops back at their first stage, "
-                + "regrowing. /test cultivarclear removes it.").withStyle(ChatFormatting.GOLD), true);
+        source.sendSuccess(() -> Component.literal(stations + " harvester stations built east of you, one per 4 plants ("
+                + plants.size() + " plants, field crops and trellises alternating). Each arm carries two barrels: produce "
+                + "goes there, overflow drops. Random ticks paused; ").withStyle(ChatFormatting.GOLD)
+                .append(Component.literal("/test cultivarharvester regrow").withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal(" ripens everything again; /test cultivarclear removes it.").withStyle(ChatFormatting.GOLD)), true);
         return 1;
     }
 
-    private static Holder<Plant> plant(ServerLevel level, String id) {
-        return level.registryAccess().registryOrThrow(CultivarRegistries.PLANT)
-                .getHolderOrThrow(ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.parse(id)));
+    private static void station(ServerLevel level, BlockPos c, List<Holder<Plant>> four) {
+        // Crops first, then the arm, so assembly only picks up the arm. Quadrant by direction from the centre.
+        for (int dx = -4; dx <= 4; dx++) {
+            for (int dz = -4; dz <= 4; dz++) {
+                int r2 = dx * dx + dz * dz;
+                boolean arm = Math.abs(dz) <= 1 && dx >= 0 && dx <= ARM;
+                if (arm || r2 <= 2 || r2 > REACH_SQ) {
+                    continue;
+                }
+                Holder<Plant> plant = four.get((dx >= 0 ? 0 : 2) + (dz >= 0 ? 0 : 1));
+                BlockPos at = c.offset(dx, 0, dz);
+                level.setBlock(at.below(), Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7), Block.UPDATE_ALL);
+                if (((dx + dz) & 1) == 0) {
+                    field(level, at, plant);
+                } else {
+                    trellis(level, at, plant);
+                }
+                crops.add(at.immutable());
+            }
+        }
+        level.setBlock(c.offset(0, -2, 0), create("creative_motor").setValue(BlockStateProperties.FACING, Direction.UP), Block.UPDATE_ALL);
+        level.setBlock(c.below(), create("mechanical_bearing").setValue(BlockStateProperties.FACING, Direction.UP), Block.UPDATE_ALL);
+        for (int x = 0; x <= ARM; x++) {
+            level.setBlock(c.offset(x, 0, 0), create("andesite_casing"), Block.UPDATE_ALL);
+        }
+        for (int x = 1; x <= ARM; x++) {
+            level.setBlock(c.offset(x, 0, 1), create("mechanical_harvester").setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH), Block.UPDATE_ALL);
+            level.setBlock(c.offset(x, 0, -1), create("mechanical_harvester").setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH), Block.UPDATE_ALL);
+        }
+        level.setBlock(c.above(), Blocks.BARREL.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.UP), Block.UPDATE_ALL);
+        level.setBlock(c.offset(1, 1, 0), Blocks.BARREL.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.UP), Block.UPDATE_ALL);
+        level.addFreshEntity(new SuperGlueEntity(level, SuperGlueEntity.span(c, c.offset(ARM, 1, 0))));
+
+        // Sign in the empty corner, naming the quadrants.
+        BlockPos signAt = c.offset(-4, 0, -4);
+        level.setBlock(signAt, Blocks.OAK_SIGN.defaultBlockState(), Block.UPDATE_ALL);
+        if (level.getBlockEntity(signAt) instanceof SignBlockEntity sign) {
+            String[] corner = {"SE ", "NE ", "SW ", "NW "};
+            SignText text = sign.getFrontText();
+            for (int q = 0; q < 4; q++) {
+                text = text.setMessage(q, Component.literal(corner[q] + four.get(q).unwrapKey().orElseThrow().location().getPath()));
+            }
+            sign.setText(text, true);
+            sign.setChanged();
+        }
     }
 
-    private static void field(ServerLevel level, BlockPos at, Holder<Plant> plant, int stage) {
+    private static void field(ServerLevel level, BlockPos at, Holder<Plant> plant) {
         level.setBlock(at, FieldCropModule.FIELD_CROP.get().defaultBlockState(), Block.UPDATE_ALL);
         if (level.getBlockEntity(at) instanceof FieldCropBlockEntity crop) {
-            crop.plant().set(Genome.base(plant), stage, true);
+            crop.plant().set(Genome.base(plant), plant.value().matureStage(), true);
         }
+    }
+
+    private static void trellis(ServerLevel level, BlockPos at, Holder<Plant> plant) {
+        int tall = plant.value().blocksAt(plant.value().matureStage());
+        for (int i = tall - 1; i >= 0; i--) { // top first so each segment finds its base already there
+            level.setBlock(at.above(i), CropModule.TIMBER_TRELLIS.get().defaultBlockState(), Block.UPDATE_ALL);
+        }
+        if (level.getBlockEntity(at) instanceof CropBlockEntity crop) {
+            crop.plant(Genome.base(plant), plant.value().matureStage());
+        }
+    }
+
+    /** {@code /test cultivarharvester regrow}: every station crop ripe again. */
+    static int regrow(CommandSourceStack source) {
+        if (builtIn == null) {
+            source.sendFailure(Component.literal("No harvester stations built; run /test cultivarharvester first."));
+            return 0;
+        }
+        int n = 0;
+        for (BlockPos p : crops) {
+            PlantCore plant = builtIn.getBlockEntity(p) instanceof FieldCropBlockEntity f ? f.plant()
+                    : builtIn.getBlockEntity(p) instanceof CropBlockEntity t ? t.plant() : null;
+            if (plant != null && plant.hasPlant()) {
+                plant.setStage(plant.species().matureStage());
+                n++;
+            }
+        }
+        int ripened = n;
+        source.sendSuccess(() -> Component.literal(ripened + " crops ripe again (" + (crops.size() - ripened) + " missing or uprooted)."), true);
+        return 1;
+    }
+
+    private static Iterable<BlockPos> box() {
+        return BlockPos.betweenClosed(BlockPos.containing(bounds.minX, bounds.minY, bounds.minZ),
+                BlockPos.containing(bounds.maxX, bounds.maxY, bounds.maxZ));
     }
 
     static int clear(CommandSourceStack source, boolean say) {
@@ -148,18 +196,22 @@ final class HarvesterRig {
             return 0;
         }
         ServerLevel level = builtIn;
-        // Twice: removing the bearing can put a running contraption's blocks back.
+        // Twice: removing a bearing can put its running contraption's blocks back.
         for (int pass = 0; pass < 2; pass++) {
             level.getEntitiesOfClass(Entity.class, bounds.inflate(2), e -> !(e instanceof Player)).forEach(Entity::discard);
-            for (BlockPos p : BlockPos.betweenClosed(BlockPos.containing(bounds.minX, bounds.minY, bounds.minZ),
-                    BlockPos.containing(bounds.maxX, bounds.maxY, bounds.maxZ))) {
+            for (BlockPos p : box()) {
                 level.setBlock(p, p.getY() < bounds.minY + 3 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
             }
         }
+        if (savedTickSpeed >= 0) {
+            level.getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(savedTickSpeed, level.getServer());
+        }
+        savedTickSpeed = -1;
+        crops.clear();
         builtIn = null;
         bounds = null;
         if (say) {
-            source.sendSuccess(() -> Component.literal("Harvester farm removed."), false);
+            source.sendSuccess(() -> Component.literal("Harvester stations removed."), false);
         }
         return 1;
     }
