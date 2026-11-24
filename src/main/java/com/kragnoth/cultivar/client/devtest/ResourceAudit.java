@@ -161,7 +161,7 @@ final class ResourceAudit {
                     errors.add("Plant " + id + ": missing top texture " + t);
                 }
             }
-            for (ResourceLocation m : r.models()) {
+            for (ResourceLocation m : com.google.common.collect.Iterables.concat(r.models(), r.trellisModels())) {
                 BakedModel model = mc.getModelManager().getModel(ModelResourceLocation.standalone(m));
                 if (model == missingModel) {
                     errors.add("Plant " + id + ": missing model " + m);

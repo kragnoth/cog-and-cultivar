@@ -37,6 +37,12 @@
       "cultivar:crop/cocoa_stage0",
       "cultivar:crop/cocoa_stage1",
       "cultivar:crop/cocoa_stage2"
+    ],
+    "random_rotation": true,
+    "trellis_models": [
+      "cultivar:crop/cocoa_trellis_stage0",
+      "cultivar:crop/cocoa_trellis_stage1",
+      "cultivar:crop/cocoa_trellis_stage2"
     ]
   }
 }

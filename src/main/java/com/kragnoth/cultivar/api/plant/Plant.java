@@ -76,10 +76,19 @@ public record Plant(int stages,
 
     /**
      * Trellis segments the plant occupies after growing through {@code stage} (1 for normal plants).
-     * Tall plants fill their {@code height} evenly across their stages.
+     * Tall plants rise evenly through their stages and reach full {@code height} only when mature, so a plant that
+     * looks fully grown is always ripe (harvesters and players can trust the height, like vanilla cane).
      */
     public int blocksAt(int stage) {
-        return height <= 1 ? 1 : (int) Math.ceil((stage + 1) * height / (double) stages);
+        return Math.max(1, (int) Math.floor(heightAt(stage) + 1e-6));
+    }
+
+    /**
+     * How tall the plant is at {@code stage}, in blocks, as a smooth value for rendering partly grown segments:
+     * rising evenly to {@code height} exactly at the mature stage ({@link #blocksAt} is its whole part, at least 1).
+     */
+    public double heightAt(int stage) {
+        return height <= 1 ? 1 : Math.min(stages, Math.max(0, stage) + 1) * height / (double) stages;
     }
 
     public int matureStage() {

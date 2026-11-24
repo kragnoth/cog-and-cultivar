@@ -23,6 +23,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * <ul>
  *   <li>{@code /test cultivar [filter]}: every Cultivar game test, run live in this world with this modpack;</li>
  *   <li>{@code /test cultivarshowcase}: a labelled gallery of everything to judge by eye;</li>
+ *   <li>{@code /test cultivarharvester [regrow]}: bearing rotation-farm stations with Create harvesters and glued
+ *       barrels over every plant (field and trellis); {@code regrow} ripens them for another pass;</li>
  *   <li>{@code /test cultivarchecklist}: the by-eye checks, each with a click that sets it up;</li>
  *   <li>{@code /test cultivarclear}: removes test plots and the showcase, restores time and random ticks;</li>
  *   <li>{@code /test cultivaraudit} (client side): textures, models, names, Ponder, JEI, creative tab.</li>
@@ -51,8 +53,12 @@ public final class DevTestModule implements CultivarModule {
                                 .executes(ctx -> LiveTestRunner.run(ctx.getSource(), StringArgumentType.getString(ctx, "filter")))))
                 .then(Commands.literal("cultivarshowcase").requires(s -> s.hasPermission(2))
                         .executes(ctx -> Showcase.build(ctx.getSource())))
+                .then(Commands.literal("cultivarharvester").requires(s -> s.hasPermission(2))
+                        .executes(ctx -> HarvesterRig.build(ctx.getSource()))
+                        .then(Commands.literal("regrow").executes(ctx -> HarvesterRig.regrow(ctx.getSource()))))
                 .then(Commands.literal("cultivarclear").requires(s -> s.hasPermission(2))
-                        .executes(ctx -> LiveTestRunner.clear(ctx.getSource(), true) + Showcase.clear(ctx.getSource(), true)))
+                        .executes(ctx -> LiveTestRunner.clear(ctx.getSource(), true) + Showcase.clear(ctx.getSource(), true)
+                                + HarvesterRig.clear(ctx.getSource(), true)))
                 .then(Commands.literal("cultivarchecklist").requires(s -> s.hasPermission(2))
                         .executes(DevTestModule::checklist)));
     }
@@ -70,7 +76,7 @@ public final class DevTestModule implements CultivarModule {
         line(s, "/time set midnight", "Shade/Lamp Cloche: Jade shows the light the crop reads; lamp glows at night");
         line(s, "/give @s cultivar:agricultural_lime 16", "Conditioner: use on soil or trellis; dusting appears, puffs, Jade 'Amended' line");
         line(s, "/give @s create:goggles", "Goggles on a crop: stats only once assayed; soil, light and amendment lines");
-        line(s, "/give @s create:mechanical_harvester", "Create harvester on a contraption reaps field and trellis crops and replants");
+        line(s, "/test cultivarharvester", "Harvester stations, every plant: produce lands in the arm barrels; regrow for another pass");
         return 1;
     }
 
