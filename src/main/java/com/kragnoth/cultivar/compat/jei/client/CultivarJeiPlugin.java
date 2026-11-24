@@ -247,6 +247,22 @@ public final class CultivarJeiPlugin implements IModPlugin {
         applyKnowledge();
     }
 
+    /**
+     * Recipes per Cultivar JEI category, hidden ones included (for {@code /test cultivaraudit}); empty if JEI's runtime
+     * isn't up yet.
+     */
+    public static java.util.Map<String, Long> recipeCounts() {
+        IJeiRuntime rt = runtime;
+        java.util.Map<String, Long> out = new java.util.LinkedHashMap<>();
+        if (rt == null) {
+            return out;
+        }
+        for (RecipeType<?> type : List.of(MutationCategory.TYPE, GrowingCategory.TYPE, AssayCategory.TYPE, SOILS, BLIGHTS, FERTILIZERS)) {
+            out.put(type.getUid().getPath(), rt.getRecipeManager().createRecipeLookup(type).includeHidden().get().count());
+        }
+        return out;
+    }
+
     @Override
     public void onRuntimeUnavailable() {
         runtime = null;
