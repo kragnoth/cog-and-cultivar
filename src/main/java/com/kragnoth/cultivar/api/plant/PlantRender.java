@@ -23,17 +23,21 @@ import java.util.Locale;
  * <p>{@code random_rotation} (optional, default false): each plant is turned to one of four sides picked from its
  * position, e.g. melons and pumpkins whose fruit then sits on a random side of the stem.
  *
+ * <p>{@code trellis_models} (optional, same layout as {@code models}): used instead of {@code models} when a
+ * single-block plant grows on a trellis, e.g. cocoa on a post as a field crop but as a small trunk beside the trellis.
+ *
  * <p>{@code top} (optional, same kind as the main list) is used for the topmost segment of a tall plant,
  * e.g. rice stalks below and panicles on top.
  */
 public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation> models, Shape shape, List<ResourceLocation> top,
-                          boolean randomRotation) {
+                          boolean randomRotation, List<ResourceLocation> trellisModels) {
     public static final Codec<PlantRender> CODEC = RecordCodecBuilder.<PlantRender>create(i -> i.group(
             ResourceLocation.CODEC.listOf().optionalFieldOf("textures", List.of()).forGetter(PlantRender::textures),
             ResourceLocation.CODEC.listOf().optionalFieldOf("models", List.of()).forGetter(PlantRender::models),
             Shape.CODEC.optionalFieldOf("shape", Shape.HASH).forGetter(PlantRender::shape),
             ResourceLocation.CODEC.listOf().optionalFieldOf("top", List.of()).forGetter(PlantRender::top),
-            Codec.BOOL.optionalFieldOf("random_rotation", false).forGetter(PlantRender::randomRotation)
+            Codec.BOOL.optionalFieldOf("random_rotation", false).forGetter(PlantRender::randomRotation),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("trellis_models", List.of()).forGetter(PlantRender::trellisModels)
     ).apply(i, PlantRender::new)).validate(r -> r.textures().isEmpty() && r.models().isEmpty()
             ? DataResult.error(() -> "render needs \"textures\" or \"models\"") : DataResult.success(r));
 
@@ -41,6 +45,7 @@ public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation
         textures = List.copyOf(textures);
         models = List.copyOf(models);
         top = List.copyOf(top);
+        trellisModels = List.copyOf(trellisModels);
     }
 
     /** Models win over textures. Model ids are {@code <ns>:crop/<name>} under {@code assets/<ns>/models/crop/}. */
@@ -54,6 +59,11 @@ public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation
 
     public ResourceLocation modelFor(int stage, int stages) {
         return pick(models, stage, stages);
+    }
+
+    /** The model for {@code stage}; on a trellis, {@code trellis_models} when the plant has them. */
+    public ResourceLocation modelFor(int stage, int stages, boolean onTrellis) {
+        return pick(onTrellis && !trellisModels.isEmpty() ? trellisModels : models, stage, stages);
     }
 
     /**

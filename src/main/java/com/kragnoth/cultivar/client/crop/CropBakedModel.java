@@ -75,7 +75,7 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
                 return modelData;
             }
             Visual v = plantVisual(field.genome(), field.stage(), pos.getY() - base.getY(), null,
-                    pos.equals(base) ? soilOverlays(base.below()) : List.of(), base);
+                    pos.equals(base) ? soilOverlays(base.below()) : List.of(), base, false);
             return v == null ? modelData : modelData.derive().with(VISUAL, v).build();
         }
         // Segments of a stacked trellis draw their share of the plant rooted at the base.
@@ -92,7 +92,7 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
             }
         }
         List<ResourceLocation> overlays = segment == 0 ? soilOverlays(crop.getBlockPos().below()) : List.of();
-        Visual v = plantVisual(crop.genome(), crop.stage(), segment, weedTex, overlays, crop.getBlockPos());
+        Visual v = plantVisual(crop.genome(), crop.stage(), segment, weedTex, overlays, crop.getBlockPos(), true);
         return v == null ? modelData : modelData.derive().with(VISUAL, v).build();
     }
 
@@ -102,7 +102,7 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
      */
     @Nullable
     private static Visual plantVisual(@Nullable Genome genome, int stage, int segment, @Nullable ResourceLocation weedTex,
-                                      List<ResourceLocation> overlays, BlockPos root) {
+                                      List<ResourceLocation> overlays, BlockPos root, boolean onTrellis) {
         int turns = 0;
         ResourceLocation plantTex = null;
         PlantRender.Shape shape = PlantRender.Shape.HASH;
@@ -118,10 +118,10 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
                 }
                 if (plant.height() <= 1) {
                     if (segment == 0) {
-                        plantTex = model ? render.modelFor(stage, plant.stages()) : render.textureFor(stage, plant.stages());
+                        plantTex = model ? render.modelFor(stage, plant.stages(), onTrellis) : render.textureFor(stage, plant.stages());
                     }
                 } else {
-                    double fill = (stage + 1) * plant.height() / (double) plant.stages() - segment;
+                    double fill = plant.heightAt(stage) - segment;
                     if (fill > 0) {
                         boolean top = segment == plant.height() - 1;
                         plantTex = top ? render.forTopFill(Math.min(1.0, fill)) : render.forFill(Math.min(1.0, fill));

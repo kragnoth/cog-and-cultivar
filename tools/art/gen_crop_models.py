@@ -82,18 +82,53 @@ for i, h in enumerate((4, 8, 12, 16)):
     model(f'cactus_stage{i}', ctex, elems)
 
 # Cocoa: vanilla's pod faces (from the vanilla UV layout), hanging under the top bar on its hook.
-for i, (w, h, side_uv, top_uv) in enumerate(((4, 5, [11, 4, 15, 9], [0, 0, 4, 4]),
-                                             (6, 7, [9, 4, 15, 11], [0, 0, 6, 6]),
-                                             (8, 9, [8, 4, 16, 13], [0, 0, 8, 8]))):  # vanilla cocoa UVs
+COCOA = ((4, 5, [11, 4, 15, 9], [0, 0, 4, 4]), (6, 7, [9, 4, 15, 11], [0, 0, 6, 6]),
+         (8, 9, [8, 4, 16, 13], [0, 0, 8, 8]))  # vanilla cocoa pod sizes and UVs per stage
+
+
+def cocoa_stem(tex, top, wood, axis="z", toward=1):
+    """Vanilla's 4 px pod stem: a vertical plane from a pod's top to the wood face at `wood` along `axis`.
+    `toward` is +1 when the wood lies in the + direction. UVs follow vanilla (u=16 at the wood end)."""
+    near, far = [16, 0, 12, 4], [12, 0, 16, 4]
+    lo, hi = (wood - 4, wood) if toward > 0 else (wood, wood + 4)
+    if axis == "z":  # plane at x=8, wood to the south (+z) as in vanilla
+        frm, to = [8, top, lo], [8, top + 4, hi]
+        faces = {"west": far if toward > 0 else near, "east": near if toward > 0 else far}
+    else:  # plane at z=centre, wood along x
+        frm, to = [lo, top, 12], [hi, top + 4, 12]
+        faces = {"north": near if toward > 0 else far, "south": far if toward > 0 else near}
+    return {"from": frm, "to": to, "faces": {d: {"texture": tex, "uv": uv} for d, uv in faces.items()}}
+
+
+for i, (w, h, side_uv, top_uv) in enumerate(COCOA):
     # Like vanilla, the pod hangs off wood: a thin jungle-log post at the back, the pod against its front face and
     # vanilla's stem plane running from the pod's top into the post.
     top, back = 13, 11
     post = box([6, 0, back], [10, 16, back + 4], "#log", "#log_top", side_uv=[6, 0, 10, 16], top_uv=[6, 6, 10, 10])
     pod = box([8 - w / 2, top - h, back - w], [8 + w / 2, top, back], "#pod", "#pod", side_uv=side_uv, top_uv=top_uv)
-    stem = {"from": [8, top, back - 4], "to": [8, top + 4, back],
-            "faces": {"west": {"texture": "#pod", "uv": [16, 0, 12, 4]}, "east": {"texture": "#pod", "uv": [12, 0, 16, 4]}}}
     model(f'cocoa_stage{i}', {"pod": f"minecraft:block/cocoa_stage{i}", "log": "minecraft:block/jungle_log",
-                              "log_top": "minecraft:block/jungle_log_top"}, [post, pod, stem])
+                              "log_top": "minecraft:block/jungle_log_top"}, [post, pod, cocoa_stem("#pod", top, back)])
+
+# On a trellis, cocoa grows as the real tree does: a short jungle-wood trunk standing against the back lattice, pods
+# straight off the bark (cauliflory) at two heights, and a tuft of leaves at the crown. The lower pod is this stage's;
+# the upper one, on the trunk's west face, is a stage behind (none at stage 0).
+for i, (w, h, side_uv, top_uv) in enumerate(COCOA):
+    tex = {"pod": f"minecraft:block/cocoa_stage{i}", "log": "minecraft:block/jungle_log",
+           "log_top": "minecraft:block/jungle_log_top", "leaves": "minecraft:block/jungle_leaves"}
+    trunk = [box([6, 0, 10], [10, 10, 14], "#log", "#log_top", side_uv=[6, 6, 10, 16], top_uv=[6, 6, 10, 10]),
+             box([6.5, 10, 10.5], [9.5, 15, 13.5], "#log", "#log_top", side_uv=[6, 0, 9, 5], top_uv=[6, 6, 9, 9])]
+    low_top = 9
+    elems = trunk + [box([8 - w / 2, low_top - h, 10 - w], [8 + w / 2, low_top, 10], "#pod", "#pod", side_uv=side_uv, top_uv=top_uv),
+                     cocoa_stem("#pod", low_top, 10)]
+    if i > 0:
+        tex["pod2"] = f"minecraft:block/cocoa_stage{i - 1}"
+        w2, h2, side2, top2 = COCOA[i - 1]
+        up_top = 13
+        elems += [box([6.5 - w2, up_top - h2, 12 - w2 / 2], [6.5, up_top, 12 + w2 / 2], "#pod2", "#pod2", side_uv=side2, top_uv=top2),
+                  cocoa_stem("#pod2", up_top, 6.5, axis="x", toward=1)]
+    crown = (3, 13) if i == 0 else (5, 11)
+    elems += plane_pair("#leaves", crown[1], 16, [0, 0, 16, 16 - crown[1]], tint=1, half=crown[0])
+    model(f'cocoa_trellis_stage{i}', tex, elems)
 
 # Glow berries: cave vines hang from the top bar; ripe stage uses the lit texture.
 for i, rows in enumerate((6, 11, 16)):

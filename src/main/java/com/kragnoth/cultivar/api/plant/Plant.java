@@ -80,11 +80,15 @@ public record Plant(int stages,
      * looks fully grown is always ripe (harvesters and players can trust the height, like vanilla cane).
      */
     public int blocksAt(int stage) {
-        int mature = matureStage();
-        if (height <= 1 || stage >= mature) {
-            return height;
-        }
-        return 1 + Math.max(0, stage) * (height - 1) / mature;
+        return Math.max(1, (int) Math.floor(heightAt(stage) + 1e-6));
+    }
+
+    /**
+     * How tall the plant is at {@code stage}, in blocks, as a smooth value for rendering partly grown segments:
+     * rising evenly to {@code height} exactly at the mature stage ({@link #blocksAt} is its whole part, at least 1).
+     */
+    public double heightAt(int stage) {
+        return height <= 1 ? 1 : Math.min(stages, Math.max(0, stage) + 1) * height / (double) stages;
     }
 
     public int matureStage() {
