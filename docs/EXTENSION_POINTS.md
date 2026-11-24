@@ -34,6 +34,14 @@ vanilla farmland keeps its moisture and reads as moist everywhere, including Cul
 every holder; use `ctx.trellis()` for trellis-only behaviour. A holder that owns a `PlantCore` (e.g. `field_crop`) runs
 the same pipeline by building a `CropTickContext` in its `randomTick`.
 
+**New growth conditions** (temperature, season...): register a `GrowthConditionType`. Override `describe()` ("Heat 20+")
+and `current(context)` ("here: 12") so goggles, Jade, seed tooltips and planting hints can say what's wrong; `test`
+also runs client side for those readouts, so read only synced state. `PlantStatus.of(plant)` gives any holder the
+headline and per-requirement results.
+
+**Different look on a trellis**: `render.trellis_models` (single-block plants) replaces `render.models` on a trellis;
+`render.random_rotation` turns each plant to one of four sides by position.
+
 **New commands**: override `registerCommands(root)` in the module and add a literal with its own `requires`.
 
 **New plot-style machines**: hold a `PlotTracker<YourBE>` and delegate three methods to it.

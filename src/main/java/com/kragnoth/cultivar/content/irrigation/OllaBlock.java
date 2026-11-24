@@ -28,7 +28,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * source does. Unlike a water source it is a solid block: bury it under the farmland layer and the spot above stays
  * plantable, and there is no water to spill or flow.
  */
-public class OllaBlock extends Block {
+public class OllaBlock extends Block implements net.minecraft.world.level.block.EntityBlock {
     public static final MapCodec<OllaBlock> CODEC = simpleCodec(OllaBlock::new);
     public static final BooleanProperty FILLED = BooleanProperty.create("filled");
 
@@ -68,6 +68,36 @@ public class OllaBlock extends Block {
             level.gameEvent(player, GameEvent.FLUID_PLACE, pos);
         }
         return ItemInteractionResult.sidedSuccess(level.isClientSide());
+    }
+
+    @Override
+    public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new OllaBlockEntity(pos, state);
+    }
+
+    /**
+     * Goggles and Jade: whether it's filled, its reach, and how much farmland in reach it is keeping moist (the
+     * farmland on its level and the layer above, as {@link #moistens} checks). Reads blocks only, so it works client side.
+     */
+    public static java.util.List<net.minecraft.network.chat.Component> readout(LevelReader level, BlockPos pos, BlockState state) {
+        var out = new java.util.ArrayList<net.minecraft.network.chat.Component>();
+        boolean filled = state.getValue(FILLED);
+        out.add(net.minecraft.network.chat.Component.translatable("block.cultivar.olla").withStyle(net.minecraft.ChatFormatting.GOLD));
+        out.add(net.minecraft.network.chat.Component.translatable(filled ? "cultivar.olla.filled" : "cultivar.olla.empty")
+                .withStyle(filled ? net.minecraft.ChatFormatting.AQUA : net.minecraft.ChatFormatting.YELLOW));
+        int r = radius();
+        out.add(net.minecraft.network.chat.Component.translatable("cultivar.olla.reach", r).withStyle(net.minecraft.ChatFormatting.GRAY));
+        if (filled) {
+            int farmland = 0;
+            for (BlockPos p : BlockPos.betweenClosed(pos.offset(-r, 0, -r), pos.offset(r, 1, r))) {
+                if (level.getBlockState(p).getBlock() instanceof net.minecraft.world.level.block.FarmBlock) {
+                    farmland++;
+                }
+            }
+            out.add(net.minecraft.network.chat.Component.translatable(farmland == 0 ? "cultivar.olla.none" : "cultivar.olla.watering", farmland)
+                    .withStyle(farmland == 0 ? net.minecraft.ChatFormatting.YELLOW : net.minecraft.ChatFormatting.GRAY));
+        }
+        return out;
     }
 
     public static int radius() {

@@ -41,6 +41,11 @@ public final class IrrigationModule implements CultivarModule {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SprinklerBlockEntity>> SPRINKLER_BE =
             BLOCK_ENTITIES.register("sprinkler", () -> BlockEntityType.Builder.of(SprinklerBlockEntity::new, SPRINKLER.get()).build(null));
 
+    /** Readout only (goggles); stores nothing. */
+    @SuppressWarnings("DataFlowIssue")
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OllaBlockEntity>> OLLA_BE =
+            BLOCK_ENTITIES.register("olla", () -> BlockEntityType.Builder.of(OllaBlockEntity::new, OLLA.get()).build(null));
+
     @Override
     public String id() {
         return "irrigation";

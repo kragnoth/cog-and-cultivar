@@ -200,7 +200,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         return plant.nutrients();
     }
 
-    private GrowthContext growthContext(Optional<Soil> soil) {
+    GrowthContext growthContext(Optional<Soil> soil) {
         return plant.context(soil);
     }
 
@@ -624,7 +624,7 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     /** Create Engineer's Goggles readout (the crop readout; the Loupe was folded into goggles). Client-side, synced state only. */
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        if (!plant.hasPlant() && weed == null && activeInfluences.isEmpty()) {
+        if (!plant.hasPlant() && weed == null && activeInfluences.isEmpty() && !isCross()) {
             return false;
         }
         CropInfo.lines(this).forEach(line -> tooltip.add(Component.literal("    ").append(line)));
