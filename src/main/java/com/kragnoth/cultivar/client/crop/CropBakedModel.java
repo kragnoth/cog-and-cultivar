@@ -1,5 +1,8 @@
 package com.kragnoth.cultivar.client.crop;
 
+import com.mojang.math.Transformation;
+import net.neoforged.neoforge.client.model.QuadTransformers;
+import org.joml.Matrix4f;
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.plant.Plant;
 import com.kragnoth.cultivar.api.plant.PlantRender;
@@ -47,12 +50,15 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
 
     /** What to draw inside the frame; plant and weed may be null, soil overlays may be empty. */
     private record Visual(@Nullable ResourceLocation plant, PlantRender.Shape shape, boolean model, @Nullable ResourceLocation weed,
-                          List<ResourceLocation> soilOverlays) {}
+                          List<ResourceLocation> soilOverlays, int quarterTurns) {}
+
+    /** A crop model turned by {@code quarterTurns} × 90° about the block's vertical axis. */
+    private record ModelKey(ResourceLocation model, int quarterTurns) {}
 
     private record Key(ResourceLocation texture, PlantRender.Shape shape) {}
 
     private final Map<Key, List<BakedQuad>> cache = new ConcurrentHashMap<>();
-    private final Map<ResourceLocation, List<BakedQuad>> modelCache = new ConcurrentHashMap<>();
+    private final Map<ModelKey, List<BakedQuad>> modelCache = new ConcurrentHashMap<>();
     private final Map<ResourceLocation, BakedQuad> floorCache = new ConcurrentHashMap<>();
     private final Map<ResourceLocation, Boolean> greyscale = new ConcurrentHashMap<>();
 
@@ -69,7 +75,7 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
                 return modelData;
             }
             Visual v = plantVisual(field.genome(), field.stage(), pos.getY() - base.getY(), null,
-                    pos.equals(base) ? soilOverlays(base.below()) : List.of());
+                    pos.equals(base) ? soilOverlays(base.below()) : List.of(), base);
             return v == null ? modelData : modelData.derive().with(VISUAL, v).build();
         }
         // Segments of a stacked trellis draw their share of the plant rooted at the base.
@@ -86,7 +92,7 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
             }
         }
         List<ResourceLocation> overlays = segment == 0 ? soilOverlays(crop.getBlockPos().below()) : List.of();
-        Visual v = plantVisual(crop.genome(), crop.stage(), segment, weedTex, overlays);
+        Visual v = plantVisual(crop.genome(), crop.stage(), segment, weedTex, overlays, crop.getBlockPos());
         return v == null ? modelData : modelData.derive().with(VISUAL, v).build();
     }
 
@@ -96,7 +102,8 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
      */
     @Nullable
     private static Visual plantVisual(@Nullable Genome genome, int stage, int segment, @Nullable ResourceLocation weedTex,
-                                      List<ResourceLocation> overlays) {
+                                      List<ResourceLocation> overlays, BlockPos root) {
+        int turns = 0;
         ResourceLocation plantTex = null;
         PlantRender.Shape shape = PlantRender.Shape.HASH;
         boolean model = false;
@@ -106,6 +113,9 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
                 PlantRender render = plant.render().get();
                 model = render.usesModels();
                 shape = render.shape();
+                if (render.randomRotation()) {
+                    turns = (int) Math.floorMod(net.minecraft.util.Mth.getSeed(root), 4L);
+                }
                 if (plant.height() <= 1) {
                     if (segment == 0) {
                         plantTex = model ? render.modelFor(stage, plant.stages()) : render.textureFor(stage, plant.stages());
@@ -122,7 +132,7 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
         if (plantTex == null && weedTex == null && overlays.isEmpty()) {
             return null;
         }
-        return new Visual(plantTex, shape, model, weedTex, overlays);
+        return new Visual(plantTex, shape, model, weedTex, overlays, turns);
     }
 
     @Override
@@ -135,7 +145,7 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
         }
         List<BakedQuad> out = new ArrayList<>(base);
         if (visual.plant() != null && visual.model()) {
-            out.addAll(modelCache.computeIfAbsent(visual.plant(), this::bakeModel));
+            out.addAll(modelCache.computeIfAbsent(new ModelKey(visual.plant(), visual.quarterTurns()), this::bakeModel));
         } else if (visual.plant() != null) {
             out.addAll(cache.computeIfAbsent(new Key(visual.plant(), visual.shape()), CropBakedModel::bake));
         }
@@ -155,6 +165,23 @@ public class CropBakedModel extends BakedModelWrapper<BakedModel> {
     /** Model ids registered by {@link CropClientModule}: everything under {@code models/crop/}. */
     public static ModelResourceLocation modelLocation(ResourceLocation id) {
         return ModelResourceLocation.standalone(id);
+    }
+
+    private List<BakedQuad> bakeModel(ModelKey key) {
+        List<BakedQuad> quads = bakeModel(key.model());
+        if (key.quarterTurns() == 0) {
+            return quads;
+        }
+        Matrix4f m = new Matrix4f().translate(0.5f, 0, 0.5f)
+                .rotateY((float) (-Math.PI / 2 * key.quarterTurns())).translate(-0.5f, 0, -0.5f);
+        var transformer = QuadTransformers.applying(new Transformation(m));
+        List<BakedQuad> out = new ArrayList<>(quads.size());
+        for (BakedQuad q : quads) {
+            BakedQuad t = transformer.process(q);
+            out.add(new BakedQuad(t.getVertices(), t.getTintIndex(), Direction.rotate(m, q.getDirection()), t.getSprite(),
+                    t.isShade(), t.hasAmbientOcclusion()));
+        }
+        return List.copyOf(out);
     }
 
     private List<BakedQuad> bakeModel(ResourceLocation id) {

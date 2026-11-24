@@ -38,6 +38,7 @@
       "cultivar:crop/pumpkin_stage1",
       "cultivar:crop/pumpkin_stage2",
       "cultivar:crop/pumpkin_stage3"
-    ]
+    ],
+    "random_rotation": true
   }
 }

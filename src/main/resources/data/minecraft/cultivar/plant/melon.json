@@ -6,9 +6,9 @@
   "seeds": "minecraft:melon_seeds",
   "products": [
     {
-      "item": "minecraft:melon_slice",
-      "min": 2,
-      "max": 5
+      "item": "minecraft:melon",
+      "min": 1,
+      "max": 1
     }
   ],
   "requirements": [
@@ -38,6 +38,7 @@
       "cultivar:crop/melon_stage1",
       "cultivar:crop/melon_stage2",
       "cultivar:crop/melon_stage3"
-    ]
+    ],
+    "random_rotation": true
   }
 }

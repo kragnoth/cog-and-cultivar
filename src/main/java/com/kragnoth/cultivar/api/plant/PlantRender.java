@@ -20,15 +20,20 @@ import java.util.Locale;
  * {@code tintindex} 0 take the stem colour and 1 the biome grass colour, but only when the pack's texture is
  * greyscale (as vanilla's are); pre-coloured pack textures are left untinted.
  *
+ * <p>{@code random_rotation} (optional, default false): each plant is turned to one of four sides picked from its
+ * position, e.g. melons and pumpkins whose fruit then sits on a random side of the stem.
+ *
  * <p>{@code top} (optional, same kind as the main list) is used for the topmost segment of a tall plant,
  * e.g. rice stalks below and panicles on top.
  */
-public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation> models, Shape shape, List<ResourceLocation> top) {
+public record PlantRender(List<ResourceLocation> textures, List<ResourceLocation> models, Shape shape, List<ResourceLocation> top,
+                          boolean randomRotation) {
     public static final Codec<PlantRender> CODEC = RecordCodecBuilder.<PlantRender>create(i -> i.group(
             ResourceLocation.CODEC.listOf().optionalFieldOf("textures", List.of()).forGetter(PlantRender::textures),
             ResourceLocation.CODEC.listOf().optionalFieldOf("models", List.of()).forGetter(PlantRender::models),
             Shape.CODEC.optionalFieldOf("shape", Shape.HASH).forGetter(PlantRender::shape),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("top", List.of()).forGetter(PlantRender::top)
+            ResourceLocation.CODEC.listOf().optionalFieldOf("top", List.of()).forGetter(PlantRender::top),
+            Codec.BOOL.optionalFieldOf("random_rotation", false).forGetter(PlantRender::randomRotation)
     ).apply(i, PlantRender::new)).validate(r -> r.textures().isEmpty() && r.models().isEmpty()
             ? DataResult.error(() -> "render needs \"textures\" or \"models\"") : DataResult.success(r));
 

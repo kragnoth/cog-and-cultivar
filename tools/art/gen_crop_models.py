@@ -59,7 +59,8 @@ for kind in ('melon', 'pumpkin'):
     tex = {"stem": f"minecraft:block/{kind}_stem", "side": f"minecraft:block/{kind}_side", "top": f"minecraft:block/{kind}_top"}
     for i, rows in enumerate((6, 10, 16)):
         model(f'{kind}_stage{i}', {"stem": tex["stem"]}, rise("#stem", rows, tint=0))
-    model(f'{kind}_stage3', tex, rise("#stem", 16, tint=0) + [box([8.5, 0, 8.5], [14.5, 6, 14.5], "#side", "#top")])
+    # Ripe: a near-full-size fruit beside the stem (8.5 px; the plant's random_rotation turns it to a random side).
+    model(f'{kind}_stage3', tex, rise("#stem", 16, tint=0) + [box([7, 0, 7], [15.5, 8.5, 15.5], "#side", "#top")])
 
 # Sugar cane: grass-tinted like vanilla, rising in four steps.
 for i, rows in enumerate((5, 9, 13, 16)):
@@ -74,14 +75,16 @@ for i, (h, leaves) in enumerate(((10, 'small'), (14, 'small'), (16, 'large')), s
 
 ctex = {"side": "minecraft:block/cactus_side", "top": "minecraft:block/cactus_top"}
 # Cactus is 3 tall on a stacked trellis; each full segment repeats the last model, so it stays a plain column.
+# 12 px wide (vanilla is 14) so it reads as a cactus but still sits inside the trellis posts; the full texture width is
+# squeezed in so the spines at its edges stay.
 for i, h in enumerate((4, 8, 12, 16)):
-    elems = [box([5, 0, 5], [11, h, 11], "#side", "#top", side_uv=[5, 16 - h, 11, 16], top_uv=[5, 5, 11, 11])]
+    elems = [box([2, 0, 2], [14, h, 14], "#side", "#top", side_uv=[0, 16 - h, 16, 16], top_uv=[0, 0, 16, 16])]
     model(f'cactus_stage{i}', ctex, elems)
 
 # Cocoa: vanilla's pod faces (from the vanilla UV layout), hanging under the top bar on its hook.
 for i, (w, h, side_uv, top_uv) in enumerate(((4, 5, [11, 4, 15, 9], [0, 0, 4, 4]),
                                              (6, 7, [9, 4, 15, 11], [0, 0, 6, 6]),
-                                             (8, 9, [7, 3, 15, 12], [0, 0, 7, 7]))):
+                                             (8, 9, [8, 4, 16, 13], [0, 0, 8, 8]))):  # vanilla cocoa UVs
     top = 13
     pod = box([8 - w / 2, top - h, 8 - w / 2], [8 + w / 2, top, 8 + w / 2], "#pod", "#pod", side_uv=side_uv, top_uv=top_uv)
     model(f'cocoa_stage{i}', {"pod": f"minecraft:block/cocoa_stage{i}"},
