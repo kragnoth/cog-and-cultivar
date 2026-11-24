@@ -748,6 +748,12 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
 | **7 — Polish** | Excalibur-based asset pass (blooms ✅, blights ✅), sounds ✅ (vanilla/Create events), advancements ✅, Ponder scenes ✅ (spreading, stats, crossbreeding, assaying), JEI ✅ / EMI categories, Jade | Release |
 
+**To do soon**
+- [ ] **Keep test code out of the release jar.** Move `gametest/`, `content/devtest/`, `client/devtest/` and the test
+  structures into a `devtest` source set that `runClient`, `runServer` and CI's game-test server load but
+  `./gradlew build` doesn't package. `CultivarModules` / `CultivarClient` pick up optional modules via a
+  `ServiceLoader` file that exists only in `devtest`. Exit test: the built jar has no `/test` commands or test classes.
+
 ### 6.1 Field farming roadmap (phases A–E, planned 2026-11-13)
 
 The trellis is the breeding half of the mod; these phases build the everyday farming half. Decisions taken:
