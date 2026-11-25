@@ -64,7 +64,66 @@ def assaying():
     return t
 
 
+def field_crops():
+    """A row of farmland by a water channel: seeds go straight in, no trellis."""
+    t = Template(5, 3, 5)
+    plate(t, 5, 5)
+    for x in (1, 2, 3):
+        t.set(x, 0, 2, FARMLAND)
+        t.set(x, 0, 3, WATER)
+    return t
+
+
+def cloches():
+    """Three trellises on watered farmland, for a Bell, a Shade and a Lamp Cloche."""
+    t = Template(5, 3, 5)
+    plate(t, 5, 5)
+    row(t, (1, 2, 3), 2)
+    return t
+
+
+def olla():
+    """An Olla in the ground (layer 0) under a 5x5 of dry farmland (layer 1)."""
+    t = Template(5, 3, 5)
+    plate(t, 5, 5, 'minecraft:dirt')
+    t.set(2, 0, 2, 'cultivar:olla[filled=false]')
+    t.fill(0, 1, 0, 4, 1, 4, 'minecraft:farmland[moisture=0]')
+    return t
+
+
+def sprinkler():
+    """A Sprinkler on a fluid pipe in the middle of a 5x5 of farmland."""
+    t = Template(5, 3, 5)
+    plate(t, 5, 5, 'minecraft:farmland[moisture=7]')
+    t.set(2, 0, 2, 'create:fluid_pipe[axis=y,waterlogged=false,up=true,down=true,north=false,south=false,east=false,west=false]')
+    t.set(2, 1, 2, 'cultivar:sprinkler[facing=up,active=true]')
+    return t
+
+
+def planter_beds():
+    """A 3x3 plot of Planter Beds with a chest + hopper feeding the corner bed."""
+    t = Template(6, 4, 6)
+    plate(t, 6, 6, 'minecraft:smooth_stone')
+    for x in (2, 3, 4):
+        for z in (1, 2, 3):
+            t.set(x, 1, z, 'cultivar:planter_bed')
+    t.set(1, 1, 1, 'minecraft:hopper[enabled=true,facing=east]')
+    t.set(1, 2, 1, 'minecraft:chest[facing=west,type=single,waterlogged=false]')
+    return t
+
+
+def trial_beds():
+    """A 3x3 Trial plot."""
+    t = Template(5, 4, 5)
+    plate(t, 5, 5, 'minecraft:smooth_stone')
+    for x in (1, 2, 3):
+        for z in (1, 2, 3):
+            t.set(x, 1, z, 'cultivar:trial_bed')
+    return t
+
+
 for name, build in (('spreading', spreading), ('crop_stats', stats), ('crossbreeding', crossbreeding),
-                    ('assaying', assaying)):
+                    ('assaying', assaying), ('field_crops', field_crops), ('cloches', cloches), ('olla', olla),
+                    ('sprinkler', sprinkler), ('planter_beds', planter_beds), ('trial_beds', trial_beds)):
     build().save(f'{OUT}/{name}.nbt')
 print('ponder schematics ok')
