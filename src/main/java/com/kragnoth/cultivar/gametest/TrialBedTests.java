@@ -114,4 +114,31 @@ public final class TrialBedTests {
         h.assertTrue(h.getBlockState(mid.above()).getValue(T), "the frame is cleared and re-armed");
         h.succeed();
     }
+
+    /** A tall plant in a trial plot gets trellises stacked for it, so it can reach full height and parent. */
+    @GameTest(template = "empty")
+    public static void trialStacksTrellisesForTallPlants(GameTestHelper h) {
+        var level = h.getLevel();
+        BlockPos bed = new BlockPos(1, 1, 1); // x + z even: a producer square
+        h.setBlock(bed, com.kragnoth.cultivar.content.trial.TrialModule.TRIAL_BED.get());
+        for (int y = 2; y <= 5; y++) {
+            h.setBlock(new BlockPos(1, y, 1), net.minecraft.world.level.block.Blocks.AIR);
+        }
+        var trial = (com.kragnoth.cultivar.content.trial.TrialBedBlockEntity) h.getBlockEntity(bed);
+        if (trial.isFrameSquare()) {
+            h.succeed(); // the test's absolute position landed on a frame square; nothing to check here
+            return;
+        }
+        var cane = level.registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.PLANT)
+                .getHolderOrThrow(net.minecraft.resources.ResourceKey.create(com.kragnoth.cultivar.api.CultivarRegistries.PLANT,
+                        net.minecraft.resources.ResourceLocation.withDefaultNamespace("sugar_cane")));
+        trial.inventory.insertItem(0, com.kragnoth.cultivar.content.crop.CultivarSeedItem.of(
+                com.kragnoth.cultivar.api.genetics.Genome.base(cane)).copyWithCount(4), false);
+        for (int i = 0; i < 6; i++) {
+            trial.work(level, level.random);
+        }
+        var crop = (com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(bed.above());
+        h.assertTrue(crop.hasPlant() && crop.segmentsMissing() == 0, "cane got trellises stacked to its full height");
+        h.succeed();
+    }
 }

@@ -237,7 +237,8 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         }
         var random = server.random;
         BlockState trellis = server.getBlockState(above);
-        if (!trellis.getValue(TrellisBlock.CLOCHE) && !trellis.getValue(TrellisBlock.CROSS) && !TrellisBlock.hasSegmentAbove(server, above)) {
+        if (!trellis.getValue(TrellisBlock.CLOCHE) && !trellis.getValue(TrellisBlock.CROSS) && !TrellisBlock.hasSegmentAbove(server, above)
+                && (!crop.hasPlant() || crop.segmentsMissing() == 0)) {
             Slot c = equipment(CLOCHE);
             if (c != null && c.stack().getItem() instanceof com.kragnoth.cultivar.content.cloche.BellClocheItem cloche) {
                 trellis = cloche.fit(trellis);
@@ -267,6 +268,21 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         if (!crop.hasPlant()) {
             bestSeed(null).ifPresent(slot -> plantFrom(crop, slot));
             return;
+        }
+        if (crop.segmentsMissing() > 0 && trellis.getValue(TrellisBlock.CLOCHE)) {
+            // A tall plant can't grow under a cloche: put the cloche back in stock so trellises can stack.
+            server.setBlock(above, trellis.setValue(TrellisBlock.CLOCHE, false), Block.UPDATE_ALL);
+            restock(server, above, new ItemStack(trellis.getValue(TrellisBlock.CLOCHE_TYPE).item()), CLOCHE);
+            return;
+        }
+        BlockPos segment = crop.nextSegmentPos();
+        if (segment != null) { // a tall plant: stack a stocked trellis on top so it can reach full height
+            Slot t = equipment(TRELLIS);
+            if (t != null) {
+                server.setBlock(segment, ((TrellisBlock) ((net.minecraft.world.item.BlockItem) t.stack().getItem()).getBlock()).defaultBlockState(), Block.UPDATE_ALL);
+                t.bed().inventory.extractItem(t.index(), 1, false);
+                return;
+            }
         }
         if (crop.isMature()) {
             if (nextToBreeder(server) && heldCycles++ < CultivarServerConfig.BED_BREED_HOLD.get()) {

@@ -261,6 +261,25 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     }
 
     /** Segments the plant still needs to reach maturity, or 0 if it has room. */
+    /**
+     * Where the next trellis segment goes for a tall plant that needs more room (the free spot above the top of this
+     * stack), or null if none is needed or the spot is blocked. Machines (Planter and Trial Beds) use it to stack
+     * trellises themselves, like a player would.
+     */
+    @Nullable
+    public BlockPos nextSegmentPos() {
+        if (level == null || isSegment() || segmentsMissing() <= 0 || getBlockState().getValue(TrellisBlock.CLOCHE)) {
+            return null; // nothing stacks on a cloched trellis
+        }
+        BlockPos top = worldPosition;
+        while (TrellisBlock.hasSegmentAbove(level, top) && top.getY() - worldPosition.getY() < MAX_STACK - 1) {
+            top = top.above();
+        }
+        BlockPos next = top.above();
+        return next.getY() - worldPosition.getY() < MAX_STACK && level.getBlockState(next).canBeReplaced()
+                && level.getFluidState(next).isEmpty() ? next : null;
+    }
+
     public int segmentsMissing() {
         Plant p = plant.species();
         return p == null ? 0 : Math.max(0, p.blocksAt(p.matureStage()) - segmentsAvailable());
