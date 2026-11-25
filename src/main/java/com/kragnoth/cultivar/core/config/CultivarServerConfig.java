@@ -105,7 +105,7 @@ public final class CultivarServerConfig {
                         "crosses that produce its species (both parents), so the cross shows up in JEI.")
                 .defineInRange("familyTreeChance", 0.2, 0.0, 1.0);
         ASSAY_MAX_UNIT = b.comment("Most Assayers that join into one unit (shared input/output).")
-                .defineInRange("maxUnitSize", 64, 1, 256);
+                .defineInRange("maxUnitSize", 81, 1, 256);
         b.pop();
 
         b.push("trial_bed");

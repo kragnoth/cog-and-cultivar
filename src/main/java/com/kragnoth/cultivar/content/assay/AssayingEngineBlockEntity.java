@@ -107,7 +107,7 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
     };
 
     private final PlotTracker<AssayingEngineBlockEntity> unit = new PlotTracker<>(this, AssayingEngineBlockEntity.class,
-            CultivarServerConfig.SPEC.isLoaded() ? CultivarServerConfig.ASSAY_MAX_UNIT.get() : 64, be -> be.unit);
+            CultivarServerConfig.SPEC.isLoaded() ? CultivarServerConfig.ASSAY_MAX_UNIT.get() : 81, be -> be.unit);
     private float progress;
     private boolean syncSoon;
 

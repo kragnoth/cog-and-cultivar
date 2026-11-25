@@ -23,7 +23,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * <ul>
  *   <li>{@code /test cultivar [filter]}: every Cultivar game test, run live in this world with this modpack;</li>
  *   <li>{@code /test cultivarshowcase}: a labelled gallery of everything to judge by eye;</li>
- *   <li>{@code /test cultivar planterbeds}: producer, breeder, trial and assayer setups as 3x3s and 9x9s;</li>
+ *   <li>{@code /test cultivar planterbeds}: producer, breeder, trial and assayer setups, small and large, with real feeds;</li>
  *   <li>{@code /test cultivarharvester [regrow]}: bearing rotation-farm stations with Create harvesters and glued
  *       barrels over every plant (field and trellis); {@code regrow} ripens them for another pass;</li>
  *   <li>{@code /test cultivarchecklist}: the by-eye checks, each with a click that sets it up;</li>
@@ -81,7 +81,7 @@ public final class DevTestModule implements CultivarModule {
         line(s, "/give @s cultivar:agricultural_lime 16", "Conditioner: use on soil or trellis; dusting appears, puffs, Jade 'Amended' line");
         line(s, "/give @s create:goggles", "Goggles on a crop: stats only once assayed; soil, light and amendment lines");
         line(s, "/test cultivarharvester", "Harvester stations, every plant: produce lands in the arm barrels; regrow for another pass");
-        line(s, "/test cultivar planterbeds", "Producer, breeder, trial and assayer setups (3x3 + 9x9) run on their own; assayers mesh off one cog");
+        line(s, "/test cultivar planterbeds", "Producer, breeder, trial and assayer setups, small + large, fed by chest/hopper, piped water; run on their own");
         return 1;
     }
 
