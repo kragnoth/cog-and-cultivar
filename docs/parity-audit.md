@@ -42,8 +42,8 @@ whole unit or plot), sneak + right-click with an empty hand takes items out, out
 | **Timber / Iron Trellis** | ✅ | ✅ full readout | ✅ brief readout | ✅ | ✅ crop status | — | — | — | ✅ |
 | **Assayers** (andesite / brass / chromatic) | ✅ Create crafter, tiered casings | ✅ unit | ✅ | ✅ unit outputs | ✅ ledger progress | ✅ items (unit) | ✅ pause | ✅ | ✅ |
 | **Sprinkler** | ✅ Spout style | ✅ | ✅ | ✅ tank | ❌ | ✅ fluid | ✅ off | ✅ | ✅ |
-| **Planter Bed** | ✅ andesite casing | ✅ plot | ✅ | ✅ plot | ✅ plot status | ✅ items + fluid (plot) | ✅ pause | ✅ dismantle mode, sneak pick-up | ✅ |
-| **Trial Bed** | ✅ brass casing | ✅ plot | ✅ | ✅ ledger | ✅ ledger progress | ✅ items (plot) | ✅ pause | ✅ | ✅ |
+| **Planter Bed** | ✅ crafter body, andesite casing, meshing cog | ✅ plot | ✅ | ✅ plot | ✅ plot status | ✅ items + fluid (plot) | ✅ pause | ✅ dismantle mode, sneak pick-up | ✅ |
+| **Trial Bed** | ✅ crafter body, brass casing, meshing cog | ✅ plot | ✅ | ✅ ledger | ✅ ledger progress | ✅ items (plot) | ✅ pause | ✅ | ✅ |
 | **Olla** | ✅ brick | ✅ | ✅ | ✅ filled | — | — | — | — | ✅ |
 
 ## Items

@@ -107,6 +107,8 @@ def planter_beds():
     for x in (2, 3, 4):
         for z in (1, 2, 3):
             t.set(x, 1, z, 'cultivar:planter_bed')
+    t.set(5, 0, 1, 'create:creative_motor[facing=up,waterlogged=false]')
+    t.set(5, 1, 1, 'create:cogwheel[axis=y,waterlogged=false]')  # meshes with the corner bed, like a crafter
     t.set(1, 1, 1, 'minecraft:hopper[enabled=true,facing=east]')
     t.set(1, 2, 1, 'minecraft:chest[facing=west,type=single,waterlogged=false]')
     return t
@@ -119,6 +121,8 @@ def trial_beds():
     for x in (1, 2, 3):
         for z in (1, 2, 3):
             t.set(x, 1, z, 'cultivar:trial_bed')
+    t.set(4, 0, 1, 'create:creative_motor[facing=up,waterlogged=false]')
+    t.set(4, 1, 1, 'create:cogwheel[axis=y,waterlogged=false]')
     return t
 
 

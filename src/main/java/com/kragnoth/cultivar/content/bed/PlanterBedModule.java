@@ -40,6 +40,10 @@ public final class PlanterBedModule implements CultivarModule {
 
     @Override
     public void onConstruct(IEventBus modBus, ModContainer container) {
+        modBus.addListener((net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent e) -> e.enqueueWork(() ->
+                com.simibubi.create.api.stress.BlockStressValues.IMPACTS.register(BED.get(), () ->
+                        com.kragnoth.cultivar.core.config.CultivarServerConfig.SPEC.isLoaded()
+                                ? com.kragnoth.cultivar.core.config.CultivarServerConfig.BED_STRESS.get() : 3.0)));
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);

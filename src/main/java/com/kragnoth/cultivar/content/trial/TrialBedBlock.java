@@ -17,32 +17,37 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-/** Trial Bed. Right-click with seeds or a Ledger to load it; empty hand takes the Ledger back. It sets up its own trellis. */
-public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.cultivar.api.soil.SoilHost, com.simibubi.create.content.equipment.wrench.IWrenchable {
-    public static final MapCodec<TrialBedBlock> CODEC = simpleCodec(TrialBedBlock::new);
+/**
+ * Trial Bed. Right-click with seeds or a Ledger to load the plot; sneak with an empty hand takes the Ledger back. It sets
+ * up its own trellises. Needs rotation (cogwheel beside it or shaft below); redstone pauses the plot.
+ */
+public class TrialBedBlock extends com.simibubi.create.content.kinetics.base.KineticBlock
+        implements com.simibubi.create.foundation.block.IBE<TrialBedBlockEntity>, com.simibubi.create.content.kinetics.simpleRelays.ICogWheel,
+        com.kragnoth.cultivar.api.soil.SoilHost {
 
     public TrialBedBlock(Properties properties) {
         super(properties);
     }
 
+    /** Powered like a Mechanical Crafter: its cogwheel meshes with neighbouring beds and cogwheels; a shaft from below also works. */
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
+    public net.minecraft.core.Direction.Axis getRotationAxis(BlockState state) {
+        return net.minecraft.core.Direction.Axis.Y;
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+    public boolean hasShaftTowards(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state, net.minecraft.core.Direction face) {
+        return face == net.minecraft.core.Direction.DOWN;
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new TrialBedBlockEntity(pos, state);
+    public Class<TrialBedBlockEntity> getBlockEntityClass() {
+        return TrialBedBlockEntity.class;
     }
 
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide() ? null : createTickerHelper(type, TrialModule.TRIAL_BED_BE.get(), (l, p, s, be) -> be.serverTick());
+    public BlockEntityType<? extends TrialBedBlockEntity> getBlockEntityType() {
+        return TrialModule.TRIAL_BED_BE.get();
     }
 
     /** Acts as farmland (so crops find a soil) and is ideal: no requirements, weeds or mutation habitats. */
@@ -132,7 +137,7 @@ public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.culti
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof TrialBedBlockEntity bed) {
             bed.dropContents();
         }

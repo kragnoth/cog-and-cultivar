@@ -39,31 +39,32 @@ import org.jetbrains.annotations.Nullable;
  * down (cloche, then trellis, back into stock; plants banked as seeds) and every slot can be pulled. Redstone pauses
  * the plot. Pipes and funnels see the whole connected plot (see {@link BedNetwork}).
  */
-public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.simibubi.create.content.equipment.wrench.IWrenchable {
-    public static final MapCodec<PlanterBedBlock> CODEC = simpleCodec(PlanterBedBlock::new);
+public class PlanterBedBlock extends com.simibubi.create.content.kinetics.base.KineticBlock
+        implements com.simibubi.create.foundation.block.IBE<PlanterBedBlockEntity>, com.simibubi.create.content.kinetics.simpleRelays.ICogWheel, SoilHost {
 
     public PlanterBedBlock(Properties properties) {
         super(properties);
     }
 
+    /** Powered like a Mechanical Crafter: its cogwheel meshes with neighbouring beds and cogwheels; a shaft from below also works. */
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
+    public net.minecraft.core.Direction.Axis getRotationAxis(BlockState state) {
+        return net.minecraft.core.Direction.Axis.Y;
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+    public boolean hasShaftTowards(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state, net.minecraft.core.Direction face) {
+        return face == net.minecraft.core.Direction.DOWN;
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new PlanterBedBlockEntity(pos, state);
+    public Class<PlanterBedBlockEntity> getBlockEntityClass() {
+        return PlanterBedBlockEntity.class;
     }
 
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide() ? null : createTickerHelper(type, PlanterBedModule.BED_BE.get(), (l, p, s, be) -> be.serverTick());
+    public BlockEntityType<? extends PlanterBedBlockEntity> getBlockEntityType() {
+        return PlanterBedModule.BED_BE.get();
     }
 
     @Override
@@ -223,7 +224,7 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed) {
             bed.dropContents();
         }

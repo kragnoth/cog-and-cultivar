@@ -1,5 +1,7 @@
 package com.kragnoth.cultivar.content.bed;
 
+import com.kragnoth.cultivar.content.cloche.ClocheType;
+
 import com.kragnoth.cultivar.api.genetics.Genome;
 import com.kragnoth.cultivar.api.plant.Fertilizer;
 import com.kragnoth.cultivar.content.crop.CropBlockEntity;
@@ -43,7 +45,7 @@ import java.util.Optional;
  * seeds, harvests a mature crop into the plot's outputs (produce only; seeds come from the Seed Satchel), and,
  * with water, gives the crop extra growth ticks and +1 humidity; it occasionally spends a fertilizer.
  */
-public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInformation {
+public class PlanterBedBlockEntity extends com.simibubi.create.content.kinetics.base.KineticBlockEntity {
     /** Seed stock (4 slots, best kept), fertilizer, trellis and cloche supply, 9 outputs. */
     public static final int SEEDS = 0, SEED_SLOTS = 4, FERTILIZER = 4, TRELLIS = 5, CLOCHE = 6, OUT_START = 7, SLOTS = 16;
     public static final int CAPACITY = 4000;
@@ -121,7 +123,6 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
     /** Inventory/tank changed: send clients (goggles) an update, at most once a second. */
     private boolean needsSync;
     private boolean syncedWater;
-    private int cooldown;
     private int ticksSinceDrain;
     private final PlotTracker<PlanterBedBlockEntity> tracker =
             new PlotTracker<>(this, PlanterBedBlockEntity.class, BedNetwork.MAX_BEDS, b -> b.tracker);
@@ -135,6 +136,12 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
     public PlanterBedBlockEntity(BlockPos pos, BlockState state) {
         super(PlanterBedModule.BED_BE.get(), pos, state);
     }
+
+    @Override
+    public void addBehaviours(List<com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour> behaviours) {}
+
+    /** Work done toward the next cycle: |RPM| / 32 per tick, so 32 RPM keeps the configured cycle length. */
+    private float cycleProgress;
 
     public @Nullable BlockState soil() {
         return soil;
@@ -210,23 +217,38 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
 
     // ---------------------------------------------------------------- work
 
+    @Override
+    public void tick() {
+        super.tick();
+        serverTick();
+    }
+
+    /**
+     * Server work, driven by rotation like a Create machine: no rotation (or overstressed), no work and no water use.
+     * Speed scales with RPM; 32 RPM matches the configured cycle.
+     */
     void serverTick() {
         if (!(level instanceof ServerLevel server)) {
             return;
         }
+        float rpm = Math.abs(getSpeed());
         if (needsSync && server.getGameTime() % 20 == (worldPosition.asLong() & 15)) {
             needsSync = false;
             server.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        }
+        if (rpm <= 0 || isOverStressed()) {
+            return;
         }
         boolean watered = !tank.isEmpty();
         if (watered && ++ticksSinceDrain >= CultivarServerConfig.BED_TICKS_PER_MB.get()) {
             ticksSinceDrain = 0;
             tank.drain(1, net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
         }
-        if (--cooldown > 0) {
+        cycleProgress += rpm / 32f;
+        if (cycleProgress < CultivarServerConfig.BED_CYCLE.get()) {
             return;
         }
-        cooldown = CultivarServerConfig.BED_CYCLE.get();
+        cycleProgress = 0;
         work(server, watered);
     }
 
@@ -268,13 +290,25 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         }
         var random = server.random;
         BlockState trellis = server.getBlockState(above);
-        if (!trellis.getValue(TrellisBlock.CLOCHE) && !trellis.getValue(TrellisBlock.CROSS) && !TrellisBlock.hasSegmentAbove(server, above)
-                && (!crop.hasPlant() || crop.segmentsMissing() == 0)) {
-            Slot c = equipment(CLOCHE);
-            if (c != null && c.stack().getItem() instanceof com.kragnoth.cultivar.content.cloche.BellClocheItem cloche) {
-                trellis = cloche.fit(trellis);
-                server.setBlock(above, trellis, Block.UPDATE_ALL);
-                c.bed().inventory.extractItem(c.index(), 1, false);
+        // Cloches go where they help: a Shade Cloche on a plant that needs it darker than here, a Lamp Cloche on one
+        // that needs more light, a Bell Cloche on the rest. A cloche that no longer suits the plant (it was replanted
+        // or upgraded) goes back into stock, and the right one goes on next cycle.
+        if (crop.hasPlant() && !trellis.getValue(TrellisBlock.CROSS) && !TrellisBlock.hasSegmentAbove(server, above)
+                && crop.segmentsMissing() == 0) {
+            ClocheType want = wantedCloche(server, above, crop.genome().species().value());
+            if (trellis.getValue(TrellisBlock.CLOCHE)) {
+                if (trellis.getValue(TrellisBlock.CLOCHE_TYPE) != want) {
+                    server.setBlock(above, trellis.setValue(TrellisBlock.CLOCHE, false), Block.UPDATE_ALL);
+                    restock(server, above, new ItemStack(trellis.getValue(TrellisBlock.CLOCHE_TYPE).item()), CLOCHE);
+                    return;
+                }
+            } else if (want != null) {
+                Slot c = cloche(want);
+                if (c != null && c.stack().getItem() instanceof com.kragnoth.cultivar.content.cloche.BellClocheItem cloche) {
+                    trellis = cloche.fit(trellis);
+                    server.setBlock(above, trellis, Block.UPDATE_ALL);
+                    c.bed().inventory.extractItem(c.index(), 1, false);
+                }
             }
         }
 
@@ -342,6 +376,40 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
             trellis.randomTick(server, above, random);
         }
         spendFertilizer(server, crop, random, above);
+    }
+
+    /**
+     * The cloche that suits {@code plant} on the trellis at {@code above}: Shade if only darker light satisfies its
+     * light needs, Lamp if only brighter light does, else Bell (growth and humidity, no light change). Judged against
+     * the spot's own light, ignoring any cloche already on it.
+     */
+    public static ClocheType wantedCloche(ServerLevel server, BlockPos above, com.kragnoth.cultivar.api.plant.Plant plant) {
+        int here = server.getRawBrightness(above, 0);
+        java.util.function.IntPredicate fits = light -> plant.requirements().stream()
+                .filter(c -> c instanceof com.kragnoth.cultivar.content.core.condition.LightCondition)
+                .map(c -> (com.kragnoth.cultivar.content.core.condition.LightCondition) c)
+                .allMatch(l -> light >= l.min() && light <= l.max());
+        if (fits.test(here)) {
+            return ClocheType.BELL;
+        }
+        if (fits.test(Math.min(here, CultivarServerConfig.SHADE_MAX_LIGHT.get()))) {
+            return ClocheType.SHADE;
+        }
+        if (fits.test(Math.max(here, CultivarServerConfig.LAMP_MIN_LIGHT.get()))) {
+            return ClocheType.LAMP;
+        }
+        return ClocheType.BELL; // no cloche fixes its light; a Bell still helps growth
+    }
+
+    /** A stocked cloche of {@code type} anywhere in the plot. */
+    private @Nullable Slot cloche(ClocheType type) {
+        for (PlanterBedBlockEntity bed : cachedNetwork()) {
+            if (bed.inventory.getStackInSlot(CLOCHE).getItem() instanceof com.kragnoth.cultivar.content.cloche.BellClocheItem c
+                    && c.type() == type) {
+                return new Slot(bed, CLOCHE);
+            }
+        }
+        return null;
     }
 
     private @Nullable Slot equipment(int slot) {
@@ -559,8 +627,8 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
     // ---------------------------------------------------------------- persistence / sync
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
         tag.put("Inventory", inventory.serializeNBT(registries));
         tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
         tag.putBoolean("Breeding", breeding);
@@ -568,20 +636,32 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         if (soil != null) {
             tag.put("Soil", NbtUtils.writeBlockState(soil));
         }
+        if (clientPacket) {
+            tag.putBoolean("Water", !tank.isEmpty());
+        } else {
+            tag.putFloat("CycleProgress", cycleProgress);
+        }
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
+        if (clientPacket) {
+            if (readClientState(tag, registries)) {
+                rerender(); // only soil/water change the look; stock updates don't rebuild the chunk
+            }
+            return;
+        }
         inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
         tank.readFromNBT(registries, tag.getCompound("Tank"));
         breeding = tag.getBoolean("Breeding");
         dismantling = tag.getBoolean("Dismantling");
-        readClient(tag, registries);
+        cycleProgress = tag.getFloat("CycleProgress");
+        readClientState(tag, registries);
     }
 
     /** Returns whether anything that affects rendering (soil, water presence) changed. */
-    private boolean readClient(CompoundTag tag, HolderLookup.Provider registries) {
+    private boolean readClientState(CompoundTag tag, HolderLookup.Provider registries) {
         BlockState oldSoil = soil;
         boolean oldWater = syncedWater;
         soil = tag.contains("Soil") ? NbtUtils.readBlockState(registries.lookupOrThrow(Registries.BLOCK), tag.getCompound("Soil")) : null;
@@ -599,40 +679,6 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
             dismantling = tag.getBoolean("Dismantling");
         }
         return !java.util.Objects.equals(oldSoil, soil) || oldWater != syncedWater;
-    }
-
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = new CompoundTag();
-        if (soil != null) {
-            tag.put("Soil", NbtUtils.writeBlockState(soil));
-        }
-        tag.putBoolean("Water", !tank.isEmpty());
-        // For goggles: stock and water are shown client-side.
-        tag.put("Inventory", inventory.serializeNBT(registries));
-        tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
-        tag.putBoolean("Breeding", breeding);
-        tag.putBoolean("Dismantling", dismantling);
-        return tag;
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        if (readClient(tag, registries)) {
-            rerender();
-        }
-    }
-
-    @Override
-    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    @Override
-    public void onDataPacket(net.minecraft.network.Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
-        if (readClient(pkt.getTag(), registries)) {
-            rerender(); // only soil/water change the look; stock updates don't rebuild the chunk
-        }
     }
 
     private void rerender() {
@@ -682,6 +728,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        super.addToGoggleTooltip(tooltip, isPlayerSneaking); // stress, like every Create machine
         List<PlanterBedBlockEntity> plot = cachedNetwork();
         int water = 0, seeds = 0, fert = 0, used = 0, outs = 0, breeders = 0;
         Genome best = null;

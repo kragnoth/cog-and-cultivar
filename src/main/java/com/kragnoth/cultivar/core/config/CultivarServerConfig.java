@@ -36,6 +36,8 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.DoubleValue ASSAY_FAMILY_CHANCE;
     public static final ModConfigSpec.IntValue ASSAY_MAX_UNIT;
     public static final ModConfigSpec.IntValue TRIAL_INTERVAL_MINUTES;
+    public static final ModConfigSpec.DoubleValue TRIAL_STRESS;
+    public static final ModConfigSpec.DoubleValue BED_STRESS;
     public static final ModConfigSpec.DoubleValue TRIAL_CHANCE;
     public static final ModConfigSpec.IntValue TRIAL_FULL_SIZE;
     public static final ModConfigSpec.BooleanValue TRIAL_CONSUMES_SEEDS;
@@ -110,6 +112,8 @@ public final class CultivarServerConfig {
         b.pop();
 
         b.push("trial_bed");
+        TRIAL_STRESS = b.comment("Stress impact of each Trial Bed, per RPM. Beds need rotation, like Mechanical Crafters; 32 RPM is normal speed.")
+                .defineInRange("stressImpact", 3.0, 0.0, 64.0);
         TRIAL_INTERVAL_MINUTES = b.comment("Minutes between a trial plot's discovery rolls.")
                 .defineInRange("intervalMinutes", 5, 1, 1440);
         TRIAL_CHANCE = b.comment("Bonus: chance per roll to discover an untested mutation outright, for a full-size plot.",
@@ -156,7 +160,9 @@ public final class CultivarServerConfig {
         b.pop();
 
         b.push("planter_bed");
-        BED_CYCLE = b.comment("Ticks between a Planter Bed's work cycles (plant, harvest, water, fertilize).")
+        BED_STRESS = b.comment("Stress impact of each Planter Bed, per RPM. Beds need rotation, like Mechanical Crafters.")
+                .defineInRange("stressImpact", 3.0, 0.0, 64.0);
+        BED_CYCLE = b.comment("Ticks between a Planter Bed's work cycles (plant, harvest, water, fertilize) at 32 RPM; faster spins work faster.")
                 .defineInRange("cycle", 10, 1, 200);
         BED_TICKS_PER_MB = b.comment("Ticks a bed runs per mB of water (4000 mB tank). Water gives extra growth and +1 humidity.")
                 .defineInRange("ticksPerMillibucket", 8, 1, 1200);

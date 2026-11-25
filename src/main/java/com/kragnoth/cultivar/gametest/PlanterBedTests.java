@@ -99,9 +99,10 @@ public final class PlanterBedTests {
         bed.work(level, false);
         h.assertTrue(h.getBlockState(pos.above()).is(CropModule.TIMBER_TRELLIS.get()), "a fed trellis is placed on top, found "
                 + h.getBlockState(pos.above()) + ", supply " + bed.inventory.getStackInSlot(PlanterBedBlockEntity.TRELLIS));
-        bed.work(level, false);
-        h.assertTrue(h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE), "a fed cloche covers it");
         ((CropBlockEntity) h.getBlockEntity(pos.above())).plant(wheat(h, 4), 3);
+        bed.work(level, false);
+        h.assertTrue(h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE),
+                "a fed cloche covers the planted crop (wheat in daylight: a Bell)");
         h.assertTrue(items.extractItem(PlanterBedBlockEntity.SEEDS, 1, true).isEmpty()
                 && items.extractItem(PlanterBedBlockEntity.FERTILIZER, 1, true).isEmpty(),
                 "growing: pipes pull only crop outputs");
@@ -180,5 +181,48 @@ public final class PlanterBedTests {
         }
         h.assertTrue(crop.weed() == null, "the bed cleared the blight and none came back");
         h.succeed();
+    }
+
+    /** Like a Create machine, a bed does nothing without rotation. */
+    @GameTest(template = "empty")
+    public static void unpoweredBedDoesNothing(GameTestHelper h) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        h.setBlock(pos, PlanterBedModule.BED.get());
+        h.setBlock(pos.above(), Blocks.AIR);
+        var bed = (PlanterBedBlockEntity) h.getBlockEntity(pos);
+        bed.setSoil(Blocks.FARMLAND.defaultBlockState());
+        bed.inventory.insertItem(PlanterBedBlockEntity.TRELLIS, new ItemStack(CropModule.TIMBER_TRELLIS.get(), 4), false);
+        for (int i = 0; i < 400; i++) {
+            bed.tick();
+        }
+        h.assertTrue(h.getBlockState(pos.above()).isAir(), "an unpowered bed places nothing");
+        h.succeed();
+    }
+
+    /** Beds pick the cloche a plant needs: Shade for dark-lovers in light, Lamp for light-lovers in the dark, else Bell. */
+    @GameTest(template = "empty")
+    public static void bedsChooseClochesByLightNeed(GameTestHelper h) {
+        var level = h.getLevel();
+        var plants = level.registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.PLANT);
+        java.util.function.Function<String, com.kragnoth.cultivar.api.plant.Plant> plant = id -> plants.get(ResourceLocation.parse(id));
+        BlockPos dark = new BlockPos(1, 1, 1), lit = new BlockPos(1, 1, 3);
+        // A sealed stone box: no sky or block light at all.
+        for (BlockPos p : BlockPos.betweenClosed(dark.offset(-1, -1, -1), dark.offset(1, 1, 1))) {
+            h.setBlock(p, Blocks.STONE);
+        }
+        h.setBlock(dark, Blocks.AIR);
+        h.setBlock(lit, Blocks.AIR);
+        h.setBlock(lit.east(), Blocks.GLOWSTONE); // block light 14 at the crop, whatever the sky does
+        h.runAfterDelay(5, () -> { // let light settle
+            var cave = h.absolutePos(dark);
+            var bright = h.absolutePos(lit);
+            h.assertTrue(PlanterBedBlockEntity.wantedCloche(level, cave, plant.apply("minecraft:wheat"))
+                    == com.kragnoth.cultivar.content.cloche.ClocheType.LAMP, "wheat in the dark gets a Lamp Cloche");
+            h.assertTrue(PlanterBedBlockEntity.wantedCloche(level, cave, plant.apply("cultivar:glowcap"))
+                    == com.kragnoth.cultivar.content.cloche.ClocheType.BELL, "glowcap in the dark needs no light change: Bell");
+            h.assertTrue(PlanterBedBlockEntity.wantedCloche(level, bright, plant.apply("cultivar:glowcap"))
+                    == com.kragnoth.cultivar.content.cloche.ClocheType.SHADE, "glowcap in bright light gets a Shade Cloche");
+            h.succeed();
+        });
     }
 }

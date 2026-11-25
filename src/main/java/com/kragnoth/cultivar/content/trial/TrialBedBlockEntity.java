@@ -52,7 +52,7 @@ import java.util.*;
  * recipe shows there), and spends one seed of each parent. Inputs: seeds and a Ledger. Output: the Ledger.
  * Only the plot's leader (lowest position) keeps the timer.
  */
-public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInformation {
+public class TrialBedBlockEntity extends com.simibubi.create.content.kinetics.base.KineticBlockEntity {
     public static final int SEED_SLOTS = 2, LEDGER = 2, SLOTS = 3;
     public static final int MAX_BEDS = 128;
 
@@ -111,7 +111,8 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
     };
 
     private int timer;
-    private int cooldown;
+    /** Work toward the next cycle: |RPM| / 32 per tick; a cycle every 10 at 32 RPM. */
+    private float cycleProgress;
     private int heldCycles;
     private boolean needsSync;
     private final PlotTracker<TrialBedBlockEntity> tracker =
@@ -119,6 +120,15 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
 
     public TrialBedBlockEntity(BlockPos pos, BlockState state) {
         super(TrialModule.TRIAL_BED_BE.get(), pos, state);
+    }
+
+    @Override
+    public void addBehaviours(List<com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour> behaviours) {}
+
+    @Override
+    public void tick() {
+        super.tick();
+        serverTick();
     }
 
     // ---------------------------------------------------------------- plot
@@ -230,8 +240,13 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
         if (isPlotPowered()) {
             return; // redstone: the plot pauses and its seeds can be pulled out
         }
-        if (--cooldown <= 0) {
-            cooldown = 10;
+        float rpm = Math.abs(getSpeed());
+        if (rpm <= 0 || isOverStressed()) {
+            return; // like a Create machine: no rotation, no work (and no discovery timer)
+        }
+        cycleProgress += rpm / 32f;
+        if (cycleProgress >= 10) {
+            cycleProgress = 0;
             work(server, server.random);
         }
         if (server.getGameTime() % 20 != 0 || !isLeader()) {
@@ -410,34 +425,28 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
     // ---------------------------------------------------------------- persistence / sync / goggles
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
         tag.put("Inventory", inventory.serializeNBT(registries));
         tag.putInt("Timer", timer);
+        if (!clientPacket) {
+            tag.putFloat("CycleProgress", cycleProgress);
+        }
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
         inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
         timer = tag.getInt("Timer");
-    }
-
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = new CompoundTag();
-        tag.put("Inventory", inventory.serializeNBT(registries));
-        tag.putInt("Timer", timer);
-        return tag;
-    }
-
-    @Override
-    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
+        if (!clientPacket) {
+            cycleProgress = tag.getFloat("CycleProgress");
+        }
     }
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        super.addToGoggleTooltip(tooltip, isPlayerSneaking); // stress, like every Create machine
         int full = CultivarServerConfig.TRIAL_FULL_SIZE.get();
         ItemStack ledger = ledger();
         tooltip.add(Component.translatable("cultivar.trial.plot", plot().size(), full).withStyle(ChatFormatting.GOLD));

@@ -54,7 +54,8 @@ import java.util.List;
  *   <li><b>Assayer unit</b> (3x3, 9x9): rows cycle andesite, brass, chromatic, driven by a cogwheel meshing with the
  *       corner Assayer; loaded with unassayed seeds and a Ledger.</li>
  * </ol>
- * Signs label each part. {@code /test cultivarclear} removes it.
+ * Every plot is driven by a Creative Motor and a cogwheel meshing with a corner machine (beds and Assayers mesh with
+ * each other like Mechanical Crafters). Signs label each part. {@code /test cultivarclear} removes it.
  */
 final class MachineRigs {
     private static final int SPACING_Z = 13;
@@ -108,6 +109,12 @@ final class MachineRigs {
                             case ASSAYER -> assayer(level, p, dz % 3, wheat, dx == 0 && dz == 0);
                         }
                     }
+                }
+                if (kind != Kind.ASSAYER) { // beds need rotation too: a cogwheel meshing with the east corner bed
+                    BlockPos cog = at.offset(size, 0, 0);
+                    level.setBlock(cog.below(), create("creative_motor").setValue(BlockStateProperties.FACING, Direction.UP), Block.UPDATE_ALL);
+                    level.setBlock(cog, create("cogwheel").setValue(BlockStateProperties.AXIS, Direction.Axis.Y), Block.UPDATE_ALL);
+                    sign(level, cog.offset(1, 0, 0), "Creative Motor", "drives a cog;", "beds mesh", "like crafters");
                 }
                 switch (kind) {
                     case PRODUCER -> {

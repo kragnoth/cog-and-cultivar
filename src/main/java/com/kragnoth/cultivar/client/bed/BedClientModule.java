@@ -14,6 +14,10 @@ public final class BedClientModule implements ClientModule {
 
     @Override
     public void onConstructClient(IEventBus modBus, ModContainer container) {
+        modBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers e) -> {
+            e.registerBlockEntityRenderer(com.kragnoth.cultivar.content.bed.PlanterBedModule.BED_BE.get(), BedCogRenderer::new);
+            e.registerBlockEntityRenderer(com.kragnoth.cultivar.content.trial.TrialModule.TRIAL_BED_BE.get(), BedCogRenderer::new);
+        });
         modBus.addListener((ModelEvent.ModifyBakingResult event) -> event.getModels().replaceAll((location, model) ->
                 location.id().equals(Cultivar.id("planter_bed")) && !"inventory".equals(location.variant())
                         ? new PlanterBedBakedModel(model) : model));

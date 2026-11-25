@@ -572,6 +572,14 @@ public final class CultivarScenes {
         scene.overlay().showText(90).text("A Planter Bed is a self-running crop plot. Touching beds join into one plot, up to 64, that shares its stock, water and output.")
                 .pointAt(util.vector().topOf(middle)).placeNearTarget().attachKeyFrame();
         scene.idle(100);
+        BlockPos cog = util.grid().at(5, 1, 1);
+        scene.world().showSection(util.select().position(cog), Direction.DOWN);
+        scene.idle(10);
+        new CreateSceneBuilder(scene).world().setKineticSpeed(util.select().position(cog), 32);
+        new CreateSceneBuilder(scene).world().setKineticSpeed(beds, -32);
+        scene.overlay().showText(90).text("Like a Mechanical Crafter it needs rotation: the beds' cogwheels mesh with each other and with a cogwheel beside the plot. Faster spins work faster.")
+                .pointAt(util.vector().topOf(cog)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
 
         scene.overlay().showControls(util.vector().topOf(middle), Pointing.DOWN, 40).rightClick()
                 .withItem(new ItemStack(Items.FARMLAND));
@@ -638,6 +646,14 @@ public final class CultivarScenes {
         scene.overlay().showText(90).text("Trial Beds are a research plot. Touching beds join up, and a full 9x9 gets the best discovery odds.")
                 .pointAt(util.vector().topOf(middle)).placeNearTarget().attachKeyFrame();
         scene.idle(100);
+        BlockPos cog = util.grid().at(4, 1, 1);
+        scene.world().showSection(util.select().position(cog), Direction.DOWN);
+        scene.idle(10);
+        new CreateSceneBuilder(scene).world().setKineticSpeed(util.select().position(cog), 32);
+        new CreateSceneBuilder(scene).world().setKineticSpeed(beds, -32);
+        scene.overlay().showText(80).text("They need rotation too: a cogwheel beside the plot drives every bed, as their cogwheels mesh.")
+                .pointAt(util.vector().topOf(cog)).placeNearTarget().attachKeyFrame();
+        scene.idle(90);
 
         scene.overlay().showControls(util.vector().topOf(middle), Pointing.DOWN, 40).rightClick()
                 .withItem(new ItemStack(LedgerModule.LEDGER.get()));
