@@ -163,15 +163,15 @@ public final class CultivarServerConfig {
         BED_STRESS = b.comment("Stress impact of each Planter Bed, per RPM. Beds need rotation, like Mechanical Crafters.")
                 .defineInRange("stressImpact", 3.0, 0.0, 64.0);
         BED_CYCLE = b.comment("Ticks between a Planter Bed's work cycles (plant, harvest, water, fertilize) at 32 RPM; faster spins work faster.")
-                .defineInRange("cycle", 10, 1, 200);
+                .defineInRange("cycle", 40, 1, 200);
         BED_TICKS_PER_MB = b.comment("Ticks a bed runs per mB of water (4000 mB tank). Water gives extra growth and +1 humidity.")
                 .defineInRange("ticksPerMillibucket", 8, 1, 1200);
         BED_GROWTH_ODDS = b.comment("With water, each cycle gives the crop an extra growth tick with chance 1 in N (default ~4x vanilla).")
-                .defineInRange("growthOdds", 40, 1, 10_000);
+                .defineInRange("growthOdds", 20, 1, 10_000);
         BED_FERTILIZER_ODDS = b.comment("Each cycle, chance 1 in N to spend one fertilizer on a growing crop.")
-                .defineInRange("fertilizerOdds", 12, 1, 10_000);
+                .defineInRange("fertilizerOdds", 6, 1, 10_000);
         BED_BREED_HOLD = b.comment("Cycles a mature crop next to a breeding bed waits before harvest, so the grafting frame can use it as a parent.")
-                .defineInRange("breedHoldCycles", 40, 0, 10_000);
+                .defineInRange("breedHoldCycles", 10, 0, 10_000);
         BED_WEED_MULTIPLIER = b.comment("Weeds on crops in a Planter Bed, relative to plain soil: 0 = none (a tended bed; any blight",
                         "already there is cleared), 1 = as on soil. Trial Beds never grow weeds.")
                 .defineInRange("weedMultiplier", 0.0, 0.0, 1.0);
