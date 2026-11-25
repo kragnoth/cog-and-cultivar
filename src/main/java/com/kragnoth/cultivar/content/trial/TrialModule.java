@@ -1,5 +1,6 @@
 package com.kragnoth.cultivar.content.trial;
 
+import com.kragnoth.cultivar.core.plot.PlotItemHandler;
 import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.core.module.CultivarModule;
@@ -44,7 +45,7 @@ public final class TrialModule implements CultivarModule {
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         modBus.addListener((RegisterCapabilitiesEvent e) -> e.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TRIAL_BED_BE.get(),
-                (be, side) -> new com.kragnoth.cultivar.content.bed.PlotItemHandler(
+                (be, side) -> new com.kragnoth.cultivar.core.plot.PlotItemHandler(
                         () -> be.plot().stream().map(b -> (net.neoforged.neoforge.items.IItemHandler) b.automation).toList())));
         modBus.addListener((BuildCreativeModeTabContentsEvent e) -> {
             if (e.getTabKey() == CoreModule.TAB.getKey()) {

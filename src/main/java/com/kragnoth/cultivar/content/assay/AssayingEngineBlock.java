@@ -1,8 +1,10 @@
 package com.kragnoth.cultivar.content.assay;
 
-import com.kragnoth.cultivar.content.core.CoreModule;
 import com.kragnoth.cultivar.content.ledger.LedgerItem;
 import com.simibubi.create.content.kinetics.base.KineticBlock;
+import com.simibubi.create.content.kinetics.simpleRelays.ICogWheel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,12 +20,24 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * Assaying Engine (spec §3.12, Phase 2c): a shaft from below spins the drum; seeds go in, come out assayed.
- * A ledger in its slot records every species that passes through.
+ * Assayer (spec §3.12): a horizontal Mechanical Crafter whose top holds farmland. Its cogwheel meshes with neighbouring
+ * Assayers and cogwheels like a crafter's, so a row shares one drive; a shaft from below also works. Touching Assayers
+ * form one unit with shared input and output ({@link AssayingEngineBlockEntity#unit()}).
+ *
+ * <p>Hands, as on every Cultivar machine: right-click with a seed, cutting or Ledger to put it in (seeds go to the
+ * least-loaded member); shift + right-click with an empty hand to take finished seeds out, then queued seeds, then the
+ * Ledger.
  */
-public class AssayingEngineBlock extends KineticBlock implements IBE<AssayingEngineBlockEntity> {
-    public AssayingEngineBlock(Properties properties) {
+public class AssayingEngineBlock extends KineticBlock implements IBE<AssayingEngineBlockEntity>, ICogWheel {
+    private final AssayTier tier;
+
+    public AssayingEngineBlock(Properties properties, AssayTier tier) {
         super(properties);
+        this.tier = tier;
+    }
+
+    public AssayTier tier() {
+        return tier;
     }
 
     @Override
@@ -49,46 +63,43 @@ public class AssayingEngineBlock extends KineticBlock implements IBE<AssayingEng
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {
-        int slot = stack.has(CoreModule.GENOME.get()) ? AssayingEngineBlockEntity.SEED_IN
-                : stack.getItem() instanceof LedgerItem ? AssayingEngineBlockEntity.LEDGER : -1;
-        if (slot < 0) {
+        if (!AssayingEngineBlockEntity.isAssayable(stack) && !(stack.getItem() instanceof LedgerItem)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
         }
         return onBlockEntityUseItemOn(level, pos, be -> {
-            ItemStack rest = be.inventory.insertItem(slot, stack, false);
+            ItemStack rest = be.insertIntoUnit(stack.copy());
             if (rest.getCount() == stack.getCount()) {
                 return ItemInteractionResult.CONSUME_PARTIAL;
             }
             player.setItemInHand(hand, rest);
+            level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.6f, 1.2f);
             return ItemInteractionResult.SUCCESS;
         });
     }
 
-    /** Empty hand: take outputs first, then (sneaking) the ledger, then any unprocessed input. */
+    /** Shift + empty hand: finished seeds from the whole unit, then queued seeds, then the Ledger. */
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!player.isShiftKeyDown()) {
+            return InteractionResult.PASS;
+        }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
         return onBlockEntityUse(level, pos, be -> {
-            int[] order = player.isShiftKeyDown()
-                    ? new int[]{AssayingEngineBlockEntity.LEDGER}
-                    : new int[]{AssayingEngineBlockEntity.SEED_OUT, AssayingEngineBlockEntity.SEED_IN};
-            for (int slot : order) {
-                ItemStack taken = be.inventory.extractItem(slot, 64, false);
-                if (!taken.isEmpty()) {
-                    player.getInventory().placeItemBackInInventory(taken);
-                    return InteractionResult.SUCCESS;
-                }
+            var taken = be.takeFromUnit();
+            taken.forEach(s -> player.getInventory().placeItemBackInInventory(s));
+            if (!taken.isEmpty()) {
+                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4f, 1f);
             }
-            return InteractionResult.PASS;
+            return taken.isEmpty() ? InteractionResult.PASS : InteractionResult.SUCCESS;
         });
     }
 
-    /** Comparator: how full the assayed-seed output is (0-15), so a contraption can wait for a batch. */
+    /** Comparator: how full the unit's finished-seed outputs are (0-15). */
     @Override
     protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
@@ -96,8 +107,7 @@ public class AssayingEngineBlock extends KineticBlock implements IBE<AssayingEng
 
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-        return level.getBlockEntity(pos) instanceof AssayingEngineBlockEntity be
-                ? net.neoforged.neoforge.items.ItemHandlerHelper.calcRedstoneFromInventory(be.inventory) : 0;
+        return level.getBlockEntity(pos) instanceof AssayingEngineBlockEntity be ? be.comparatorSignal() : 0;
     }
 
     @Override

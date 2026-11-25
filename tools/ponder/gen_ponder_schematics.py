@@ -56,8 +56,11 @@ def crossbreeding():
 def assaying():
     t = Template(5, 3, 5)
     plate(t, 5, 5, 'minecraft:smooth_stone')
-    t.set(2, 0, 2, 'create:shaft[axis=y,waterlogged=false]')
-    t.set(2, 1, 2, 'cultivar:assaying_engine')
+    t.set(0, 0, 2, 'create:creative_motor[facing=up,waterlogged=false]')
+    t.set(0, 1, 2, 'create:cogwheel[axis=y,waterlogged=false]')  # meshes with the first Assayer like a crafter's cog
+    t.set(1, 1, 2, 'cultivar:assaying_engine')
+    t.set(2, 1, 2, 'cultivar:brass_assaying_engine')
+    t.set(3, 1, 2, 'cultivar:chromatic_assaying_engine')
     return t
 
 

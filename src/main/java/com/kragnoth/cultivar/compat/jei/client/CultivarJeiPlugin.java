@@ -230,7 +230,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(CropModule.TIMBER_TRELLIS.get(), MutationCategory.TYPE);
         registration.addRecipeCatalyst(CropModule.IRON_TRELLIS.get(), MutationCategory.TYPE);
         registration.addRecipeCatalyst(TrialModule.TRIAL_BED.get(), MutationCategory.TYPE);
-        registration.addRecipeCatalyst(AssayModule.ENGINE_ITEM.get(), AssayCategory.TYPE);
+        AssayModule.tiers().forEach(b -> registration.addRecipeCatalyst(b.get(), AssayCategory.TYPE));
         for (var trellis : List.of(CropModule.TIMBER_TRELLIS.get(), CropModule.IRON_TRELLIS.get())) {
             registration.addRecipeCatalyst(trellis, GrowingCategory.TYPE, SOILS, FERTILIZERS, BLIGHTS);
         }

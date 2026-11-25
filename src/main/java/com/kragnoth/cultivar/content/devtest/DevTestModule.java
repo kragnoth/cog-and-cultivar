@@ -23,6 +23,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * <ul>
  *   <li>{@code /test cultivar [filter]}: every Cultivar game test, run live in this world with this modpack;</li>
  *   <li>{@code /test cultivarshowcase}: a labelled gallery of everything to judge by eye;</li>
+ *   <li>{@code /test cultivar planterbeds}: producer, breeder, trial and assayer setups as 3x3s and 9x9s;</li>
  *   <li>{@code /test cultivarharvester [regrow]}: bearing rotation-farm stations with Create harvesters and glued
  *       barrels over every plant (field and trellis); {@code regrow} ripens them for another pass;</li>
  *   <li>{@code /test cultivarchecklist}: the by-eye checks, each with a click that sets it up;</li>
@@ -47,6 +48,8 @@ public final class DevTestModule implements CultivarModule {
         event.getDispatcher().register(Commands.literal("test")
                 .then(Commands.literal("cultivar").requires(s -> s.hasPermission(2))
                         .executes(ctx -> LiveTestRunner.run(ctx.getSource(), null))
+                        // A literal wins over the filter argument, so "/test cultivar planterbeds" builds the setups.
+                        .then(Commands.literal("planterbeds").executes(ctx -> MachineRigs.build(ctx.getSource())))
                         .then(Commands.argument("filter", StringArgumentType.word())
                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(LiveTestRunner.tests(null).stream()
                                         .map(t -> t.batchName().equals("defaultBatch") ? t.testName() : t.batchName()).distinct(), b))
@@ -58,7 +61,8 @@ public final class DevTestModule implements CultivarModule {
                         .then(Commands.literal("regrow").executes(ctx -> HarvesterRig.regrow(ctx.getSource()))))
                 .then(Commands.literal("cultivarclear").requires(s -> s.hasPermission(2))
                         .executes(ctx -> LiveTestRunner.clear(ctx.getSource(), true) + Showcase.clear(ctx.getSource(), true)
-                                + HarvesterRig.clear(ctx.getSource(), true)))
+                                + HarvesterRig.clear(ctx.getSource(), true)
+                                + MachineRigs.clear(ctx.getSource(), true)))
                 .then(Commands.literal("cultivarchecklist").requires(s -> s.hasPermission(2))
                         .executes(DevTestModule::checklist)));
     }
@@ -77,6 +81,7 @@ public final class DevTestModule implements CultivarModule {
         line(s, "/give @s cultivar:agricultural_lime 16", "Conditioner: use on soil or trellis; dusting appears, puffs, Jade 'Amended' line");
         line(s, "/give @s create:goggles", "Goggles on a crop: stats only once assayed; soil, light and amendment lines");
         line(s, "/test cultivarharvester", "Harvester stations, every plant: produce lands in the arm barrels; regrow for another pass");
+        line(s, "/test cultivar planterbeds", "Producer, breeder, trial and assayer setups (3x3 + 9x9) run on their own; assayers mesh off one cog");
         return 1;
     }
 

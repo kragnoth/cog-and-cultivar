@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "TET",
+    "BAB"
+  ],
+  "key": {
+    "T": {
+      "item": "cultivar:timber_trellis"
+    },
+    "E": {
+      "item": "create:electron_tube"
+    },
+    "B": {
+      "item": "create:brass_casing"
+    },
+    "A": {
+      "item": "cultivar:assaying_engine"
+    }
+  },
+  "result": {
+    "id": "cultivar:brass_assaying_engine",
+    "count": 1
+  }
+}

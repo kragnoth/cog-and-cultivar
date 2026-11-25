@@ -28,6 +28,12 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.DoubleValue BED_QUALITY_GROWTH;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_STRENGTH;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_VIGOUR;
+    public static final ModConfigSpec.DoubleValue ASSAY_STRESS;
+    public static final ModConfigSpec.DoubleValue ASSAY_SPEED_ANDESITE;
+    public static final ModConfigSpec.DoubleValue ASSAY_SPEED_BRASS;
+    public static final ModConfigSpec.DoubleValue ASSAY_SPEED_CHROMATIC;
+    public static final ModConfigSpec.DoubleValue ASSAY_FAMILY_CHANCE;
+    public static final ModConfigSpec.IntValue ASSAY_MAX_UNIT;
     public static final ModConfigSpec.IntValue TRIAL_INTERVAL_MINUTES;
     public static final ModConfigSpec.DoubleValue TRIAL_CHANCE;
     public static final ModConfigSpec.IntValue TRIAL_FULL_SIZE;
@@ -86,6 +92,20 @@ public final class CultivarServerConfig {
                 .defineInRange("maxMutationMultiplier", 1.5, 1.0, 4.0);
         MIN_WEED_MULTIPLIER = b.comment("Floor on the combined weed multiplier (lower = stronger suppression).")
                 .defineInRange("minWeedMultiplier", 0.5, 0.0, 1.0);
+        b.pop();
+
+        b.push("assayer");
+        ASSAY_STRESS = b.comment("Stress impact of each Assayer, per RPM (Create units; a Millstone is 4).")
+                .defineInRange("stressImpact", 3.0, 0.0, 64.0);
+        ASSAY_SPEED_ANDESITE = b.comment("Speed multipliers per tier. At 1.0, 32 RPM assays a seed in 5 s; speed scales with RPM.")
+                .defineInRange("speedAndesite", 1.0, 0.01, 64.0);
+        ASSAY_SPEED_BRASS = b.defineInRange("speedBrass", 2.0, 0.01, 64.0);
+        ASSAY_SPEED_CHROMATIC = b.defineInRange("speedChromatic", 4.0, 0.01, 64.0);
+        ASSAY_FAMILY_CHANCE = b.comment("With a Botanical Ledger in the unit: chance per assayed seed to also record one of the",
+                        "crosses that produce its species (both parents), so the cross shows up in JEI.")
+                .defineInRange("familyTreeChance", 0.2, 0.0, 1.0);
+        ASSAY_MAX_UNIT = b.comment("Most Assayers that join into one unit (shared input/output).")
+                .defineInRange("maxUnitSize", 64, 1, 256);
         b.pop();
 
         b.push("trial_bed");

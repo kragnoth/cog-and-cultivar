@@ -33,7 +33,7 @@ public final class TooltipClientModule implements ClientModule {
                     continue;
                 }
                 TooltipModifier modifier = new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE);
-                if (item == AssayModule.ENGINE_ITEM.get()) {
+                if (AssayModule.tiers().stream().anyMatch(b -> b.get().asItem() == item)) {
                     modifier = modifier.andThen(TooltipModifier.mapNull(KineticStats.create(item)));
                 }
                 TooltipModifier.REGISTRY.register(item, modifier);

@@ -1,1 +1,7 @@
-{ "variants": { "": { "model": "cultivar:block/assaying_engine" } } }
+{
+ "variants": {
+  "": {
+   "model": "cultivar:block/assayer/andesite"
+  }
+ }
+}

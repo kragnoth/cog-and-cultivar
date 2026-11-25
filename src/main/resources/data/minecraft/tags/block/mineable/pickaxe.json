@@ -1,6 +1,8 @@
 {
   "values": [
     "cultivar:assaying_engine",
+    "cultivar:brass_assaying_engine",
+    "cultivar:chromatic_assaying_engine",
     "cultivar:sprinkler",
     "cultivar:planter_bed",
     "cultivar:trial_bed",

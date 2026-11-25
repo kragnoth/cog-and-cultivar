@@ -559,6 +559,21 @@ The original AgriCraft-derived notes below are kept for reference.
 - **Seed Satchel:** no enchant gate (the 1.18 enchant requirement was friction for little gain); instead the satchel needs a **brass dial upgrade** to enable sorting. Same capacity and sorter logic; the sorter dial is shown on the item model via an item property.
 - **Transplanting Spade / Pruning Shears:** the same function as trowel and clipper.
 
+### 3.12a Assayers (tiered, planned and built 2026-11-25)
+
+- **Look:** a Mechanical Crafter laid on its back (Create's own crafter geometry and textures, generated from the
+  Create jar by `tools/art/gen_assayer.py`), casing swapped per tier, moist farmland where the crafting grid was.
+  Tiers: **andesite** (farmland), **brass** (farmland + small trellis), **chromatic** (trellis under a cloche;
+  recipe uses Create's legacy `create:chromatic_compound`, which packs re-enable; pack makers can swap it).
+- **Power:** a vertical small cogwheel (rendered in the side window) meshes with neighbouring Assayers and
+  cogwheels like crafters do; a shaft from below also works. Stress impact `assayer.stressImpact` (default 3).
+- **Unit:** touching Assayers (any tier) form one unit (`PlotTracker`): one item handler for pipes and funnels,
+  seeds spread to idle members, one Ledger serves all. Speed = RPM × tier multiplier (config 1/2/4).
+- **Ledger:** records each assayed species, and with chance `assayer.familyTreeChance` (0.2) both parents of a
+  cross that makes it, so the cross shows in JEI.
+- **Hands (every Cultivar machine):** right-click with an item loads the unit/plot; shift + empty hand takes items
+  out (outputs first). Planter Bed soil comes out with a wrench.
+
 ### 3.13 Seed Vault (storage, rebuilt) — dropped
 
 > **Dropped:** seeds stack per genome, Create item vaults and the stock system store them, and the Phase 3 filter attributes (species, stat ≥ N, assayed) do the sorting.

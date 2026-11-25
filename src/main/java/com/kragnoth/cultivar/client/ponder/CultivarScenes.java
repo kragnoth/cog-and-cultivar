@@ -223,7 +223,7 @@ public final class CultivarScenes {
         grow(scene, util, f, "minecraft:carrot", 3, 1, 7);
         scene.idle(60);
 
-        scene.overlay().showText(80).text("Stats stay hidden until the seed is read in an Assaying Engine.")
+        scene.overlay().showText(80).text("Stats stay hidden until the seed is read in an Assayer.")
                 .pointAt(util.vector().topOf(f)).placeNearTarget().colored(PonderPalette.BLUE);
         scene.idle(90);
 
@@ -341,45 +341,59 @@ public final class CultivarScenes {
         scene.showBasePlate();
         scene.idle(10);
 
-        BlockPos engine = util.grid().at(2, 1, 2), shaft = util.grid().at(2, 0, 2);
-        var kinetics = util.select().position(engine).add(util.select().position(shaft));
-        scene.world().showSection(util.select().position(engine), Direction.DOWN);
+        BlockPos motor = util.grid().at(0, 0, 2), cog = util.grid().at(0, 1, 2);
+        BlockPos andesite = util.grid().at(1, 1, 2), brass = util.grid().at(2, 1, 2), chromatic = util.grid().at(3, 1, 2);
+        var drive = util.select().position(motor).add(util.select().position(cog));
+        scene.world().showSection(drive, Direction.DOWN);
+        scene.world().showSection(util.select().position(andesite), Direction.DOWN);
         scene.idle(10);
-        scene.world().setKineticSpeed(kinetics, 32);
-        scene.overlay().showText(90).text("The Assaying Engine reads the genome of seeds and cuttings. It runs on rotation from below.")
-                .pointAt(util.vector().blockSurface(shaft, Direction.WEST)).placeNearTarget().attachKeyFrame();
+        scene.world().setKineticSpeed(drive, 32);
+        scene.world().setKineticSpeed(util.select().position(andesite), -32);
+        scene.overlay().showText(90).text("The Assayer reads the genome of seeds and cuttings. Its cogwheel takes rotation from a neighbouring cog, like a Mechanical Crafter.")
+                .pointAt(util.vector().blockSurface(cog, Direction.UP)).placeNearTarget().attachKeyFrame();
         scene.idle(100);
 
-        scene.overlay().showControls(util.vector().topOf(engine), Pointing.DOWN, 40).rightClick()
+        scene.world().showSection(util.select().position(brass), Direction.DOWN);
+        scene.idle(5);
+        scene.world().showSection(util.select().position(chromatic), Direction.DOWN);
+        scene.world().setKineticSpeed(util.select().position(brass), 32);
+        scene.world().setKineticSpeed(util.select().position(chromatic), -32);
+        scene.overlay().showText(100).text("Touching Assayers mesh and join into one unit. Andesite, brass and chromatic tiers assay 1x, 2x and 4x as fast.")
+                .pointAt(util.vector().topOf(brass)).placeNearTarget().attachKeyFrame();
+        scene.idle(110);
+
+        scene.overlay().showControls(util.vector().topOf(brass), Pointing.DOWN, 40).rightClick()
                 .withItem(new ItemStack(CropModule.SEED.get()));
         scene.idle(10);
-        scene.overlay().showText(90).text("Right-click it with seeds, or feed it from a funnel, chute, hopper or pipe.")
-                .pointAt(util.vector().topOf(engine)).placeNearTarget();
+        scene.overlay().showText(90).text("Right-click any of them with seeds, or feed one from a funnel or pipe: the whole unit shares the work.")
+                .pointAt(util.vector().topOf(brass)).placeNearTarget();
         scene.idle(100);
 
-        scene.overlay().showText(90).text("Each seed takes 5 seconds at 32 RPM. Spin it faster to assay faster.")
-                .pointAt(util.vector().centerOf(engine)).placeNearTarget().attachKeyFrame();
+        scene.overlay().showText(90).text("At 32 RPM an andesite Assayer takes 5 seconds per seed. Spin it faster to assay faster.")
+                .pointAt(util.vector().centerOf(andesite)).placeNearTarget().attachKeyFrame();
         scene.idle(40);
-        scene.world().setKineticSpeed(kinetics, 128);
-        scene.effects().rotationSpeedIndicator(engine);
+        scene.world().setKineticSpeed(drive, 128);
+        scene.world().setKineticSpeed(util.select().position(andesite).add(util.select().position(chromatic)), -128);
+        scene.world().setKineticSpeed(util.select().position(brass), 128);
+        scene.effects().rotationSpeedIndicator(cog);
         scene.idle(60);
 
         ItemStack assayed = new ItemStack(CropModule.SEED.get());
         assayed.set(CoreModule.ASSAYED.get(), net.minecraft.util.Unit.INSTANCE);
-        scene.world().createItemEntity(util.vector().topOf(engine), new Vec3(0, 0.25, 0), assayed);
-        scene.overlay().showText(100).text("Assayed seeds show their four stats in the tooltip. Take them with an empty hand, or pull them out from any side.")
-                .pointAt(util.vector().topOf(engine)).placeNearTarget();
+        scene.world().createItemEntity(util.vector().topOf(brass), new Vec3(0, 0.25, 0), assayed);
+        scene.overlay().showText(100).text("Assayed seeds show their four stats in the tooltip. Sneak-right-click with an empty hand to take them, or pull them out from any side.")
+                .pointAt(util.vector().topOf(brass)).placeNearTarget();
         scene.idle(110);
         scene.world().modifyEntities(ItemEntity.class, e -> e.discard());
 
-        scene.overlay().showControls(util.vector().topOf(engine), Pointing.DOWN, 40).rightClick()
+        scene.overlay().showControls(util.vector().topOf(chromatic), Pointing.DOWN, 40).rightClick()
                 .withItem(new ItemStack(LedgerModule.LEDGER.get()));
         scene.idle(10);
-        scene.overlay().showText(100).text("Put a Botanical Ledger inside and it records every species the engine assays. Sneak with an empty hand to take it back.")
-                .pointAt(util.vector().topOf(engine)).placeNearTarget().attachKeyFrame();
+        scene.overlay().showText(100).text("A Botanical Ledger in the unit records every species assayed, and sometimes a cross that makes it: both parents, so the cross shows in JEI.")
+                .pointAt(util.vector().topOf(chromatic)).placeNearTarget().attachKeyFrame();
         scene.idle(110);
-        scene.overlay().showText(90).text("Engineer's Goggles show its progress, and a comparator reads how full the output is.")
-                .pointAt(util.vector().blockSurface(engine, Direction.NORTH)).placeNearTarget();
+        scene.overlay().showText(90).text("Engineer's Goggles show progress and the unit's queue, and a comparator reads how full the outputs are.")
+                .pointAt(util.vector().blockSurface(andesite, Direction.NORTH)).placeNearTarget();
         scene.idle(100);
         scene.markAsFinished();
     }

@@ -111,7 +111,7 @@ public final class CultivarDisplaySources {
     static void bind() {
         DisplaySource.BY_BLOCK.add(CropModule.TIMBER_TRELLIS.get(), CROP.get());
         DisplaySource.BY_BLOCK.add(CropModule.IRON_TRELLIS.get(), CROP.get());
-        DisplaySource.BY_BLOCK.add(AssayModule.ENGINE.get(), LEDGER.get());
+        AssayModule.tiers().forEach(b -> DisplaySource.BY_BLOCK.add(b.get(), LEDGER.get()));
         DisplaySource.BY_BLOCK.add(com.kragnoth.cultivar.content.bed.PlanterBedModule.BED.get(), PLOT.get());
         DisplaySource.BY_BLOCK.add(com.kragnoth.cultivar.content.trial.TrialModule.TRIAL_BED.get(), TRIAL.get());
     }

@@ -26,7 +26,7 @@ public final class CultivarPonderPlugin implements PonderPlugin {
                 .addStoryBoard("crop_stats", CultivarScenes::stats);
         h.forComponents(CropModule.TIMBER_TRELLIS, CropModule.IRON_TRELLIS, LedgerModule.LEDGER, CropModule.SEED)
                 .addStoryBoard("crossbreeding", CultivarScenes::crossbreeding);
-        h.forComponents(AssayModule.ENGINE_ITEM)
+        h.forComponents(AssayModule.ENGINE_ITEM, AssayModule.BRASS_ENGINE_ITEM, AssayModule.CHROMATIC_ENGINE_ITEM)
                 .addStoryBoard("assaying", CultivarScenes::assaying);
     }
 }

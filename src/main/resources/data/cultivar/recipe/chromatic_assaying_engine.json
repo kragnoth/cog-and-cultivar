@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CBC",
+    "XAX"
+  ],
+  "key": {
+    "C": {
+      "item": "create:chromatic_compound"
+    },
+    "B": {
+      "item": "cultivar:bell_cloche"
+    },
+    "X": {
+      "item": "create:precision_mechanism"
+    },
+    "A": {
+      "item": "cultivar:brass_assaying_engine"
+    }
+  },
+  "result": {
+    "id": "cultivar:chromatic_assaying_engine",
+    "count": 1
+  }
+}

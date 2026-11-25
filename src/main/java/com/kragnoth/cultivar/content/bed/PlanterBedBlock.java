@@ -132,11 +132,19 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
-        // Seeds / fertilizer into their slots.
+        // Seeds / fertilizer: into this bed first, then anywhere in the plot (the plot shares its stock).
         for (int slot : new int[]{0, 1, 2, 3, PlanterBedBlockEntity.FERTILIZER}) {
             if (bed.inventory.isItemValid(slot, stack)) {
                 if (!level.isClientSide()) {
-                    player.setItemInHand(hand, bed.inventory.insertItem(slot, stack, false));
+                    ItemStack rest = bed.inventory.insertItem(slot, stack, false);
+                    for (PlanterBedBlockEntity other : bed.cachedNetwork()) {
+                        for (int s : new int[]{0, 1, 2, 3, PlanterBedBlockEntity.FERTILIZER}) {
+                            if (!rest.isEmpty() && other.inventory.isItemValid(s, rest)) {
+                                rest = other.inventory.insertItem(s, rest, false);
+                            }
+                        }
+                    }
+                    player.setItemInHand(hand, rest);
                 }
                 return ItemInteractionResult.sidedSuccess(level.isClientSide());
             }
@@ -152,20 +160,30 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
-        if (player.isShiftKeyDown()) {
-            if (bed.soil() != null) {
-                player.getInventory().placeItemBackInInventory(new ItemStack(bed.soil().getBlock()));
-                bed.setSoil(null);
-            }
-            return InteractionResult.SUCCESS;
+        // Machine rule: shift + empty hand takes items out, outputs first (the whole plot), then this bed's stock.
+        if (!player.isShiftKeyDown()) {
+            return InteractionResult.PASS;
         }
-        for (int i = PlanterBedBlockEntity.OUT_START; i < PlanterBedBlockEntity.SLOTS; i++) {
-            ItemStack out = bed.inventory.extractItem(i, 64, false);
-            if (!out.isEmpty()) {
-                player.getInventory().placeItemBackInInventory(out);
+        boolean took = false;
+        for (PlanterBedBlockEntity member : bed.cachedNetwork()) {
+            for (int i = PlanterBedBlockEntity.OUT_START; i < PlanterBedBlockEntity.SLOTS; i++) {
+                ItemStack out = member.inventory.extractItem(i, 64, false);
+                if (!out.isEmpty()) {
+                    player.getInventory().placeItemBackInInventory(out);
+                    took = true;
+                }
             }
         }
-        return InteractionResult.SUCCESS;
+        if (!took) {
+            for (int i = 0; i < PlanterBedBlockEntity.OUT_START; i++) {
+                ItemStack in = bed.inventory.extractItem(i, 64, false);
+                if (!in.isEmpty()) {
+                    player.getInventory().placeItemBackInInventory(in);
+                    took = true;
+                }
+            }
+        }
+        return took ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 
     @Override
@@ -194,9 +212,21 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
         super.onRemove(state, level, pos, newState, moving);
     }
 
-    /** Beds don't rotate; sneak-wrench picks them up (contents drop). */
+    /** Beds don't rotate: the wrench takes the soil out instead. Sneak-wrench picks the bed up (contents drop). */
     @Override
     public InteractionResult onWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
-        return InteractionResult.PASS;
+        Level level = context.getLevel();
+        if (!(level.getBlockEntity(context.getClickedPos()) instanceof PlanterBedBlockEntity bed) || bed.soil() == null) {
+            return InteractionResult.PASS;
+        }
+        if (!level.isClientSide()) {
+            ItemStack soil = new ItemStack(bed.soil().getBlock());
+            bed.setSoil(null);
+            if (context.getPlayer() != null) {
+                context.getPlayer().getInventory().placeItemBackInInventory(soil);
+            }
+            level.playSound(null, context.getClickedPos(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.BLOCKS, 1f, 1f);
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 }
