@@ -569,8 +569,11 @@ The original AgriCraft-derived notes below are kept for reference.
   cogwheels like crafters do; a shaft from below also works. Stress impact `assayer.stressImpact` (default 3).
 - **Unit:** touching Assayers (any tier) form one unit (`PlotTracker`): one item handler for pipes and funnels,
   seeds spread to idle members, one Ledger serves all. Speed = RPM × tier multiplier (config 1/2/4).
-- **Ledger:** records each assayed species, and with chance `assayer.familyTreeChance` (0.2) both parents of a
-  cross that makes it, so the cross shows in JEI.
+- **Ledger / family tree:** records each assayed species. With chance `assayer.familyTreeChance` (0.2) it also
+  records one random not-yet-known cross from anywhere in the species' ancestry (parents and child, so it shows in
+  JEI; repeated assays fill the whole tree), and leaves **half-known hints** for every cross the species leads to,
+  two generations down: JEI shows the child and the known parent, the partner as "?". Hints live in the Ledger and
+  player knowledge alongside species.
 - **Hands (every Cultivar machine):** right-click with an item loads the unit/plot; shift + empty hand takes items
   out (outputs first). Planter Bed soil comes out with a wrench.
 

@@ -171,8 +171,13 @@ public final class CultivarJeiPlugin implements IModPlugin {
             return;
         }
         Set<Holder<Plant>> bred = new LinkedHashSet<>();
-        for (Mutation m : level.registryAccess().registryOrThrow(CultivarRegistries.MUTATION)) {
-            CROSSES.add(new MutationCategory.Cross(m));
+        var mutations = level.registryAccess().registryOrThrow(CultivarRegistries.MUTATION);
+        for (Mutation m : mutations) {
+            // Three pages per cross, one shown at a time: fully known, or half-known with either parent as "?".
+            var key = mutations.getResourceKey(m).orElse(null);
+            for (int hidden = 0; hidden <= 2; hidden++) {
+                CROSSES.add(new MutationCategory.Cross(m, key, hidden));
+            }
             bred.add(m.child());
         }
         registration.addRecipes(MutationCategory.TYPE, List.copyOf(CROSSES));
@@ -280,7 +285,16 @@ public final class CultivarJeiPlugin implements IModPlugin {
         List<MutationCategory.Cross> hidden = new ArrayList<>();
         for (MutationCategory.Cross cross : CROSSES) {
             Mutation m = cross.mutation();
-            boolean visible = reveal || knows(known, m.parentA()) && knows(known, m.parentB()) && knows(known, m.child());
+            boolean full = reveal || knows(known, m.parentA()) && knows(known, m.parentB()) && knows(known, m.child());
+            boolean visible;
+            if (cross.hidden() == 0) {
+                visible = full;
+            } else {
+                // Half-known (an Assayer's family-tree hint): show the parent the hint names, the other as "?".
+                var hint = cross.key() == null ? java.util.Optional.<LedgerItem.Hint>empty() : known.hintFor(cross.key());
+                int hide = hint.map(h -> m.parentA().is(h.shown()) ? 2 : 1).orElse(0);
+                visible = !full && hide == cross.hidden();
+            }
             (visible ? shown : hidden).add(cross);
         }
         rt.getRecipeManager().unhideRecipes(MutationCategory.TYPE, shown);

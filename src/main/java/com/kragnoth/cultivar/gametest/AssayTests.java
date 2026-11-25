@@ -91,9 +91,9 @@ public final class AssayTests {
         h.succeed();
     }
 
-    /** With a Ledger, an assay can record both parents of a cross that makes the species. */
+    /** Family tree: one ancestor cross fully recorded, and half-known hints for crosses the plant leads to. */
     @GameTest(template = "empty")
-    public static void familyTreeRecordsParents(GameTestHelper h) {
+    public static void familyTreeRecordsAncestryAndHints(GameTestHelper h) {
         var mutations = h.getLevel().registryAccess().registryOrThrow(CultivarRegistries.MUTATION);
         var m = mutations.stream().findFirst().orElse(null);
         if (m == null) {
@@ -103,13 +103,19 @@ public final class AssayTests {
         BlockPos pos = new BlockPos(1, 1, 1);
         h.setBlock(pos, AssayModule.ENGINE.get());
         AssayingEngineBlockEntity be = (AssayingEngineBlockEntity) h.getBlockEntity(pos);
+
         ItemStack ledger = new ItemStack(LedgerModule.LEDGER.get());
-        var child = m.child().unwrapKey().orElseThrow();
-        h.assertTrue(be.recordFamily(ledger, child), "an unknown cross gets recorded");
+        h.assertTrue(be.recordFamily(ledger, m.child().unwrapKey().orElseThrow()), "a child with unknown ancestry teaches something");
         var data = LedgerItem.data(ledger);
-        boolean anyCross = mutations.stream().anyMatch(x -> x.child().is(child)
-                && data.knows(x.parentA().unwrapKey().orElseThrow()) && data.knows(x.parentB().unwrapKey().orElseThrow()));
-        h.assertTrue(anyCross, "both parents of a cross that makes it are now known");
+        h.assertTrue(mutations.stream().anyMatch(x -> java.util.stream.Stream.of(x.parentA(), x.parentB(), x.child())
+                .allMatch(p -> data.knows(p.unwrapKey().orElseThrow()))), "one cross in its ancestry is now fully known");
+
+        ItemStack second = new ItemStack(LedgerModule.LEDGER.get());
+        var parent = m.parentA().unwrapKey().orElseThrow();
+        be.recordFamily(second, parent);
+        var key = mutations.getResourceKey(m).orElseThrow();
+        h.assertTrue(LedgerItem.data(second).hints().stream().anyMatch(hint -> hint.cross().equals(key)),
+                "a parent's assay leaves a half-known hint for the cross it leads to");
         h.succeed();
     }
 }

@@ -295,34 +295,82 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
     }
 
     /**
-     * Family tree: records both parents of one cross that produces {@code species} and isn't fully known yet, so the
-     * cross shows in JEI. Returns true if something new was learned.
+     * Family tree, from one assayed {@code species}:
+     * <ul>
+     *   <li><b>Ancestry</b>: one random cross from anywhere in its ancestry (its parents' crosses, theirs, and so on)
+     *       that the Ledger doesn't fully know yet gets recorded: both parents and the child, so it shows in JEI.
+     *       Repeated assays fill in the whole tree.</li>
+     *   <li><b>Descendants</b>: every cross it is a parent of, and every cross those children are parents of (two
+     *       generations), becomes a {@link LedgerItem.Hint}: JEI shows the child and the known parent, the other
+     *       parent as "?".</li>
+     * </ul>
+     * Returns true if the Ledger learned anything.
      */
     public boolean recordFamily(ItemStack ledger, ResourceKey<Plant> species) {
         if (level == null) {
             return false;
         }
-        LedgerItem.Data known = LedgerItem.data(ledger);
-        List<Mutation> open = new ArrayList<>();
-        for (Mutation m : level.registryAccess().registryOrThrow(CultivarRegistries.MUTATION)) {
-            var a = m.parentA().unwrapKey();
-            var b = m.parentB().unwrapKey();
-            if (m.child().is(species) && a.isPresent() && b.isPresent() && !(known.knows(a.get()) && known.knows(b.get()))) {
-                open.add(m);
+        var crosses = level.registryAccess().registryOrThrow(CultivarRegistries.MUTATION);
+        boolean learned = false;
+
+        // Ancestry, breadth first up the tree.
+        List<Mutation> ancestry = new ArrayList<>();
+        java.util.Set<ResourceKey<Plant>> seen = new java.util.HashSet<>(java.util.List.of(species));
+        java.util.ArrayDeque<ResourceKey<Plant>> queue = new java.util.ArrayDeque<>(seen);
+        while (!queue.isEmpty()) {
+            ResourceKey<Plant> plant = queue.poll();
+            for (Mutation m : crosses) {
+                if (m.child().is(plant) && !ancestry.contains(m)) {
+                    ancestry.add(m);
+                    for (var parent : List.of(m.parentA(), m.parentB())) {
+                        parent.unwrapKey().filter(seen::add).ifPresent(queue::add);
+                    }
+                }
             }
         }
-        if (open.isEmpty()) {
-            return false;
+        LedgerItem.Data known = LedgerItem.data(ledger);
+        List<Mutation> open = ancestry.stream().filter(m -> !fullyKnown(known, m)).toList();
+        if (!open.isEmpty()) {
+            Mutation m = open.get(level.random.nextInt(open.size()));
+            for (var plant : List.of(m.parentA(), m.parentB(), m.child())) {
+                plant.unwrapKey().ifPresent(k -> LedgerItem.record(ledger, k));
+            }
+            learned = true;
         }
-        Mutation m = open.get(level.random.nextInt(open.size()));
-        LedgerItem.record(ledger, m.parentA().unwrapKey().orElseThrow());
-        LedgerItem.record(ledger, m.parentB().unwrapKey().orElseThrow());
-        if (level instanceof ServerLevel server) {
+
+        // Descendants, two generations down, as half-known hints.
+        LedgerItem.Data now = LedgerItem.data(ledger);
+        List<LedgerItem.Hint> hints = new ArrayList<>();
+        java.util.Set<ResourceKey<Plant>> generation = java.util.Set.of(species);
+        for (int depth = 0; depth < 2 && !generation.isEmpty(); depth++) {
+            java.util.Set<ResourceKey<Plant>> next = new java.util.HashSet<>();
+            for (Mutation m : crosses) {
+                var key = crosses.getResourceKey(m);
+                for (ResourceKey<Plant> parent : generation) {
+                    if (key.isPresent() && (m.parentA().is(parent) || m.parentB().is(parent))) {
+                        if (!fullyKnown(now, m)) {
+                            hints.add(new LedgerItem.Hint(key.get(), parent));
+                        }
+                        m.child().unwrapKey().ifPresent(next::add);
+                        break;
+                    }
+                }
+            }
+            generation = next;
+        }
+        learned |= LedgerItem.hint(ledger, hints) > 0;
+
+        if (learned && level instanceof ServerLevel server) {
             BlockPos p = worldPosition;
             server.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.getX() + 0.5, p.getY() + 1.1, p.getZ() + 0.5, 8, 0.25, 0.1, 0.25, 0);
             server.playSound(null, p, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 0.8f, 1.2f);
         }
-        return true;
+        return learned;
+    }
+
+    private static boolean fullyKnown(LedgerItem.Data known, Mutation m) {
+        return java.util.stream.Stream.of(m.parentA(), m.parentB(), m.child())
+                .allMatch(h -> h.unwrapKey().map(known::knows).orElse(false));
     }
 
     public float progress() {

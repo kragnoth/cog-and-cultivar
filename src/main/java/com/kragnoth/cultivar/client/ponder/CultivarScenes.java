@@ -389,7 +389,7 @@ public final class CultivarScenes {
         scene.overlay().showControls(util.vector().topOf(chromatic), Pointing.DOWN, 40).rightClick()
                 .withItem(new ItemStack(LedgerModule.LEDGER.get()));
         scene.idle(10);
-        scene.overlay().showText(100).text("A Botanical Ledger in the unit records every species assayed, and sometimes a cross that makes it: both parents, so the cross shows in JEI.")
+        scene.overlay().showText(100).text("A Botanical Ledger in the unit records every species assayed. Sometimes it also maps the family tree: a cross from its ancestry, and the crosses it leads to two generations down.")
                 .pointAt(util.vector().topOf(chromatic)).placeNearTarget().attachKeyFrame();
         scene.idle(110);
         scene.overlay().showText(90).text("Engineer's Goggles show progress and the unit's queue, and a comparator reads how full the outputs are.")
