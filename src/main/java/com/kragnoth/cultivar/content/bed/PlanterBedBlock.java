@@ -152,6 +152,7 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
                         }
                     }
                     player.setItemInHand(hand, rest);
+                    level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.6f, 1.2f);
                 }
                 return ItemInteractionResult.sidedSuccess(level.isClientSide());
             }
@@ -164,12 +165,12 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
         if (!(level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed)) {
             return InteractionResult.PASS;
         }
-        if (level.isClientSide()) {
-            return InteractionResult.SUCCESS;
-        }
         // Machine rule: shift + empty hand takes items out, outputs first (the whole plot), then this bed's stock.
         if (!player.isShiftKeyDown()) {
             return InteractionResult.PASS;
+        }
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
         }
         boolean took = false;
         for (PlanterBedBlockEntity member : bed.cachedNetwork()) {
@@ -189,6 +190,9 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
                     took = true;
                 }
             }
+        }
+        if (took) {
+            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4f, 1f);
         }
         return took ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }

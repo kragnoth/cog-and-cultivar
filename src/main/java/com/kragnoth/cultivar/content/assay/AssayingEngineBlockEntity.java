@@ -192,8 +192,9 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
         return List.of();
     }
 
+    /** The unit's Ledger (wherever in the unit it sits), or null. */
     @Nullable
-    private ItemStack unitLedger() {
+    public ItemStack unitLedger() {
         for (AssayingEngineBlockEntity member : unit()) {
             ItemStack l = member.inventory.getStackInSlot(LEDGER);
             if (!l.isEmpty()) {
@@ -235,7 +236,10 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
             spread();
         }
         float before = progress;
-        advance(Math.abs(getSpeed()));
+        // Redstone on any member pauses the unit (like a Trial plot or a Sprinkler), keeping progress.
+        if (!unit.isPowered()) {
+            advance(Math.abs(getSpeed()));
+        }
         // Sync roughly once a second while working, on every start/finish, and after inventory changes (goggles, render).
         if (syncSoon || (int) (before / 20) != (int) (progress / 20) || (before == 0) != (progress == 0)) {
             syncSoon = false;

@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Botanical Ledger: records species. Use it on a planted trellis to record that species; the Assaying Engine and
+ * Botanical Ledger: records species. Use it on a planted trellis to record that species; the Assayers and
  * Trial Bed record into a Ledger in their slot. Carrying or reading a Ledger merges it with the holder's
  * {@link Knowledge} both ways, so the player keeps what they learned and a shared Ledger teaches its reader.
  * A mutation shows up once you know its child and both parents, so discovery stays progressive.

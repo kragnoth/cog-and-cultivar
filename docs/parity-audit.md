@@ -34,13 +34,17 @@ Legend: ✅ present · ⚠️ partial · ❌ missing · — not applicable
 
 ## Blocks
 
-| Block | Look | Goggles | Jade | Comparator | Display Link | Pipes | Redstone | Wrench | Tests | Needed |
-|---|---|---|---|---|---|---|---|---|---|---|
-| **Timber / Iron Trellis** | ✅ Excalibur | ✅ | ✅ | ✅ | ✅ crop status | — | — | — | ✅ | Axe/pickaxe tool tags; item descriptions; Ponder (planting, grafting, stacking, cloche) |
-| **Assaying Engine** | ✅ brass casing | ✅ | ✅ (capability) | ✅ | ✅ ledger progress | ✅ items | ❌ | ✅ | ✅ | Item description; JEI category; redstone pause (Create convention for processors); Ponder |
-| **Sprinkler** | ✅ Spout style | ❌ | ⚠️ tank via capability | ❌ | ❌ | ✅ fluid | ❌ | ❌ | ✅ | Goggles (water, running, area); comparator (tank level); redstone off-switch; wrench rotate/pick-up; item description; Ponder |
-| **Planter Bed** | ✅ andesite casing | ✅ plot-wide | ✅ (capability) | ✅ plot-wide | ❌ | ✅ items + fluid | ✅ strip + dump | ❌ | ✅ | Display Link (plot status: best seed, stock, outputs); wrench pick-up keeping contents; item description; Ponder (plot, breeder/producer, dump mode) |
-| **Trial Bed** | ✅ brass casing | ✅ plot-wide | ✅ (capability) | ❌ | ❌ | ✅ items | ❌ | ❌ | ✅ | Comparator (Ledger completeness); Display Link (ledger progress, as the Assaying Engine has); redstone pause, or dump to match the Planter Bed; wrench; item description; Ponder |
+Updated 2026-11-25 (continuity pass). Every machine follows one hand rule: right-click with an item loads it (into the
+whole unit or plot), sneak + right-click with an empty hand takes items out, outputs first.
+
+| Block | Look | Goggles | Jade | Comparator | Display Link | Pipes | Redstone | Wrench | Tests |
+|---|---|---|---|---|---|---|---|---|---|
+| **Timber / Iron Trellis** | ✅ | ✅ full readout | ✅ brief readout | ✅ | ✅ crop status | — | — | — | ✅ |
+| **Assayers** (andesite / brass / chromatic) | ✅ Create crafter, tiered casings | ✅ unit | ✅ | ✅ unit outputs | ✅ ledger progress | ✅ items (unit) | ✅ pause | ✅ | ✅ |
+| **Sprinkler** | ✅ Spout style | ✅ | ✅ | ✅ tank | ❌ | ✅ fluid | ✅ off | ✅ | ✅ |
+| **Planter Bed** | ✅ andesite casing | ✅ plot | ✅ | ✅ plot | ✅ plot status | ✅ items + fluid (plot) | ✅ strip + dump | ✅ soil out, sneak pick-up | ✅ |
+| **Trial Bed** | ✅ brass casing | ✅ plot | ✅ | ✅ ledger | ✅ ledger progress | ✅ items (plot) | ✅ pause | ✅ | ✅ |
+| **Olla** | ✅ brick | ✅ | ✅ | ✅ filled | — | — | — | — | ✅ |
 
 ## Items
 

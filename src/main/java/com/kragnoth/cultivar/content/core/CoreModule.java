@@ -37,7 +37,7 @@ public final class CoreModule implements CultivarModule {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Genome>> GENOME =
             COMPONENTS.registerComponentType("genome", b -> b.persistent(Genome.CODEC).networkSynchronized(Genome.STREAM_CODEC));
 
-    /** Present on seed items whose stats have been revealed by an Assaying Engine. */
+    /** Present on seed items whose stats have been revealed by an Assayer. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> ASSAYED =
             COMPONENTS.registerComponentType("assayed", b -> b.persistent(Unit.CODEC).networkSynchronized(StreamCodec.unit(Unit.INSTANCE)));
 

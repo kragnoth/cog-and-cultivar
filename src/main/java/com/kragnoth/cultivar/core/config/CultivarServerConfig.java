@@ -74,7 +74,7 @@ public final class CultivarServerConfig {
                 .defineEnum("statExpression", Genetics.Expression.MAX);
         CLONE_MUTATIONS = b.comment("Whether a single-parent clone can still drift stats.")
                 .define("cloneMutations", false);
-        REQUIRE_ASSAY = b.comment("Seed item tooltips hide stats until the seed is assayed (Assaying Engine).",
+        REQUIRE_ASSAY = b.comment("Seed item tooltips hide stats until the seed is assayed (Assayer).",
                         "Goggles always read crops in the field.")
                 .define("requireAssay", true);
         SATCHEL_SEED_BASE = b.comment("Harvesting a mature plant with the Seed Satchel (hand or Deployer): base chance of a seed.",

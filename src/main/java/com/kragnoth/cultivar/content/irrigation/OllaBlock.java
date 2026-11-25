@@ -70,6 +70,17 @@ public class OllaBlock extends Block implements net.minecraft.world.level.block.
         return ItemInteractionResult.sidedSuccess(level.isClientSide());
     }
 
+    /** Comparator: 15 when filled, 0 when empty, so a contraption or alarm can tell. */
+    @Override
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        return state.getValue(FILLED) ? 15 : 0;
+    }
+
     @Override
     public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new OllaBlockEntity(pos, state);

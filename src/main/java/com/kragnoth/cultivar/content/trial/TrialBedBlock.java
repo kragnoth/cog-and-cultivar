@@ -83,6 +83,7 @@ public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.culti
                 }
             }
             player.setItemInHand(hand, rest);
+            level.playSound(null, pos, net.minecraft.sounds.SoundEvents.ITEM_FRAME_ADD_ITEM, net.minecraft.sounds.SoundSource.BLOCKS, 0.6f, 1.2f);
         }
         return ItemInteractionResult.sidedSuccess(level.isClientSide());
     }
@@ -98,6 +99,7 @@ public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.culti
                 ItemStack ledger = member.inventory.extractItem(TrialBedBlockEntity.LEDGER, 1, false);
                 if (!ledger.isEmpty()) {
                     player.getInventory().placeItemBackInInventory(ledger);
+                    level.playSound(null, pos, net.minecraft.sounds.SoundEvents.ITEM_PICKUP, net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 1f);
                     return InteractionResult.SUCCESS;
                 }
             }

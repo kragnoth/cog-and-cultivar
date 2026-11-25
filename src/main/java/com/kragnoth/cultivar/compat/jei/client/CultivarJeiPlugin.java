@@ -53,7 +53,7 @@ import org.jetbrains.annotations.Nullable;
  *   <li>Crosses are a category, each hidden until the player knows the child and both parents (the same rule as the
  *       Ledger), so JEI never spoils discovery. {@code genetics.revealAllMutations} shows them all.</li>
  *   <li>Every bred plant gets an info page saying how it is found.</li>
- *   <li>Reference pages that spoil nothing: soils, fertilizers, the Assaying Engine; info pages for the machines.</li>
+ *   <li>Reference pages that spoil nothing: soils, fertilizers, the Assayers; info pages for the machines.</li>
  * </ul>
  */
 @JeiPlugin
@@ -207,6 +207,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
                 .map(h -> MutationCategory.seed(h)).toList();
         registration.addRecipes(AssayCategory.TYPE, List.of(new AssayCategory.Assay(seeds)));
 
+        AssayModule.tiers().forEach(b -> info(registration, b.get(), "assayer"));
         info(registration, PlanterBedModule.BED_ITEM.get(), "planter_bed");
         info(registration, TrialModule.TRIAL_BED_ITEM.get(), "trial_bed");
         info(registration, IrrigationModule.SPRINKLER_ITEM.get(), "sprinkler");

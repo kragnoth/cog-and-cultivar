@@ -6,7 +6,6 @@
   * seed_satchel(_dial) Excalibur bundle with a brass buckle and rivets (the dial version adds the brass dial);
   * bed_soil.png        Planter Bed floor: dark moist tilled loam, so it doesn't read as coarse dirt (a dry soil);
   * trial_soil.png      Trial Bed floor: tilled loam pegged out with brass markers and twine into four test plots;
-  * assay_glass.png     Assaying Engine window: Excalibur glass with its frame in brass and rivets at the corners.
 
 Usage: python3 tools/art/gen_art_pass.py [<excalibur assets/minecraft/textures dir>]
 """
@@ -91,19 +90,10 @@ def trial_soil():
     return im
 
 
-def assay_glass():
-    im = to_brass(load('block/glass'))
-    for x, y in ((0, 0), (15, 0), (0, 15), (15, 15), (7, 7), (8, 8)):
-        if im.getpixel((x, y))[3] > 0:
-            im.putpixel((x, y), BRASS[0])  # rivets
-    return im
-
-
 s = satchel()
 s.save(f'{OUT}/item/seed_satchel.png')
 satchel_dial(s).save(f'{OUT}/item/seed_satchel_dial.png')
 seed().save(f'{OUT}/item/seed.png')
 bed_soil().save(f'{OUT}/block/bed_soil.png')
 trial_soil().save(f'{OUT}/block/trial_soil.png')
-assay_glass().save(f'{OUT}/block/assay_glass.png')
 print('art pass ok')

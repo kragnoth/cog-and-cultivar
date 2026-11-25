@@ -113,6 +113,30 @@ public class SprinklerBlock extends BaseEntityBlock implements com.simibubi.crea
     }
 
     /** Comparator: how full the water tank is. */
+    /** A water bucket fills it, like a Planter Bed or an Olla. */
+    @Override
+    protected net.minecraft.world.ItemInteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level,
+                                                                  BlockPos pos, net.minecraft.world.entity.player.Player player,
+                                                                  net.minecraft.world.InteractionHand hand,
+                                                                  net.minecraft.world.phys.BlockHitResult hit) {
+        if (!stack.is(net.minecraft.world.item.Items.WATER_BUCKET) || !(level.getBlockEntity(pos) instanceof SprinklerBlockEntity sprinkler)) {
+            return net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        var water = new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER, SprinklerBlockEntity.CAPACITY);
+        var simulate = net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
+        if (sprinkler.tank.fill(water, simulate) < SprinklerBlockEntity.CAPACITY) {
+            return net.minecraft.world.ItemInteractionResult.CONSUME_PARTIAL; // already has water in it
+        }
+        if (!level.isClientSide()) {
+            sprinkler.tank.fill(water, net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+            if (!player.getAbilities().instabuild) {
+                player.setItemInHand(hand, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BUCKET));
+            }
+            level.playSound(null, pos, net.minecraft.sounds.SoundEvents.BUCKET_EMPTY, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
+        }
+        return net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide());
+    }
+
     @Override
     protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;

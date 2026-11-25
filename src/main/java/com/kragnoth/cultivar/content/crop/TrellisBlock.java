@@ -291,7 +291,7 @@ public class TrellisBlock extends BaseEntityBlock implements com.kragnoth.cultiv
         if (player.isShiftKeyDown() && state.getValue(CLOCHE)) {
             if (!level.isClientSide()) {
                 level.setBlock(pos, state.setValue(CLOCHE, false), UPDATE_ALL);
-                popResource(level, pos, new ItemStack(state.getValue(CLOCHE_TYPE).item()));
+                player.getInventory().placeItemBackInInventory(new ItemStack(state.getValue(CLOCHE_TYPE).item()));
                 level.playSound(null, pos, SoundEvents.GLASS_HIT, SoundSource.BLOCKS, 1f, 1.2f);
                 crop.invalidateInfluence();
             }
@@ -300,7 +300,7 @@ public class TrellisBlock extends BaseEntityBlock implements com.kragnoth.cultiv
         if (player.isShiftKeyDown() && state.getValue(CROSS)) {
             if (!level.isClientSide()) {
                 level.setBlock(pos, state.setValue(CROSS, false), UPDATE_ALL);
-                popResource(level, pos, new ItemStack(asItem()));
+                player.getInventory().placeItemBackInInventory(new ItemStack(asItem()));
             }
             return InteractionResult.sidedSuccess(level.isClientSide());
         }
