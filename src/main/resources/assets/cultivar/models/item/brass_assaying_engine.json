@@ -1,6 +1,6 @@
 {
  "parent": "block/block",
- "render_type": "minecraft:cutout",
+ "render_type": "minecraft:translucent",
  "textures": {
   "3": "create:block/crafter_thingies",
   "4": "create:block/crafter_side",
@@ -10,7 +10,7 @@
   "9": "create:block/cogwheel",
   "soil": "minecraft:block/farmland_moist",
   "particle": "create:block/brass_casing",
-  "trellis": "cultivar:block/timber_trellis"
+  "hatch": "cultivar:block/assayer/brass_hatch"
  },
  "elements": [
   {
@@ -23,64 +23,269 @@
    "to": [
     16,
     16,
+    5
+   ],
+   "faces": {
+    "up": {
+     "texture": "#5",
+     "uv": [
+      0,
+      0,
+      16,
+      5
+     ]
+    },
+    "down": {
+     "texture": "#7",
+     "uv": [
+      0,
+      0,
+      16,
+      5
+     ]
+    },
+    "north": {
+     "texture": "#4",
+     "uv": [
+      0,
+      0,
+      16,
+      6
+     ]
+    },
+    "south": {
+     "texture": "#8",
+     "uv": [
+      0,
+      0,
+      16,
+      5
+     ]
+    },
+    "west": {
+     "texture": "#4",
+     "uv": [
+      0,
+      0,
+      5,
+      6
+     ]
+    },
+    "east": {
+     "texture": "#4",
+     "uv": [
+      0,
+      0,
+      5,
+      6
+     ]
+    }
+   }
+  },
+  {
+   "name": "Top",
+   "from": [
+    0,
+    10,
+    11
+   ],
+   "to": [
+    16,
+    16,
     16
    ],
    "faces": {
-    "north": {
-     "uv": [
-      0,
-      0,
-      16,
-      6
-     ],
-     "texture": "#4"
-    },
-    "east": {
-     "uv": [
-      0,
-      0,
-      16,
-      6
-     ],
-     "texture": "#4"
-    },
-    "south": {
-     "uv": [
-      0,
-      0,
-      16,
-      6
-     ],
-     "texture": "#4"
-    },
-    "west": {
-     "uv": [
-      0,
-      0,
-      16,
-      6
-     ],
-     "texture": "#4"
-    },
     "up": {
+     "texture": "#5",
      "uv": [
       0,
-      0,
+      11,
       16,
       16
-     ],
-     "rotation": 270,
-     "texture": "#5"
+     ]
     },
     "down": {
+     "texture": "#7",
+     "uv": [
+      0,
+      11,
+      16,
+      16
+     ]
+    },
+    "north": {
+     "texture": "#8",
      "uv": [
       0,
       0,
       16,
-      16
-     ],
-     "rotation": 90,
-     "texture": "#7"
+      5
+     ]
+    },
+    "south": {
+     "texture": "#4",
+     "uv": [
+      0,
+      0,
+      16,
+      6
+     ]
+    },
+    "west": {
+     "texture": "#4",
+     "uv": [
+      11,
+      0,
+      16,
+      6
+     ]
+    },
+    "east": {
+     "texture": "#4",
+     "uv": [
+      11,
+      0,
+      16,
+      6
+     ]
+    }
+   }
+  },
+  {
+   "name": "Top",
+   "from": [
+    0,
+    10,
+    5
+   ],
+   "to": [
+    5,
+    16,
+    11
+   ],
+   "faces": {
+    "up": {
+     "texture": "#5",
+     "uv": [
+      0,
+      5,
+      5,
+      11
+     ]
+    },
+    "down": {
+     "texture": "#7",
+     "uv": [
+      0,
+      5,
+      5,
+      11
+     ]
+    },
+    "north": {
+     "texture": "#8",
+     "uv": [
+      0,
+      0,
+      5,
+      5
+     ]
+    },
+    "south": {
+     "texture": "#8",
+     "uv": [
+      0,
+      0,
+      5,
+      5
+     ]
+    },
+    "west": {
+     "texture": "#4",
+     "uv": [
+      5,
+      0,
+      11,
+      6
+     ]
+    },
+    "east": {
+     "texture": "#8",
+     "uv": [
+      5,
+      0,
+      11,
+      5
+     ]
+    }
+   }
+  },
+  {
+   "name": "Top",
+   "from": [
+    11,
+    10,
+    5
+   ],
+   "to": [
+    16,
+    16,
+    11
+   ],
+   "faces": {
+    "up": {
+     "texture": "#5",
+     "uv": [
+      11,
+      5,
+      16,
+      11
+     ]
+    },
+    "down": {
+     "texture": "#7",
+     "uv": [
+      11,
+      5,
+      16,
+      11
+     ]
+    },
+    "north": {
+     "texture": "#8",
+     "uv": [
+      11,
+      0,
+      16,
+      5
+     ]
+    },
+    "south": {
+     "texture": "#8",
+     "uv": [
+      11,
+      0,
+      16,
+      5
+     ]
+    },
+    "west": {
+     "texture": "#8",
+     "uv": [
+      5,
+      0,
+      11,
+      5
+     ]
+    },
+    "east": {
+     "texture": "#4",
+     "uv": [
+      5,
+      0,
+      11,
+      6
+     ]
     }
    }
   },
@@ -565,12 +770,12 @@
    "name": "opening",
    "from": [
     5,
-    15.5,
+    10,
     5
    ],
    "to": [
     11,
-    16.5,
+    11,
     11
    ],
    "faces": {
@@ -1026,133 +1231,34 @@
    }
   },
   {
-   "name": "trellis",
+   "name": "hatch",
    "from": [
-    5.5,
-    16.5,
-    5.5
+    5,
+    16.6,
+    5
    ],
    "to": [
-    5.5,
-    22,
-    10.5
+    11,
+    16.9,
+    11
    ],
    "faces": {
-    "east": {
-     "texture": "#trellis",
+    "up": {
+     "texture": "#hatch",
      "uv": [
-      0,
-      0,
-      16,
-      16
+      5,
+      5,
+      11,
+      11
      ]
     },
-    "west": {
-     "texture": "#trellis",
+    "down": {
+     "texture": "#hatch",
      "uv": [
-      0,
-      0,
-      16,
-      16
-     ]
-    }
-   }
-  },
-  {
-   "name": "trellis",
-   "from": [
-    10.5,
-    16.5,
-    5.5
-   ],
-   "to": [
-    10.5,
-    22,
-    10.5
-   ],
-   "faces": {
-    "east": {
-     "texture": "#trellis",
-     "uv": [
-      0,
-      0,
-      16,
-      16
-     ]
-    },
-    "west": {
-     "texture": "#trellis",
-     "uv": [
-      0,
-      0,
-      16,
-      16
-     ]
-    }
-   }
-  },
-  {
-   "name": "trellis",
-   "from": [
-    5.5,
-    16.5,
-    5.5
-   ],
-   "to": [
-    10.5,
-    22,
-    5.5
-   ],
-   "faces": {
-    "north": {
-     "texture": "#trellis",
-     "uv": [
-      0,
-      0,
-      16,
-      16
-     ]
-    },
-    "south": {
-     "texture": "#trellis",
-     "uv": [
-      0,
-      0,
-      16,
-      16
-     ]
-    }
-   }
-  },
-  {
-   "name": "trellis",
-   "from": [
-    5.5,
-    16.5,
-    10.5
-   ],
-   "to": [
-    10.5,
-    22,
-    10.5
-   ],
-   "faces": {
-    "north": {
-     "texture": "#trellis",
-     "uv": [
-      0,
-      0,
-      16,
-      16
-     ]
-    },
-    "south": {
-     "texture": "#trellis",
-     "uv": [
-      0,
-      0,
-      16,
-      16
+      5,
+      5,
+      11,
+      11
      ]
     }
    }

@@ -24,6 +24,7 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.IntValue BED_GROWTH_ODDS;
     public static final ModConfigSpec.IntValue BED_FERTILIZER_ODDS;
     public static final ModConfigSpec.IntValue BED_BREED_HOLD;
+    public static final ModConfigSpec.DoubleValue BED_WEED_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_GAIN;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_GROWTH;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_STRENGTH;
@@ -165,6 +166,9 @@ public final class CultivarServerConfig {
                 .defineInRange("fertilizerOdds", 12, 1, 10_000);
         BED_BREED_HOLD = b.comment("Cycles a mature crop next to a breeding bed waits before harvest, so the grafting frame can use it as a parent.")
                 .defineInRange("breedHoldCycles", 40, 0, 10_000);
+        BED_WEED_MULTIPLIER = b.comment("Weeds on crops in a Planter Bed, relative to plain soil: 0 = none (a tended bed; any blight",
+                        "already there is cleared), 1 = as on soil. Trial Beds never grow weeds.")
+                .defineInRange("weedMultiplier", 0.0, 0.0, 1.0);
         BED_QUALITY_GAIN = b.comment("Seed ranking weights: beds plant, keep and upgrade to the highest weighted stat total.",
                         "Defaults favour output: Gain 3, Growth 2, Strength 1, Vigour 1.")
                 .defineInRange("qualityGain", 3.0, 0.0, 100.0);

@@ -358,7 +358,7 @@ public final class CultivarScenes {
         scene.world().showSection(util.select().position(chromatic), Direction.DOWN);
         scene.world().setKineticSpeed(util.select().position(brass), 32);
         scene.world().setKineticSpeed(util.select().position(chromatic), -32);
-        scene.overlay().showText(100).text("Touching Assayers mesh and join into one unit. Andesite, brass and chromatic tiers assay 1x, 2x and 4x as fast.")
+        scene.overlay().showText(100).text("Touching Assayers mesh and join into one unit. Andesite, brass (glazed) and chromatic (glowing) tiers assay 1x, 2x and 4x as fast.")
                 .pointAt(util.vector().topOf(brass)).placeNearTarget().attachKeyFrame();
         scene.idle(110);
 

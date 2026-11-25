@@ -79,6 +79,13 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
                 .anyMatch(s -> s.blocks().contains(state.getBlockHolder()));
     }
 
+    /** A tended bed: weeds scaled by {@code planter_bed.weedMultiplier} (default 0, none). */
+    @Override
+    public double weedMultiplier(net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return com.kragnoth.cultivar.core.config.CultivarServerConfig.SPEC.isLoaded()
+                ? com.kragnoth.cultivar.core.config.CultivarServerConfig.BED_WEED_MULTIPLIER.get() : 0.0;
+    }
+
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hit) {

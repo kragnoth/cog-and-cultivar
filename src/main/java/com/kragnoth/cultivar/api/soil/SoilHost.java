@@ -26,4 +26,12 @@ public interface SoilHost {
     default boolean isIdeal(BlockGetter level, BlockPos pos) {
         return false;
     }
+
+    /**
+     * Scales weed spawning, growth and spread on the crop above (1 = normal, 0 = none). A tended machine bed keeps its
+     * crop clean, so automation isn't a constant battle with blight.
+     */
+    default double weedMultiplier(BlockGetter level, BlockPos pos) {
+        return 1.0;
+    }
 }

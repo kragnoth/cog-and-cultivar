@@ -157,4 +157,22 @@ public final class PlanterBedTests {
         h.assertTrue(gain == 9, "the producer upgraded to the bred Gain 9 seed, got " + gain);
         h.succeed();
     }
+
+    /** A tended bed (default weedMultiplier 0) keeps its crop clean: no new blight, and blight that got in is cleared. */
+    @GameTest(template = "empty")
+    public static void bedsKeepCropsFreeOfWeeds(GameTestHelper h) {
+        var level = h.getLevel();
+        BlockPos bed = new BlockPos(1, 1, 1);
+        h.setBlock(bed, PlanterBedModule.BED.get());
+        ((PlanterBedBlockEntity) h.getBlockEntity(bed)).setSoil(Blocks.FARMLAND.defaultBlockState());
+        h.setBlock(bed.above(), CropModule.TIMBER_TRELLIS.get());
+        var crop = (com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(bed.above());
+        var weed = level.registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.WEED).holders().findFirst().orElseThrow();
+        crop.setWeed(weed, 0);
+        for (int i = 0; i < 200; i++) {
+            crop.tickWeeds(level, level.random, com.kragnoth.cultivar.api.influence.InfluenceEffects.NONE);
+        }
+        h.assertTrue(crop.weed() == null, "the bed cleared the blight and none came back");
+        h.succeed();
+    }
 }

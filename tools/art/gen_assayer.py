@@ -11,7 +11,8 @@ Reads Create's own crafter geometry and textures straight from the Create jar (n
 
 Geometry is the crafter's up-facing item model: the valve frame and opening on top (the opening shows moist farmland
 instead of the crafting grid), the side windows where the cogwheel shows (the block entity renderer spins a Create
-cogwheel there). Brass adds a small trellis on the farmland, chromatic a trellis under a glass cloche.
+cogwheel there). Brass and chromatic glaze the farmland window with a flush hatch (a little cold frame) framed in
+their metal; the chromatic hatch glows faintly. The seed under test is drawn by the renderer as a sprout.
 
 The brass tier uses Create's textures unchanged; andesite and chromatic swap only the casing parts.
 
@@ -108,6 +109,26 @@ os.makedirs(TEX, exist_ok=True)
 side = create_tex('crafter_side')
 recolour(side, andesite_ramp()).save(f'{TEX}/andesite_side.png')
 recolour(side, CHROMATIC, rest=night_wood).save(f'{TEX}/chromatic_side.png')
+BRASS = hexes('845125', 'ab7531', 'c4943d', 'd6b055', 'dfbe5e', 'f4df8d')
+
+
+def hatch(frame, tint):
+    """A glazed hatch for the 6x6 window (texture region 5..10): metal frame and a centre mullion over tinted glass."""
+    im = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+    for x in range(5, 11):
+        for y in range(5, 11):
+            im.putpixel((x, y), tint)
+    for i in range(5, 11):
+        im.putpixel((i, 5), frame[4] + (255,)); im.putpixel((5, i), frame[4] + (255,))
+        im.putpixel((i, 10), frame[1] + (255,)); im.putpixel((10, i), frame[1] + (255,))
+        im.putpixel((i, 8), frame[2] + (255,)); im.putpixel((8, i), frame[3] + (255,))
+    im.putpixel((6, 7), (255, 255, 255, 140)); im.putpixel((7, 6), (255, 255, 255, 110))  # a glint
+    return im
+
+
+hatch(BRASS, (205, 228, 236, 70)).save(f'{TEX}/brass_hatch.png')
+hatch(CHROMATIC, (180, 140, 235, 90)).save(f'{TEX}/chromatic_hatch.png')
+
 casing = recolour(create_tex('brass_casing'), CHROMATIC, rest=night_wood)
 casing.putpixel((2, 2), CHROMATIC[-1] + (255,))  # a glint in the top-left corner, like light catching the alloy
 casing.save(f'{TEX}/chromatic_casing.png')
@@ -129,26 +150,38 @@ def face(tex, uv):
     return {"texture": tex, "uv": uv}
 
 
-def trellis():
-    """A small trellis standing on the farmland: four lattice panes around the 6x6 opening."""
-    full = [0, 0, 16, 16]
+PIT = (5, 11)       # the 6x6 window, x and z
+SOIL_Y = 11         # farmland sits 5 px down in a pit, so a sprout fits under the hatch
+
+
+def ring_top(top):
+    """Create's crafter top slab with a 6x6 pit cut through its middle: four strips, outer faces as before, inner
+    walls in dark log (the machine's insides)."""
+    lo, hi = PIT
+    y0, y1 = top['from'][1], top['to'][1]
+    strips = [(0, 0, 16, lo), (0, hi, 16, 16), (0, lo, lo, hi), (hi, lo, 16, hi)]
     out = []
-    for x in (5.5, 10.5):
-        out.append({"name": "trellis", "from": [x, 16.5, 5.5], "to": [x, 22, 10.5],
-                    "faces": {"east": face("#trellis", full), "west": face("#trellis", full)}})
-    for z in (5.5, 10.5):
-        out.append({"name": "trellis", "from": [5.5, 16.5, z], "to": [10.5, 22, z],
-                    "faces": {"north": face("#trellis", full), "south": face("#trellis", full)}})
+    for x0, z0, x1, z1 in strips:
+        faces = {"up": face(top['faces']['up']['texture'], [x0, z0, x1, z1]),
+                 "down": face(top['faces']['down']['texture'], [x0, z0, x1, z1])}
+        band = top['faces']['north']['uv']
+        for d, edge, outer, span in (("north", z0, 0, (x0, x1)), ("south", z1, 16, (x0, x1)),
+                                     ("west", x0, 0, (z0, z1)), ("east", x1, 16, (z0, z1))):
+            if edge == outer:
+                faces[d] = face(top['faces'][d]['texture'], [span[0], band[1], span[1], band[3]])
+            elif edge in PIT:  # a pit wall (the parts behind the side strips are hidden anyway)
+                faces[d] = face("#8", [span[0], 0, span[1], y1 - SOIL_Y])
+        out.append({"name": "Top", "from": [x0, y0, z0], "to": [x1, y1, z1], "faces": faces})
     return out
 
 
-def cloche():
-    """A glass cloche over the trellis, with a brass knob."""
-    glass = {d: face("#cloche", [2, 1, 14, 15]) for d in ("north", "south", "east", "west")}
-    glass["up"] = face("#cloche", [2, 2, 14, 14])
-    return [{"name": "cloche", "from": [4.5, 16.5, 4.5], "to": [11.5, 23, 11.5], "faces": glass},
-            {"name": "knob", "from": [7.5, 23, 7.5], "to": [8.5, 24, 8.5],
-             "faces": {d: face("#knob", [7, 7, 9, 9]) for d in ("north", "south", "east", "west", "up")}}]
+def glazing(glow):
+    """The hatch: a thin glass sheet flush with the top of the valve frame, over the farmland."""
+    up = face("#hatch", [5, 5, 11, 11])
+    if glow:
+        up["neoforge_data"] = {"block_light": 9, "sky_light": 15}
+    return [{"name": "hatch", "from": [5, 16.6, 5], "to": [11, 16.9, 11],
+             "faces": {"up": up, "down": face("#hatch", [5, 5, 11, 11])}}]
 
 
 def model(tier, item):
@@ -158,8 +191,13 @@ def model(tier, item):
         name = e.get('name', '')
         if name == 'valve_lid' or (not item and name in GEAR):
             continue  # the lid is the crafter's output flap; the gear is drawn spinning by the renderer
-        if name == 'opening':  # farmland where the crafting grid was
+        if name == 'opening':  # farmland at the bottom of the pit, where the crafting grid was
+            e['from'] = [PIT[0], SOIL_Y - 1, PIT[0]]
+            e['to'] = [PIT[1], SOIL_Y, PIT[1]]
             e['faces'] = {"up": face("#soil", [5, 5, 11, 11])}
+        if name == 'Top':
+            elems += ring_top(e)
+            continue
         if name == 'Bottom' and not item:
             e['faces']['down'] = face("#8", [0, 0, 16, 16])
         elems.append(e)
@@ -167,13 +205,9 @@ def model(tier, item):
            "8": "create:block/smooth_dark_log_top", "9": "create:block/cogwheel", "soil": "minecraft:block/farmland_moist",
            "particle": t['casing']}
     if tier in ('brass', 'chromatic'):
-        tex["trellis"] = "cultivar:block/timber_trellis"
-        elems += trellis()
-    if tier == 'chromatic':
-        tex["cloche"] = "cultivar:block/bell_cloche"
-        tex["knob"] = "cultivar:block/brass_knob"
-        elems += cloche()
-    out = {"parent": "block/block", "render_type": "minecraft:translucent" if tier == 'chromatic' else "minecraft:cutout",
+        tex["hatch"] = f"cultivar:block/assayer/{tier}_hatch"
+        elems += glazing(tier == 'chromatic')
+    out = {"parent": "block/block", "render_type": "minecraft:cutout" if tier == 'andesite' else "minecraft:translucent",
            "textures": tex, "elements": elems}
     if item:
         out["display"] = crafter_item.get("display", {})

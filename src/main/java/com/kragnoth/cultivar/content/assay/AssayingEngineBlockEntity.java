@@ -287,6 +287,10 @@ public class AssayingEngineBlockEntity extends KineticBlockEntity {
         if (level != null) {
             com.simibubi.create.AllSoundEvents.CLIPBOARD_CHECKMARK.playOnServer(level, worldPosition, 0.5f, 1f);
         }
+        if (level instanceof ServerLevel server) { // a few green specks as the sprout is read and pulled
+            server.sendParticles(ParticleTypes.HAPPY_VILLAGER, worldPosition.getX() + 0.5, worldPosition.getY() + 1.05,
+                    worldPosition.getZ() + 0.5, 3, 0.12, 0.05, 0.12, 0);
+        }
         sendData();
     }
 

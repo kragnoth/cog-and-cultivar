@@ -563,8 +563,10 @@ The original AgriCraft-derived notes below are kept for reference.
 
 - **Look:** a Mechanical Crafter laid on its back (Create's own crafter geometry and textures, generated from the
   Create jar by `tools/art/gen_assayer.py`), casing swapped per tier, moist farmland where the crafting grid was.
-  Tiers: **andesite** (farmland), **brass** (farmland + small trellis), **chromatic** (trellis under a cloche;
-  recipe uses Create's legacy `create:chromatic_compound`, which packs re-enable; pack makers can swap it).
+  The farmland sits in a 6x6 pit; the seed under test grows there as a sprout (its own stage textures) while it is
+  assayed. Tiers: **andesite** (open pit), **brass** (a flush glazed hatch, like a cold frame), **chromatic** (the
+  hatch in chromatic metal, faintly glowing; recipe uses Create's legacy `create:chromatic_compound`, which packs
+  re-enable; pack makers can swap it).
 - **Power:** a vertical small cogwheel (rendered in the side window) meshes with neighbouring Assayers and
   cogwheels like crafters do; a shaft from below also works. Stress impact `assayer.stressImpact` (default 3).
 - **Unit:** touching Assayers (any tier) form one unit (`PlotTracker`): one item handler for pipes and funnels,
