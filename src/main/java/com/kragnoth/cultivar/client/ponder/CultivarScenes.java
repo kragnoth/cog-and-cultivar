@@ -143,7 +143,7 @@ public final class CultivarScenes {
                 .pointAt(util.vector().topOf(f)).placeNearTarget().attachKeyFrame();
         scene.idle(90);
 
-        scene.overlay().showText(100).text("A Grafting Frame beside a single ripe crop slowly copies it. The higher the parent's Vigour, the sooner it happens.")
+        scene.overlay().showText(100).text("A Grafting Frame beside a single ripe crop slowly copies it. The higher the parent's Vigor, the sooner it happens.")
                 .pointAt(util.vector().centerOf(f)).placeNearTarget();
         scene.idle(70);
         frame(scene, f, false);
@@ -204,7 +204,7 @@ public final class CultivarScenes {
         crop(scene, util, p2, "minecraft:carrot", 2, 7);
         scene.overlay().showText(90).text("Every seed carries four stats, each from 1 to 10.").independent(10).attachKeyFrame();
         scene.idle(30);
-        scene.overlay().showText(140).text("Gain: more produce per harvest. Growth: ripens faster. Strength: copes with worse soil and light and fends off blight; at 10 it grows on any soil. Vigour: crosses more readily and passes on better stats.")
+        scene.overlay().showText(140).text("Gain: more produce per harvest. Growth: ripens faster. Strength: copes with worse soil and light and fends off blight; at 10 it grows on any soil. Vigor: crosses more readily and passes on better stats.")
                 .independent(40);
         scene.idle(150);
 
@@ -223,7 +223,7 @@ public final class CultivarScenes {
         grow(scene, util, f, "minecraft:carrot", 3, 1, 7);
         scene.idle(60);
 
-        scene.overlay().showText(80).text("Stats stay hidden until the seed is read in an Assaying Engine.")
+        scene.overlay().showText(80).text("Stats stay hidden until the seed is read in an Assayer.")
                 .pointAt(util.vector().topOf(f)).placeNearTarget().colored(PonderPalette.BLUE);
         scene.idle(90);
 
@@ -254,7 +254,7 @@ public final class CultivarScenes {
                 .pointAt(util.vector().topOf(3, 1, 1)).placeNearTarget().colored(PonderPalette.GREEN);
         scene.idle(100);
 
-        scene.overlay().showText(110).text("Vigour speeds everything up: at 1 a parent joins a cross about half the time, at 10 every time. Breed it up first.")
+        scene.overlay().showText(110).text("Vigor speeds everything up: at 1 a parent joins a cross about half the time, at 10 every time. Breed it up first.")
                 .independent(20);
         scene.idle(120);
         scene.overlay().showText(90).text("When you're ready to automate, a Planter Bed breeds, ranks and keeps its best seeds by itself.")
@@ -341,45 +341,338 @@ public final class CultivarScenes {
         scene.showBasePlate();
         scene.idle(10);
 
-        BlockPos engine = util.grid().at(2, 1, 2), shaft = util.grid().at(2, 0, 2);
-        var kinetics = util.select().position(engine).add(util.select().position(shaft));
-        scene.world().showSection(util.select().position(engine), Direction.DOWN);
+        BlockPos motor = util.grid().at(0, 0, 2), cog = util.grid().at(0, 1, 2);
+        BlockPos andesite = util.grid().at(1, 1, 2), brass = util.grid().at(2, 1, 2), chromatic = util.grid().at(3, 1, 2);
+        var drive = util.select().position(motor).add(util.select().position(cog));
+        scene.world().showSection(drive, Direction.DOWN);
+        scene.world().showSection(util.select().position(andesite), Direction.DOWN);
         scene.idle(10);
-        scene.world().setKineticSpeed(kinetics, 32);
-        scene.overlay().showText(90).text("The Assaying Engine reads the genome of seeds and cuttings. It runs on rotation from below.")
-                .pointAt(util.vector().blockSurface(shaft, Direction.WEST)).placeNearTarget().attachKeyFrame();
+        scene.world().setKineticSpeed(drive, 32);
+        scene.world().setKineticSpeed(util.select().position(andesite), -32);
+        scene.overlay().showText(90).text("The Assayer reads the genome of seeds and cuttings. Its cogwheel takes rotation from a neighboring cog, like a Mechanical Crafter.")
+                .pointAt(util.vector().blockSurface(cog, Direction.UP)).placeNearTarget().attachKeyFrame();
         scene.idle(100);
 
-        scene.overlay().showControls(util.vector().topOf(engine), Pointing.DOWN, 40).rightClick()
+        scene.world().showSection(util.select().position(brass), Direction.DOWN);
+        scene.idle(5);
+        scene.world().showSection(util.select().position(chromatic), Direction.DOWN);
+        scene.world().setKineticSpeed(util.select().position(brass), 32);
+        scene.world().setKineticSpeed(util.select().position(chromatic), -32);
+        scene.overlay().showText(100).text("Touching Assayers mesh and join into one unit. Andesite, brass (glazed) and chromatic (glowing) tiers assay 1x, 2x and 4x as fast.")
+                .pointAt(util.vector().topOf(brass)).placeNearTarget().attachKeyFrame();
+        scene.idle(110);
+
+        scene.overlay().showControls(util.vector().topOf(brass), Pointing.DOWN, 40).rightClick()
                 .withItem(new ItemStack(CropModule.SEED.get()));
         scene.idle(10);
-        scene.overlay().showText(90).text("Right-click it with seeds, or feed it from a funnel, chute, hopper or pipe.")
-                .pointAt(util.vector().topOf(engine)).placeNearTarget();
+        scene.overlay().showText(90).text("Right-click any of them with seeds, or feed one from a funnel or pipe: the whole unit shares the work.")
+                .pointAt(util.vector().topOf(brass)).placeNearTarget();
         scene.idle(100);
 
-        scene.overlay().showText(90).text("Each seed takes 5 seconds at 32 RPM. Spin it faster to assay faster.")
-                .pointAt(util.vector().centerOf(engine)).placeNearTarget().attachKeyFrame();
+        scene.overlay().showText(90).text("At 32 RPM an andesite Assayer takes 5 seconds per seed. Spin it faster to assay faster.")
+                .pointAt(util.vector().centerOf(andesite)).placeNearTarget().attachKeyFrame();
         scene.idle(40);
-        scene.world().setKineticSpeed(kinetics, 128);
-        scene.effects().rotationSpeedIndicator(engine);
+        scene.world().setKineticSpeed(drive, 128);
+        scene.world().setKineticSpeed(util.select().position(andesite).add(util.select().position(chromatic)), -128);
+        scene.world().setKineticSpeed(util.select().position(brass), 128);
+        scene.effects().rotationSpeedIndicator(cog);
         scene.idle(60);
 
         ItemStack assayed = new ItemStack(CropModule.SEED.get());
         assayed.set(CoreModule.ASSAYED.get(), net.minecraft.util.Unit.INSTANCE);
-        scene.world().createItemEntity(util.vector().topOf(engine), new Vec3(0, 0.25, 0), assayed);
-        scene.overlay().showText(100).text("Assayed seeds show their four stats in the tooltip. Take them with an empty hand, or pull them out from any side.")
-                .pointAt(util.vector().topOf(engine)).placeNearTarget();
+        scene.world().createItemEntity(util.vector().topOf(brass), new Vec3(0, 0.25, 0), assayed);
+        scene.overlay().showText(100).text("Assayed seeds show their four stats in the tooltip. Sneak-right-click with an empty hand to take them, or pull them out from any side.")
+                .pointAt(util.vector().topOf(brass)).placeNearTarget();
         scene.idle(110);
         scene.world().modifyEntities(ItemEntity.class, e -> e.discard());
 
-        scene.overlay().showControls(util.vector().topOf(engine), Pointing.DOWN, 40).rightClick()
+        scene.overlay().showControls(util.vector().topOf(chromatic), Pointing.DOWN, 40).rightClick()
                 .withItem(new ItemStack(LedgerModule.LEDGER.get()));
         scene.idle(10);
-        scene.overlay().showText(100).text("Put a Botanical Ledger inside and it records every species the engine assays. Sneak with an empty hand to take it back.")
-                .pointAt(util.vector().topOf(engine)).placeNearTarget().attachKeyFrame();
+        scene.overlay().showText(100).text("A Botanical Ledger in the unit records every species assayed. Sometimes it also maps the family tree: a cross from its ancestry, and the crosses it leads to two generations down.")
+                .pointAt(util.vector().topOf(chromatic)).placeNearTarget().attachKeyFrame();
         scene.idle(110);
-        scene.overlay().showText(90).text("Engineer's Goggles show its progress, and a comparator reads how full the output is.")
-                .pointAt(util.vector().blockSurface(engine, Direction.NORTH)).placeNearTarget();
+        scene.overlay().showText(90).text("Engineer's Goggles show progress and the unit's queue, and a comparator reads how full the outputs are.")
+                .pointAt(util.vector().blockSurface(andesite, Direction.NORTH)).placeNearTarget();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    // ------------------------------------------------------------------------------------------------ field crops
+
+    /** Plants a field crop (no trellis) at {@code pos} and shows it at a stage. */
+    private static void field(SceneBuilder scene, SceneBuildingUtil util, BlockPos pos, String id, int stage) {
+        scene.world().modifyBlockEntity(pos, com.kragnoth.cultivar.content.field.FieldCropBlockEntity.class,
+                be -> be.plant().set(genome(id, 1), stage, true));
+        scene.world().modifyBlockEntityNBT(util.select().position(pos), com.kragnoth.cultivar.content.field.FieldCropBlockEntity.class,
+                tag -> { }, true);
+    }
+
+    public static void fieldCrops(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("field_crops", "Planting without a trellis");
+        scene.configureBasePlate(0, 0, 5);
+        scene.showBasePlate();
+        scene.idle(10);
+
+        BlockPos a = util.grid().at(1, 1, 2), b = util.grid().at(2, 1, 2), c = util.grid().at(3, 1, 2);
+        scene.overlay().showControls(util.vector().topOf(a.below()), Pointing.DOWN, 40).rightClick()
+                .withItem(new ItemStack(Items.WHEAT_SEEDS));
+        scene.idle(10);
+        for (BlockPos p : new BlockPos[]{a, b, c}) {
+            scene.world().setBlock(p, com.kragnoth.cultivar.content.field.FieldCropModule.FIELD_CROP.get().defaultBlockState(), false);
+            field(scene, util, p, "minecraft:wheat", 0);
+        }
+        scene.world().showSection(util.select().fromTo(a, c), Direction.DOWN); // placed blocks only draw once shown
+        scene.overlay().showText(90).text("Any seed Cultivar knows can go straight onto farmland, or whatever soil the plant likes. It keeps its genome and stats.")
+                .pointAt(util.vector().topOf(b)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
+        for (int stage = 1; stage <= 7; stage++) {
+            for (BlockPos p : new BlockPos[]{a, b, c}) {
+                field(scene, util, p, "minecraft:wheat", stage);
+            }
+            scene.idle(5);
+        }
+        scene.overlay().showText(90).text("It grows like a normal crop, using its Growth, Gain and Strength, but it never spreads, crosses or gets blight.")
+                .pointAt(util.vector().topOf(b)).placeNearTarget();
+        scene.idle(100);
+
+        scene.overlay().showControls(util.vector().topOf(a), Pointing.DOWN, 40).rightClick();
+        scene.world().createItemEntity(util.vector().topOf(a), new Vec3(0.05, 0.25, 0), new ItemStack(Items.WHEAT));
+        field(scene, util, a, "minecraft:wheat", 0);
+        scene.overlay().showText(90).text("Right-click it when ripe to harvest and replant. Break it like wheat to get the seed back. Create Harvesters work on it too.")
+                .pointAt(util.vector().topOf(a)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
+        scene.world().modifyEntities(ItemEntity.class, e -> e.discard());
+        scene.overlay().showText(80).text("If a seed won't take, a message says why, and its tooltip lists what the plant needs.")
+                .pointAt(util.vector().topOf(c)).placeNearTarget();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    // ------------------------------------------------------------------------------------------------ cloches
+
+    private static void cloche(SceneBuilder scene, BlockPos pos, com.kragnoth.cultivar.content.cloche.ClocheType type) {
+        scene.world().modifyBlock(pos, s -> s.setValue(TrellisBlock.CLOCHE, true).setValue(TrellisBlock.CLOCHE_TYPE, type), false);
+    }
+
+    public static void cloches(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("cloches", "Cloches");
+        scene.configureBasePlate(0, 0, 5);
+        scene.showBasePlate();
+        scene.idle(10);
+
+        BlockPos bell = util.grid().at(1, 1, 2), shade = util.grid().at(2, 1, 2), lamp = util.grid().at(3, 1, 2);
+        scene.world().showSection(util.select().fromTo(bell, lamp), Direction.DOWN);
+        scene.idle(10);
+        for (BlockPos p : new BlockPos[]{bell, shade, lamp}) {
+            crop(scene, util, p, "minecraft:wheat", 1, 3);
+        }
+        scene.overlay().showControls(util.vector().topOf(bell), Pointing.DOWN, 40).rightClick()
+                .withItem(new ItemStack(com.kragnoth.cultivar.content.cloche.ClocheModule.BELL_CLOCHE.get()));
+        scene.idle(10);
+        cloche(scene, bell, com.kragnoth.cultivar.content.cloche.ClocheType.BELL);
+        scene.overlay().showText(90).text("A Bell Cloche on a single trellis: the crop grows 10% faster, its soil reads one step wetter, and no new blight takes hold.")
+                .pointAt(util.vector().topOf(bell)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
+
+        scene.overlay().showControls(util.vector().topOf(shade), Pointing.DOWN, 40).rightClick()
+                .withItem(new ItemStack(com.kragnoth.cultivar.content.cloche.ClocheModule.SHADE_CLOCHE.get()));
+        scene.idle(10);
+        cloche(scene, shade, com.kragnoth.cultivar.content.cloche.ClocheType.SHADE);
+        scene.overlay().showText(90).text("A Shade Cloche does the same, and its crop reads light 3 at most: dark-loving plants grow beside bright ones.")
+                .pointAt(util.vector().topOf(shade)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
+
+        scene.overlay().showControls(util.vector().topOf(lamp), Pointing.DOWN, 40).rightClick()
+                .withItem(new ItemStack(com.kragnoth.cultivar.content.cloche.ClocheModule.LAMP_CLOCHE.get()));
+        scene.idle(10);
+        cloche(scene, lamp, com.kragnoth.cultivar.content.cloche.ClocheType.LAMP);
+        scene.overlay().showText(90).text("A Lamp Cloche lights its own crop to at least 14, day or night, without lighting anything else.")
+                .pointAt(util.vector().topOf(lamp)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80).text("Sneak-right-click with an empty hand to take a cloche off. Tall crops can't grow under one.")
+                .pointAt(util.vector().topOf(shade)).placeNearTarget();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    // ------------------------------------------------------------------------------------------------ olla
+
+    public static void olla(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("olla", "Watering with an Olla");
+        scene.configureBasePlate(0, 0, 5);
+        scene.showBasePlate();
+        scene.idle(10);
+
+        BlockPos pot = util.grid().at(2, 0, 2);
+        scene.overlay().showControls(util.vector().topOf(pot), Pointing.DOWN, 40).rightClick()
+                .withItem(new ItemStack(Items.WATER_BUCKET));
+        scene.idle(10);
+        scene.world().modifyBlock(pot, s -> s.setValue(com.kragnoth.cultivar.content.irrigation.OllaBlock.FILLED, true), false);
+        scene.overlay().showText(80).text("An Olla is a brick pot. Fill it once with a water bucket or bottle; it never runs dry.")
+                .pointAt(util.vector().topOf(pot)).placeNearTarget().attachKeyFrame();
+        scene.idle(90);
+
+        var field = util.select().fromTo(0, 1, 0, 4, 1, 4);
+        scene.world().showSection(field, Direction.DOWN);
+        scene.idle(20);
+        scene.world().modifyBlocks(field, s -> s.hasProperty(net.minecraft.world.level.block.FarmBlock.MOISTURE)
+                ? s.setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7) : s, false);
+        scene.overlay().showText(100).text("Bury it under the farmland: farmland within 4 blocks, on its level or the layer above, stays moist like it would beside water.")
+                .pointAt(util.vector().topOf(util.grid().at(4, 1, 2))).placeNearTarget().attachKeyFrame();
+        scene.idle(110);
+        scene.overlay().showText(90).text("Nothing flows or spills, and the spot above it can be farmed. Goggles show what it waters; a comparator reads whether it's filled.")
+                .pointAt(util.vector().topOf(util.grid().at(2, 1, 2))).placeNearTarget();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    // ------------------------------------------------------------------------------------------------ sprinkler
+
+    public static void sprinkler(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("sprinkler", "The Sprinkler");
+        scene.configureBasePlate(0, 0, 5);
+        scene.showBasePlate();
+        scene.idle(10);
+
+        BlockPos head = util.grid().at(2, 1, 2);
+        scene.world().showSection(util.select().position(head), Direction.DOWN);
+        scene.idle(10);
+        scene.overlay().showText(90).text("Mount a Sprinkler on any fluid pipe and feed it water, or fill it with a water bucket.")
+                .pointAt(util.vector().topOf(head)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
+        scene.effects().emitParticles(util.vector().topOf(head),
+                scene.effects().simpleParticleEmitter(ParticleTypes.SPLASH, new Vec3(0, 0.3, 0)), 12, 60);
+        scene.overlay().showText(100).text("While it has water it gives crops nearby extra growth, now and then a bone-meal pulse, and keeps farmland moist.")
+                .pointAt(util.vector().topOf(util.grid().at(4, 0, 2))).placeNearTarget().attachKeyFrame();
+        scene.idle(110);
+        scene.overlay().showText(80).text("A redstone signal switches it off. Use a wrench to turn it to face any side.")
+                .pointAt(util.vector().blockSurface(head, Direction.WEST)).placeNearTarget();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    // ------------------------------------------------------------------------------------------------ planter beds
+
+    private static void bedSoil(SceneBuilder scene, SceneBuildingUtil util, BlockPos pos) {
+        scene.world().modifyBlockEntityNBT(util.select().position(pos), com.kragnoth.cultivar.content.bed.PlanterBedBlockEntity.class,
+                tag -> tag.put("Soil", net.minecraft.nbt.NbtUtils.writeBlockState(Blocks.FARMLAND.defaultBlockState())), true);
+    }
+
+    public static void planterBeds(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("planter_beds", "Planter Beds");
+        scene.configureBasePlate(0, 0, 6);
+        scene.showBasePlate();
+        scene.idle(10);
+
+        var beds = util.select().fromTo(2, 1, 1, 4, 1, 3);
+        scene.world().showSection(beds, Direction.DOWN);
+        scene.idle(10);
+        BlockPos corner = util.grid().at(2, 1, 1), middle = util.grid().at(3, 1, 2);
+        scene.overlay().showText(90).text("A Planter Bed is a self-running crop plot. Touching beds join into one plot, up to 64, that shares its stock, water and output.")
+                .pointAt(util.vector().topOf(middle)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
+
+        scene.overlay().showControls(util.vector().topOf(middle), Pointing.DOWN, 40).rightClick()
+                .withItem(new ItemStack(Items.FARMLAND));
+        scene.idle(10);
+        for (int x = 2; x <= 4; x++) {
+            for (int z = 1; z <= 3; z++) {
+                bedSoil(scene, util, util.grid().at(x, 1, z));
+            }
+        }
+        scene.overlay().showText(80).text("Give each bed a soil block, then water: a bucket, or a pipe into any bed of the plot.")
+                .pointAt(util.vector().topOf(middle)).placeNearTarget();
+        scene.idle(90);
+
+        scene.world().showSection(util.select().fromTo(1, 1, 1, 1, 2, 1), Direction.DOWN);
+        scene.idle(10);
+        scene.overlay().showText(100).text("Feed seeds, fertilizer, trellises and cloches through one bed, by hand, hopper or pipe. The plot places trellises and cloches itself.")
+                .pointAt(util.vector().topOf(util.grid().at(1, 2, 1))).placeNearTarget().attachKeyFrame();
+        scene.idle(60);
+        for (int x = 2; x <= 4; x++) {
+            for (int z = 1; z <= 3; z++) {
+                BlockPos top = util.grid().at(x, 2, z);
+                scene.world().setBlock(top, CropModule.TIMBER_TRELLIS.get().defaultBlockState(), false);
+            }
+        }
+        scene.world().showSection(util.select().fromTo(2, 2, 1, 4, 2, 3), Direction.DOWN);
+        scene.idle(10);
+        for (int x = 2; x <= 4; x++) {
+            for (int z = 1; z <= 3; z++) {
+                crop(scene, util, util.grid().at(x, 2, z), "minecraft:wheat", 1, 7);
+            }
+        }
+        scene.idle(40);
+        scene.overlay().showText(100).text("It plants its best seeds, grows them blight-free, stacks trellises for tall crops, harvests into its outputs, and swaps in better seeds over time.")
+                .pointAt(util.vector().topOf(util.grid().at(3, 2, 2))).placeNearTarget().attachKeyFrame();
+        scene.idle(110);
+
+        frame(scene, util.grid().at(3, 2, 2), true);
+        crop(scene, util, util.grid().at(3, 2, 2), null, 1, 0);
+        scene.overlay().showText(90).text("Put a grafting frame on a bed and it becomes a breeder: children born there are banked as seeds for the plot.")
+                .pointAt(util.vector().topOf(util.grid().at(3, 2, 2))).placeNearTarget();
+        scene.idle(100);
+
+        scene.overlay().showControls(util.vector().topOf(corner), Pointing.DOWN, 40).rightClick()
+                .withItem(new ItemStack(com.simibubi.create.AllItems.WRENCH.get()));
+        scene.idle(10);
+        scene.overlay().showText(100).text("Sneak-right-click with an empty hand to take outputs, then stock, then soil. A wrench switches the plot to dismantle; redstone pauses it.")
+                .pointAt(util.vector().topOf(corner)).placeNearTarget().attachKeyFrame();
+        scene.idle(110);
+        scene.markAsFinished();
+    }
+
+    // ------------------------------------------------------------------------------------------------ trial beds
+
+    public static void trialBeds(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("trial_beds", "Trial Beds");
+        scene.configureBasePlate(0, 0, 5);
+        scene.showBasePlate();
+        scene.idle(10);
+
+        var beds = util.select().fromTo(1, 1, 1, 3, 1, 3);
+        scene.world().showSection(beds, Direction.DOWN);
+        scene.idle(10);
+        BlockPos middle = util.grid().at(2, 1, 2);
+        scene.overlay().showText(90).text("Trial Beds are a research plot. Touching beds join up, and a full 9x9 gets the best discovery odds.")
+                .pointAt(util.vector().topOf(middle)).placeNearTarget().attachKeyFrame();
+        scene.idle(100);
+
+        scene.overlay().showControls(util.vector().topOf(middle), Pointing.DOWN, 40).rightClick()
+                .withItem(new ItemStack(LedgerModule.LEDGER.get()));
+        scene.idle(10);
+        scene.overlay().showText(80).text("Load seeds of many plants and a Botanical Ledger, by hand or hopper.")
+                .pointAt(util.vector().topOf(middle)).placeNearTarget();
+        scene.idle(90);
+
+        for (int x = 1; x <= 3; x++) {
+            for (int z = 1; z <= 3; z++) {
+                BlockPos top = util.grid().at(x, 2, z);
+                boolean frameSquare = ((x + z) & 1) == 1;
+                scene.world().setBlock(top, CropModule.TIMBER_TRELLIS.get().defaultBlockState().setValue(TrellisBlock.CROSS, frameSquare), false);
+            }
+        }
+        scene.world().showSection(util.select().fromTo(1, 2, 1, 3, 2, 3), Direction.DOWN);
+        scene.idle(10);
+        String[] plants = {"minecraft:wheat", "minecraft:carrot", "minecraft:potato", "minecraft:beetroot", "minecraft:wheat"};
+        int n = 0;
+        for (int x = 1; x <= 3; x++) {
+            for (int z = 1; z <= 3; z++) {
+                if (((x + z) & 1) == 0) {
+                    crop(scene, util, util.grid().at(x, 2, z), plants[n++ % plants.length], 1, 7);
+                }
+            }
+        }
+        scene.overlay().showText(110).text("It grows them on a checkerboard of free trellises and grafting frames, with every habitat limit and all blight removed, and crosses them for real.")
+                .pointAt(util.vector().topOf(util.grid().at(2, 2, 2))).placeNearTarget().attachKeyFrame();
+        scene.idle(120);
+        sparkle(scene, util, util.grid().at(2, 2, 1));
+        scene.overlay().showText(100).text("Every real mutation it finds is recorded in the Ledger, and now and then it discovers an untested cross outright.")
+                .pointAt(util.vector().topOf(util.grid().at(2, 2, 1))).placeNearTarget();
+        scene.idle(110);
+        scene.overlay().showText(90).text("Sneak-right-click with an empty hand to take the Ledger back. Redstone pauses the plot so pipes can pull its seeds.")
+                .pointAt(util.vector().topOf(middle)).placeNearTarget();
         scene.idle(100);
         scene.markAsFinished();
     }

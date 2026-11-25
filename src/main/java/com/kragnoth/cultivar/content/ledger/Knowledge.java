@@ -35,7 +35,7 @@ public final class Knowledge {
         if (merged.size() == before) {
             return 0;
         }
-        set(player, new LedgerItem.Data(merged));
+        set(player, new LedgerItem.Data(merged, current.hints()));
         Set<ResourceKey<Plant>> fresh = new HashSet<>(merged);
         fresh.removeAll(current.researched());
         award(player, fresh);
@@ -61,7 +61,7 @@ public final class Knowledge {
         } else {
             kept.removeAll(plants);
         }
-        set(player, new LedgerItem.Data(kept));
+        set(player, new LedgerItem.Data(kept, plants == null ? Set.of() : get(player).hints()));
         return before - kept.size();
     }
 
@@ -69,9 +69,15 @@ public final class Knowledge {
     public static boolean exchange(ServerPlayer player, ItemStack ledger) {
         LedgerItem.Data book = LedgerItem.data(ledger);
         boolean learned = learn(player, book.researched()) > 0;
+        LedgerItem.Data before = get(player);
+        LedgerItem.Data withHints = before.withHints(book.hints());
+        if (withHints.hints().size() != before.hints().size()) {
+            set(player, withHints);
+            learned = true;
+        }
         LedgerItem.Data known = get(player);
-        if (known.researched().size() != book.researched().size() || !book.researched().containsAll(known.researched())) {
-            ledger.set(LedgerModule.LEDGER_DATA.get(), known);
+        if (!book.equals(known)) { // the player now holds everything the book had, and maybe more
+            ledger.set(LedgerModule.LEDGER_DATA.get(), known.merge(book));
             return true;
         }
         return learned;

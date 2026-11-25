@@ -261,6 +261,25 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
     }
 
     /** Segments the plant still needs to reach maturity, or 0 if it has room. */
+    /**
+     * Where the next trellis segment goes for a tall plant that needs more room (the free spot above the top of this
+     * stack), or null if none is needed or the spot is blocked. Machines (Planter and Trial Beds) use it to stack
+     * trellises themselves, like a player would.
+     */
+    @Nullable
+    public BlockPos nextSegmentPos() {
+        if (level == null || isSegment() || segmentsMissing() <= 0 || getBlockState().getValue(TrellisBlock.CLOCHE)) {
+            return null; // nothing stacks on a cloched trellis
+        }
+        BlockPos top = worldPosition;
+        while (TrellisBlock.hasSegmentAbove(level, top) && top.getY() - worldPosition.getY() < MAX_STACK - 1) {
+            top = top.above();
+        }
+        BlockPos next = top.above();
+        return next.getY() - worldPosition.getY() < MAX_STACK && level.getBlockState(next).canBeReplaced()
+                && level.getFluidState(next).isEmpty() ? next : null;
+    }
+
     public int segmentsMissing() {
         Plant p = plant.species();
         return p == null ? 0 : Math.max(0, p.blocksAt(p.matureStage()) - segmentsAvailable());
@@ -456,13 +475,29 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
         return out;
     }
 
+    /** The soil host's weed multiplier for the crop at {@code pos} (1 on plain soil). */
+    private static double weedMultiplier(net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        BlockPos below = pos.below();
+        return level.getBlockState(below).getBlock() instanceof com.kragnoth.cultivar.api.soil.SoilHost host
+                ? host.weedMultiplier(level, below) : 1.0;
+    }
+
     /** Weed spawn/growth/spread for this tick; true if a weed event consumed it. Called by the weeds phase. */
     public boolean tickWeeds(ServerLevel level, RandomSource random, InfluenceEffects fx) {
         if (!CultivarServerConfig.WEEDS_ENABLED.get()) {
             return false;
         }
+        double hostWeeds = weedMultiplier(level, worldPosition);
+        if (hostWeeds <= 0) {
+            if (weed != null) { // a bed keeps its crop clean: any blight that got in is cleared
+                weed = null;
+                weedStage = 0;
+                changed();
+            }
+            return false;
+        }
         ResourceKey<Stat> resistance = CoreModule.STRENGTH.getKey(); // Strength also resists weeds
-        double chance = GrowthMath.weedChance(plant.hasPlant(), stat(resistance), Genetics.max(resistance), fx);
+        double chance = GrowthMath.weedChance(plant.hasPlant(), stat(resistance), Genetics.max(resistance), fx) * hostWeeds;
         if (random.nextDouble() >= chance) {
             return false;
         }
@@ -494,7 +529,8 @@ public class CropBlockEntity extends BlockEntity implements IHaveGoggleInformati
             for (Direction dir : Direction.Plane.HORIZONTAL) {
                 BlockPos np = worldPosition.relative(dir);
                 if (level.isLoaded(np) && level.getBlockEntity(np) instanceof CropBlockEntity neighbour
-                        && neighbour.weed == null && !neighbour.isSegment() && random.nextBoolean()) {
+                        && neighbour.weed == null && !neighbour.isSegment() && random.nextBoolean()
+                        && random.nextDouble() < weedMultiplier(level, np)) {
                     neighbour.weed = weed;
                     neighbour.weedStage = 0;
                     neighbour.changed();

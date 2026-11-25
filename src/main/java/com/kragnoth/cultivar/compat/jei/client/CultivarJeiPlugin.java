@@ -53,7 +53,7 @@ import org.jetbrains.annotations.Nullable;
  *   <li>Crosses are a category, each hidden until the player knows the child and both parents (the same rule as the
  *       Ledger), so JEI never spoils discovery. {@code genetics.revealAllMutations} shows them all.</li>
  *   <li>Every bred plant gets an info page saying how it is found.</li>
- *   <li>Reference pages that spoil nothing: soils, fertilizers, the Assaying Engine; info pages for the machines.</li>
+ *   <li>Reference pages that spoil nothing: soils, fertilizers, the Assayers; info pages for the machines.</li>
  * </ul>
  */
 @JeiPlugin
@@ -171,8 +171,13 @@ public final class CultivarJeiPlugin implements IModPlugin {
             return;
         }
         Set<Holder<Plant>> bred = new LinkedHashSet<>();
-        for (Mutation m : level.registryAccess().registryOrThrow(CultivarRegistries.MUTATION)) {
-            CROSSES.add(new MutationCategory.Cross(m));
+        var mutations = level.registryAccess().registryOrThrow(CultivarRegistries.MUTATION);
+        for (Mutation m : mutations) {
+            // Three pages per cross, one shown at a time: fully known, or half-known with either parent as "?".
+            var key = mutations.getResourceKey(m).orElse(null);
+            for (int hidden = 0; hidden <= 2; hidden++) {
+                CROSSES.add(new MutationCategory.Cross(m, key, hidden));
+            }
             bred.add(m.child());
         }
         registration.addRecipes(MutationCategory.TYPE, List.copyOf(CROSSES));
@@ -202,6 +207,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
                 .map(h -> MutationCategory.seed(h)).toList();
         registration.addRecipes(AssayCategory.TYPE, List.of(new AssayCategory.Assay(seeds)));
 
+        AssayModule.tiers().forEach(b -> info(registration, b.get(), "assayer"));
         info(registration, PlanterBedModule.BED_ITEM.get(), "planter_bed");
         info(registration, TrialModule.TRIAL_BED_ITEM.get(), "trial_bed");
         info(registration, IrrigationModule.SPRINKLER_ITEM.get(), "sprinkler");
@@ -230,7 +236,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(CropModule.TIMBER_TRELLIS.get(), MutationCategory.TYPE);
         registration.addRecipeCatalyst(CropModule.IRON_TRELLIS.get(), MutationCategory.TYPE);
         registration.addRecipeCatalyst(TrialModule.TRIAL_BED.get(), MutationCategory.TYPE);
-        registration.addRecipeCatalyst(AssayModule.ENGINE_ITEM.get(), AssayCategory.TYPE);
+        AssayModule.tiers().forEach(b -> registration.addRecipeCatalyst(b.get(), AssayCategory.TYPE));
         for (var trellis : List.of(CropModule.TIMBER_TRELLIS.get(), CropModule.IRON_TRELLIS.get())) {
             registration.addRecipeCatalyst(trellis, GrowingCategory.TYPE, SOILS, FERTILIZERS, BLIGHTS);
         }
@@ -280,7 +286,16 @@ public final class CultivarJeiPlugin implements IModPlugin {
         List<MutationCategory.Cross> hidden = new ArrayList<>();
         for (MutationCategory.Cross cross : CROSSES) {
             Mutation m = cross.mutation();
-            boolean visible = reveal || knows(known, m.parentA()) && knows(known, m.parentB()) && knows(known, m.child());
+            boolean full = reveal || knows(known, m.parentA()) && knows(known, m.parentB()) && knows(known, m.child());
+            boolean visible;
+            if (cross.hidden() == 0) {
+                visible = full;
+            } else {
+                // Half-known (an Assayer's family-tree hint): show the parent the hint names, the other as "?".
+                var hint = cross.key() == null ? java.util.Optional.<LedgerItem.Hint>empty() : known.hintFor(cross.key());
+                int hide = hint.map(h -> m.parentA().is(h.shown()) ? 2 : 1).orElse(0);
+                visible = !full && hide == cross.hidden();
+            }
             (visible ? shown : hidden).add(cross);
         }
         rt.getRecipeManager().unhideRecipes(MutationCategory.TYPE, shown);

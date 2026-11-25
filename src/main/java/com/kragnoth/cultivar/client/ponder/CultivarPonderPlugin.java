@@ -26,7 +26,20 @@ public final class CultivarPonderPlugin implements PonderPlugin {
                 .addStoryBoard("crop_stats", CultivarScenes::stats);
         h.forComponents(CropModule.TIMBER_TRELLIS, CropModule.IRON_TRELLIS, LedgerModule.LEDGER, CropModule.SEED)
                 .addStoryBoard("crossbreeding", CultivarScenes::crossbreeding);
-        h.forComponents(AssayModule.ENGINE_ITEM)
+        h.forComponents(AssayModule.ENGINE_ITEM, AssayModule.BRASS_ENGINE_ITEM, AssayModule.CHROMATIC_ENGINE_ITEM)
                 .addStoryBoard("assaying", CultivarScenes::assaying);
+        h.forComponents(CropModule.SEED)
+                .addStoryBoard("field_crops", CultivarScenes::fieldCrops);
+        h.forComponents(com.kragnoth.cultivar.content.cloche.ClocheModule.BELL_CLOCHE, com.kragnoth.cultivar.content.cloche.ClocheModule.SHADE_CLOCHE,
+                        com.kragnoth.cultivar.content.cloche.ClocheModule.LAMP_CLOCHE)
+                .addStoryBoard("cloches", CultivarScenes::cloches);
+        h.forComponents(com.kragnoth.cultivar.content.irrigation.IrrigationModule.OLLA_ITEM)
+                .addStoryBoard("olla", CultivarScenes::olla);
+        h.forComponents(com.kragnoth.cultivar.content.irrigation.IrrigationModule.SPRINKLER_ITEM)
+                .addStoryBoard("sprinkler", CultivarScenes::sprinkler);
+        h.forComponents(com.kragnoth.cultivar.content.bed.PlanterBedModule.BED_ITEM)
+                .addStoryBoard("planter_beds", CultivarScenes::planterBeds);
+        h.forComponents(com.kragnoth.cultivar.content.trial.TrialModule.TRIAL_BED_ITEM)
+                .addStoryBoard("trial_beds", CultivarScenes::trialBeds);
     }
 }

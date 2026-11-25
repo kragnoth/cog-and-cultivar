@@ -104,19 +104,25 @@ public final class PlanterBedTests {
         ((CropBlockEntity) h.getBlockEntity(pos.above())).plant(wheat(h, 4), 3);
         h.assertTrue(items.extractItem(PlanterBedBlockEntity.SEEDS, 1, true).isEmpty()
                 && items.extractItem(PlanterBedBlockEntity.FERTILIZER, 1, true).isEmpty(),
-                "unpowered: pipes pull only crop outputs");
+                "growing: pipes pull only crop outputs");
         bed.inventory.setStackInSlot(PlanterBedBlockEntity.SEEDS, new ItemStack(Items.WHEAT_SEEDS, 3));
 
         h.setBlock(pos.east(), Blocks.REDSTONE_BLOCK);
         bed.work(level, false);
+        h.assertTrue(h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE),
+                "redstone only pauses the plot");
+        h.setBlock(pos.east(), Blocks.AIR);
+        bed.invalidatePowerForTests();
+        h.assertTrue(bed.toggleDismantling(), "a wrench puts the plot into dismantle mode");
+        bed.work(level, false);
         h.assertTrue(!h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE)
-                && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.CLOCHE).isEmpty(), "redstone takes the cloche back");
+                && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.CLOCHE).isEmpty(), "dismantling takes the cloche back");
         bed.work(level, false);
         h.assertTrue(h.getBlockState(pos.above()).isAir() && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.TRELLIS).isEmpty(),
                 "then the trellis");
         h.assertTrue(!bed.inventory.getStackInSlot(PlanterBedBlockEntity.SEEDS).isEmpty(), "the plant is banked as a seed");
         h.assertTrue(!items.extractItem(PlanterBedBlockEntity.TRELLIS, 1, false).isEmpty()
-                && !items.extractItem(PlanterBedBlockEntity.SEEDS, 1, false).isEmpty(), "powered: dump mode, every slot can be pulled");
+                && !items.extractItem(PlanterBedBlockEntity.SEEDS, 1, false).isEmpty(), "dismantling: every slot can be pulled");
         h.succeed();
     }
 
@@ -155,6 +161,24 @@ public final class PlanterBedTests {
         int gain = com.kragnoth.cultivar.content.core.genetics.Genetics.expressed(prodCrop.genome(),
                 com.kragnoth.cultivar.content.core.CoreModule.GAIN.getKey(), com.kragnoth.cultivar.content.core.genetics.Genetics.current());
         h.assertTrue(gain == 9, "the producer upgraded to the bred Gain 9 seed, got " + gain);
+        h.succeed();
+    }
+
+    /** A tended bed (default weedMultiplier 0) keeps its crop clean: no new blight, and blight that got in is cleared. */
+    @GameTest(template = "empty")
+    public static void bedsKeepCropsFreeOfWeeds(GameTestHelper h) {
+        var level = h.getLevel();
+        BlockPos bed = new BlockPos(1, 1, 1);
+        h.setBlock(bed, PlanterBedModule.BED.get());
+        ((PlanterBedBlockEntity) h.getBlockEntity(bed)).setSoil(Blocks.FARMLAND.defaultBlockState());
+        h.setBlock(bed.above(), CropModule.TIMBER_TRELLIS.get());
+        var crop = (com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(bed.above());
+        var weed = level.registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.WEED).holders().findFirst().orElseThrow();
+        crop.setWeed(weed, 0);
+        for (int i = 0; i < 200; i++) {
+            crop.tickWeeds(level, level.random, com.kragnoth.cultivar.api.influence.InfluenceEffects.NONE);
+        }
+        h.assertTrue(crop.weed() == null, "the bed cleared the blight and none came back");
         h.succeed();
     }
 }

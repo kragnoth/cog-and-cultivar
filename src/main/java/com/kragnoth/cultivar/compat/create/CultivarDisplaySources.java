@@ -22,7 +22,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * Display Link sources (spec §3.13): a trellis reports its crop ("Carrot 75%" / "Carrot: ready"), and the
- * Assaying Engine reports ledger progress ("Ledger 12/33 species") or, without a ledger, what it's assaying.
+ * Assayers report ledger progress ("Ledger 12/33 species") or, without a ledger, what it's assaying.
  * Lang: {@code cultivar.display_source.<id>}.
  */
 public final class CultivarDisplaySources {
@@ -47,8 +47,8 @@ public final class CultivarDisplaySources {
             if (!(context.getSourceBlockEntity() instanceof AssayingEngineBlockEntity engine)) {
                 return EMPTY_LINE;
             }
-            ItemStack ledger = engine.inventory.getStackInSlot(AssayingEngineBlockEntity.LEDGER);
-            if (ledger.isEmpty()) {
+            ItemStack ledger = engine.unitLedger();
+            if (ledger == null) {
                 ItemStack in = engine.inventory.getStackInSlot(AssayingEngineBlockEntity.SEED_IN);
                 return in.isEmpty() ? Component.translatable("cultivar.assay.idle")
                         : Component.translatable("cultivar.assay.progress",
@@ -111,7 +111,7 @@ public final class CultivarDisplaySources {
     static void bind() {
         DisplaySource.BY_BLOCK.add(CropModule.TIMBER_TRELLIS.get(), CROP.get());
         DisplaySource.BY_BLOCK.add(CropModule.IRON_TRELLIS.get(), CROP.get());
-        DisplaySource.BY_BLOCK.add(AssayModule.ENGINE.get(), LEDGER.get());
+        AssayModule.tiers().forEach(b -> DisplaySource.BY_BLOCK.add(b.get(), LEDGER.get()));
         DisplaySource.BY_BLOCK.add(com.kragnoth.cultivar.content.bed.PlanterBedModule.BED.get(), PLOT.get());
         DisplaySource.BY_BLOCK.add(com.kragnoth.cultivar.content.trial.TrialModule.TRIAL_BED.get(), TRIAL.get());
     }

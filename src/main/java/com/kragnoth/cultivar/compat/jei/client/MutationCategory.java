@@ -24,8 +24,11 @@ import net.minecraft.world.item.ItemStack;
 
 /** One cross: two parents, the child, its chance and the habitat it needs. Hidden until the player knows it. */
 final class MutationCategory implements IRecipeCategory<MutationCategory.Cross> {
-    /** A mutation as JEI sees it; identity matters, since hiding works on these exact instances. */
-    record Cross(Mutation mutation) {}
+    /**
+     * A mutation as JEI sees it; identity matters, since hiding works on these exact instances. {@code hidden}: 0 shows
+     * both parents, 1 hides parent A, 2 hides parent B (a half-known cross from an Assayer's family-tree hint).
+     */
+    record Cross(Mutation mutation, @org.jetbrains.annotations.Nullable net.minecraft.resources.ResourceKey<Mutation> key, int hidden) {}
 
     static final RecipeType<Cross> TYPE = RecipeType.create(Cultivar.MOD_ID, "mutation", Cross.class);
     private static final int WIDTH = 150;
@@ -65,14 +68,20 @@ final class MutationCategory implements IRecipeCategory<MutationCategory.Cross> 
 
     @Override
     public int getHeight() {
-        return TEXT_Y + 30;
+        return TEXT_Y + 40; // room for up to three habitat lines and the half-known note
     }
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, Cross cross, IFocusGroup focuses) {
         Mutation m = cross.mutation();
-        builder.addSlot(RecipeIngredientRole.INPUT, 1, 1).setStandardSlotBackground().addItemStack(seed(m.parentA()));
-        builder.addSlot(RecipeIngredientRole.INPUT, 37, 1).setStandardSlotBackground().addItemStack(seed(m.parentB()));
+        var a = builder.addSlot(RecipeIngredientRole.INPUT, 1, 1).setStandardSlotBackground();
+        var b = builder.addSlot(RecipeIngredientRole.INPUT, 37, 1).setStandardSlotBackground();
+        if (cross.hidden() != 1) {
+            a.addItemStack(seed(m.parentA()));
+        }
+        if (cross.hidden() != 2) {
+            b.addItemStack(seed(m.parentB()));
+        }
         builder.addSlot(RecipeIngredientRole.OUTPUT, 101, 1).setOutputSlotBackground().addItemStack(seed(m.child()));
     }
 
@@ -80,6 +89,11 @@ final class MutationCategory implements IRecipeCategory<MutationCategory.Cross> 
     public void draw(Cross cross, IRecipeSlotsView slots, GuiGraphics g, double mouseX, double mouseY) {
         var font = Minecraft.getInstance().font;
         g.drawString(font, "+", 25, 5, 0x404040, false);
+        if (cross.hidden() != 0) { // the unknown parent
+            int x = cross.hidden() == 1 ? 1 : 37;
+            g.drawString(font, "?", x + 6, 5, 0x806020, false);
+            g.drawString(font, Component.translatable("jei.cultivar.mutation.half_known"), 0, getHeight() - 9, 0x806020, false);
+        }
         arrow.draw(g, 66, 1);
         Mutation m = cross.mutation();
         g.drawString(font, Math.round(m.chance() * 100) + "%", 127, 5, 0x404040, false);

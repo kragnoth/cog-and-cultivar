@@ -62,27 +62,52 @@ public class TrialBedBlock extends BaseEntityBlock implements com.kragnoth.culti
         if (!(level.getBlockEntity(pos) instanceof TrialBedBlockEntity bed)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
+        // Into this bed first, then anywhere in the plot (seeds are shared plot stock; one Ledger serves the plot).
+        boolean valid = false;
         for (int slot = 0; slot < TrialBedBlockEntity.SLOTS; slot++) {
-            if (bed.inventory.isItemValid(slot, stack)) {
-                if (!level.isClientSide()) {
-                    ItemStack rest = bed.inventory.insertItem(slot, stack, false);
-                    if (rest.getCount() == stack.getCount()) {
-                        continue;
-                    }
-                    player.setItemInHand(hand, rest);
-                }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide());
-            }
+            valid |= bed.inventory.isItemValid(slot, stack);
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (!valid) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (!level.isClientSide()) {
+            ItemStack rest = stack;
+            java.util.List<TrialBedBlockEntity> order = new java.util.ArrayList<>(bed.plot());
+            order.remove(bed);
+            order.addFirst(bed);
+            for (TrialBedBlockEntity member : order) {
+                for (int slot = 0; slot < TrialBedBlockEntity.SLOTS && !rest.isEmpty(); slot++) {
+                    if (member.inventory.isItemValid(slot, rest)) {
+                        rest = member.inventory.insertItem(slot, rest, false);
+                    }
+                }
+            }
+            player.setItemInHand(hand, rest);
+            level.playSound(null, pos, net.minecraft.sounds.SoundEvents.ITEM_FRAME_ADD_ITEM, net.minecraft.sounds.SoundSource.BLOCKS, 0.6f, 1.2f);
+        }
+        return ItemInteractionResult.sidedSuccess(level.isClientSide());
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        // Machine rule: shift + empty hand takes items out: the Ledger (the plot's output) first, then this bed's seeds.
+        if (!player.isShiftKeyDown()) {
+            return InteractionResult.PASS;
+        }
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof TrialBedBlockEntity bed) {
-            ItemStack ledger = bed.inventory.extractItem(TrialBedBlockEntity.LEDGER, 1, false);
-            if (!ledger.isEmpty()) {
-                player.getInventory().placeItemBackInInventory(ledger);
+            for (TrialBedBlockEntity member : bed.plot()) {
+                ItemStack ledger = member.inventory.extractItem(TrialBedBlockEntity.LEDGER, 1, false);
+                if (!ledger.isEmpty()) {
+                    player.getInventory().placeItemBackInInventory(ledger);
+                    level.playSound(null, pos, net.minecraft.sounds.SoundEvents.ITEM_PICKUP, net.minecraft.sounds.SoundSource.PLAYERS, 0.4f, 1f);
+                    return InteractionResult.SUCCESS;
+                }
+            }
+            for (int slot = 0; slot < TrialBedBlockEntity.SEED_SLOTS; slot++) {
+                ItemStack seeds = bed.inventory.extractItem(slot, 64, false);
+                if (!seeds.isEmpty()) {
+                    player.getInventory().placeItemBackInInventory(seeds);
+                }
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide());

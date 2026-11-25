@@ -7,6 +7,7 @@ import com.kragnoth.cultivar.content.crop.CropBlockEntity;
 import com.kragnoth.cultivar.content.crop.TrellisBlock;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -32,10 +33,11 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Planter Bed. Right-click with: a soil block to fill it; a trellis to set one on top; a Bell Cloche to cover that
- * trellis; seeds or fertilizer to load it; a water bucket to fill it. Empty hand takes the outputs; sneak with an
- * empty hand to empty the soil. Pipes can also feed trellises and cloches, which the bed places itself. Pipes pull
- * only crop outputs, unless any bed in the plot has a redstone signal: then the plot strips down (cloche, then
- * trellis, back into stock; plants banked as seeds) and every slot can be pulled (dump mode). Pipes and funnels see the whole connected plot (see {@link BedNetwork}).
+ * trellis; seeds or fertilizer to load it; a water bucket to fill it. Sneak with an empty hand to take the plot's
+ * outputs, then this bed's stock, then its soil. Pipes can also feed trellises and cloches, which the bed places
+ * itself. Pipes pull only crop outputs, unless the plot is in dismantle mode (toggled with a wrench): then it strips
+ * down (cloche, then trellis, back into stock; plants banked as seeds) and every slot can be pulled. Redstone pauses
+ * the plot. Pipes and funnels see the whole connected plot (see {@link BedNetwork}).
  */
 public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.simibubi.create.content.equipment.wrench.IWrenchable {
     public static final MapCodec<PlanterBedBlock> CODEC = simpleCodec(PlanterBedBlock::new);
@@ -77,6 +79,13 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
     private static boolean isSoil(Level level, BlockState state) {
         return level.registryAccess().registryOrThrow(CultivarRegistries.SOIL).stream()
                 .anyMatch(s -> s.blocks().contains(state.getBlockHolder()));
+    }
+
+    /** A tended bed: weeds scaled by {@code planter_bed.weedMultiplier} (default 0, none). */
+    @Override
+    public double weedMultiplier(net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return com.kragnoth.cultivar.core.config.CultivarServerConfig.SPEC.isLoaded()
+                ? com.kragnoth.cultivar.core.config.CultivarServerConfig.BED_WEED_MULTIPLIER.get() : 0.0;
     }
 
     @Override
@@ -132,11 +141,20 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
-        // Seeds / fertilizer into their slots.
+        // Seeds / fertilizer: into this bed first, then anywhere in the plot (the plot shares its stock).
         for (int slot : new int[]{0, 1, 2, 3, PlanterBedBlockEntity.FERTILIZER}) {
             if (bed.inventory.isItemValid(slot, stack)) {
                 if (!level.isClientSide()) {
-                    player.setItemInHand(hand, bed.inventory.insertItem(slot, stack, false));
+                    ItemStack rest = bed.inventory.insertItem(slot, stack, false);
+                    for (PlanterBedBlockEntity other : bed.cachedNetwork()) {
+                        for (int s : new int[]{0, 1, 2, 3, PlanterBedBlockEntity.FERTILIZER}) {
+                            if (!rest.isEmpty() && other.inventory.isItemValid(s, rest)) {
+                                rest = other.inventory.insertItem(s, rest, false);
+                            }
+                        }
+                    }
+                    player.setItemInHand(hand, rest);
+                    level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.6f, 1.2f);
                 }
                 return ItemInteractionResult.sidedSuccess(level.isClientSide());
             }
@@ -149,23 +167,41 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
         if (!(level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed)) {
             return InteractionResult.PASS;
         }
+        // Machine rule: shift + empty hand takes items out: the plot's outputs, then this bed's stock, then its soil.
+        if (!player.isShiftKeyDown()) {
+            return InteractionResult.PASS;
+        }
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
-        if (player.isShiftKeyDown()) {
-            if (bed.soil() != null) {
-                player.getInventory().placeItemBackInInventory(new ItemStack(bed.soil().getBlock()));
-                bed.setSoil(null);
-            }
-            return InteractionResult.SUCCESS;
-        }
-        for (int i = PlanterBedBlockEntity.OUT_START; i < PlanterBedBlockEntity.SLOTS; i++) {
-            ItemStack out = bed.inventory.extractItem(i, 64, false);
-            if (!out.isEmpty()) {
-                player.getInventory().placeItemBackInInventory(out);
+        boolean took = false;
+        for (PlanterBedBlockEntity member : bed.cachedNetwork()) {
+            for (int i = PlanterBedBlockEntity.OUT_START; i < PlanterBedBlockEntity.SLOTS; i++) {
+                ItemStack out = member.inventory.extractItem(i, 64, false);
+                if (!out.isEmpty()) {
+                    player.getInventory().placeItemBackInInventory(out);
+                    took = true;
+                }
             }
         }
-        return InteractionResult.SUCCESS;
+        if (!took) {
+            for (int i = 0; i < PlanterBedBlockEntity.OUT_START; i++) {
+                ItemStack in = bed.inventory.extractItem(i, 64, false);
+                if (!in.isEmpty()) {
+                    player.getInventory().placeItemBackInInventory(in);
+                    took = true;
+                }
+            }
+        }
+        if (!took && bed.soil() != null) { // last of all, the soil itself
+            player.getInventory().placeItemBackInInventory(new ItemStack(bed.soil().getBlock()));
+            bed.setSoil(null);
+            took = true;
+        }
+        if (took) {
+            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4f, 1f);
+        }
+        return took ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 
     @Override
@@ -194,9 +230,24 @@ public class PlanterBedBlock extends BaseEntityBlock implements SoilHost, com.si
         super.onRemove(state, level, pos, newState, moving);
     }
 
-    /** Beds don't rotate; sneak-wrench picks them up (contents drop). */
+    /**
+     * Beds don't rotate: the wrench flips the whole plot between growing and dismantling (strip trellises and cloches
+     * back into stock, bank plants as seeds, and let pipes empty every slot). Sneak-wrench picks the bed up.
+     */
     @Override
     public InteractionResult onWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
-        return InteractionResult.PASS;
+        Level level = context.getLevel();
+        if (!(level.getBlockEntity(context.getClickedPos()) instanceof PlanterBedBlockEntity bed)) {
+            return InteractionResult.PASS;
+        }
+        if (!level.isClientSide()) {
+            boolean dismantling = bed.toggleDismantling();
+            if (context.getPlayer() != null) {
+                context.getPlayer().displayClientMessage(Component.translatable(dismantling ? "cultivar.bed.mode.dismantle"
+                        : "cultivar.bed.mode.grow"), true);
+            }
+            level.playSound(null, context.getClickedPos(), SoundEvents.ITEM_FRAME_ROTATE_ITEM, SoundSource.BLOCKS, 1f, dismantling ? 0.8f : 1.2f);
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 }

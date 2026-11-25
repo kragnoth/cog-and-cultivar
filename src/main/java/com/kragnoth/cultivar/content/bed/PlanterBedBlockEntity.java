@@ -74,7 +74,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
 
     /**
      * Automation: seeds, fertilizer, trellises and cloches go in. Normally only the crop outputs come out; while the
-     * plot is powered (dump mode) every slot can be pulled, so the whole plot empties through its pipes.
+     * plot is dismantling (wrench mode) every slot can be pulled, so the whole plot empties through its pipes.
      */
     public final IItemHandler automation = new IItemHandler() {
         @Override
@@ -94,7 +94,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
 
         @Override
         public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return slot >= OUT_START || isPlotPowered() ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
+            return slot >= OUT_START || isPlotDismantling() ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
         }
 
         @Override
@@ -126,6 +126,8 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
     private final PlotTracker<PlanterBedBlockEntity> tracker =
             new PlotTracker<>(this, PlanterBedBlockEntity.class, BedNetwork.MAX_BEDS, b -> b.tracker);
     /** This bed's trellis is a grafting frame the bed keeps re-arming (set when it sees a cross above). */
+    /** Dismantle mode, toggled plot-wide with a wrench. */
+    private boolean dismantling;
     private boolean breeding;
     /** Cycles the crop above has been held mature for a neighbouring breeder. */
     private int heldCycles;
@@ -166,13 +168,39 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         return tracker.members();
     }
 
-    /** True if any bed in the plot has a redstone signal: the plot strips down and dumps everything. */
+    /** True if any bed in the plot has a redstone signal: the plot pauses, like every Cultivar machine. */
     public boolean isPlotPowered() {
         return tracker.isPowered();
     }
 
+    /** Dismantle mode (set with a wrench, plot-wide): the plot strips down and lets pipes empty every slot. */
+    public boolean isPlotDismantling() {
+        for (PlanterBedBlockEntity bed : cachedNetwork()) {
+            if (bed.dismantling) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Wrench: flips the whole plot between growing and dismantling. Returns the new mode. Server side. */
+    public boolean toggleDismantling() {
+        boolean next = !isPlotDismantling();
+        for (PlanterBedBlockEntity bed : cachedNetwork()) {
+            bed.dismantling = next;
+            bed.setChanged();
+            bed.needsSync = true;
+        }
+        return next;
+    }
+
     /** A neighbour changed (maybe redstone): re-check the plot's power on the next query. */
     void invalidatePower() {
+        tracker.invalidatePower();
+    }
+
+    /** For game tests, which change redstone within one tick. */
+    public void invalidatePowerForTests() {
         tracker.invalidatePower();
     }
 
@@ -216,10 +244,13 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
      */
     public void work(ServerLevel server, boolean watered) {
         BlockPos above = worldPosition.above();
-        // Redstone on any bed: the plot strips down (cloche and trellis back into stock, plants banked as seeds)
-        // and dumps everything through its pipes (see automation).
-        if (isPlotPowered()) {
+        // Dismantle mode (wrench): the plot strips down (cloche and trellis back into stock, plants banked as seeds)
+        // and lets its pipes empty everything (see automation). Redstone just pauses it.
+        if (isPlotDismantling()) {
             strip(server, above);
+            return;
+        }
+        if (isPlotPowered()) {
             return;
         }
         // Build: set a stocked trellis on an empty spot, then cover it with a stocked cloche.
@@ -237,7 +268,8 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         }
         var random = server.random;
         BlockState trellis = server.getBlockState(above);
-        if (!trellis.getValue(TrellisBlock.CLOCHE) && !trellis.getValue(TrellisBlock.CROSS) && !TrellisBlock.hasSegmentAbove(server, above)) {
+        if (!trellis.getValue(TrellisBlock.CLOCHE) && !trellis.getValue(TrellisBlock.CROSS) && !TrellisBlock.hasSegmentAbove(server, above)
+                && (!crop.hasPlant() || crop.segmentsMissing() == 0)) {
             Slot c = equipment(CLOCHE);
             if (c != null && c.stack().getItem() instanceof com.kragnoth.cultivar.content.cloche.BellClocheItem cloche) {
                 trellis = cloche.fit(trellis);
@@ -267,6 +299,21 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         if (!crop.hasPlant()) {
             bestSeed(null).ifPresent(slot -> plantFrom(crop, slot));
             return;
+        }
+        if (crop.segmentsMissing() > 0 && trellis.getValue(TrellisBlock.CLOCHE)) {
+            // A tall plant can't grow under a cloche: put the cloche back in stock so trellises can stack.
+            server.setBlock(above, trellis.setValue(TrellisBlock.CLOCHE, false), Block.UPDATE_ALL);
+            restock(server, above, new ItemStack(trellis.getValue(TrellisBlock.CLOCHE_TYPE).item()), CLOCHE);
+            return;
+        }
+        BlockPos segment = crop.nextSegmentPos();
+        if (segment != null) { // a tall plant: stack a stocked trellis on top so it can reach full height
+            Slot t = equipment(TRELLIS);
+            if (t != null) {
+                server.setBlock(segment, ((TrellisBlock) ((net.minecraft.world.item.BlockItem) t.stack().getItem()).getBlock()).defaultBlockState(), Block.UPDATE_ALL);
+                t.bed().inventory.extractItem(t.index(), 1, false);
+                return;
+            }
         }
         if (crop.isMature()) {
             if (nextToBreeder(server) && heldCycles++ < CultivarServerConfig.BED_BREED_HOLD.get()) {
@@ -517,6 +564,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         tag.put("Inventory", inventory.serializeNBT(registries));
         tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
         tag.putBoolean("Breeding", breeding);
+        tag.putBoolean("Dismantling", dismantling);
         if (soil != null) {
             tag.put("Soil", NbtUtils.writeBlockState(soil));
         }
@@ -528,6 +576,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
         tank.readFromNBT(registries, tag.getCompound("Tank"));
         breeding = tag.getBoolean("Breeding");
+        dismantling = tag.getBoolean("Dismantling");
         readClient(tag, registries);
     }
 
@@ -547,6 +596,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
                 tank.readFromNBT(registries, tag.getCompound("Tank"));
             }
             breeding = tag.getBoolean("Breeding");
+            dismantling = tag.getBoolean("Dismantling");
         }
         return !java.util.Objects.equals(oldSoil, soil) || oldWater != syncedWater;
     }
@@ -562,6 +612,7 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
         tag.put("Inventory", inventory.serializeNBT(registries));
         tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
         tag.putBoolean("Breeding", breeding);
+        tag.putBoolean("Dismantling", dismantling);
         return tag;
     }
 
@@ -652,6 +703,11 @@ public class PlanterBedBlockEntity extends BlockEntity implements IHaveGoggleInf
             }
         }
         tooltip.add(Component.translatable("cultivar.bed.plot", plot.size(), breeders).withStyle(ChatFormatting.GOLD));
+        if (isPlotDismantling()) {
+            tooltip.add(Component.translatable("cultivar.bed.dismantling").withStyle(ChatFormatting.RED));
+        } else if (isPlotPowered()) {
+            tooltip.add(Component.translatable("cultivar.bed.paused").withStyle(ChatFormatting.YELLOW));
+        }
         tooltip.add(Component.translatable("cultivar.bed.soil", soil == null
                 ? Component.translatable("cultivar.bed.no_soil") : soil.getBlock().getName()).withStyle(ChatFormatting.GRAY));
         // Water is synced per bed only as "has water"; the exact plot total is server-side, shown via Jade.

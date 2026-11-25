@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 
-/** Assaying Engine: any seed in, the same seed out with its stats revealed; a Ledger in its slot records the species. */
+/** Assayers: any seed in, the same seed out with its stats revealed; a Ledger in the unit records the species. */
 final class AssayCategory implements IRecipeCategory<AssayCategory.Assay> {
     record Assay(List<ItemStack> seeds) {}
 

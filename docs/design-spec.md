@@ -559,6 +559,26 @@ The original AgriCraft-derived notes below are kept for reference.
 - **Seed Satchel:** no enchant gate (the 1.18 enchant requirement was friction for little gain); instead the satchel needs a **brass dial upgrade** to enable sorting. Same capacity and sorter logic; the sorter dial is shown on the item model via an item property.
 - **Transplanting Spade / Pruning Shears:** the same function as trowel and clipper.
 
+### 3.12a Assayers (tiered, planned and built 2026-11-25)
+
+- **Look:** a Mechanical Crafter laid on its back (Create's own crafter geometry and textures, generated from the
+  Create jar by `tools/art/gen_assayer.py`), casing swapped per tier, moist farmland where the crafting grid was.
+  The farmland sits in a 6x6 pit; the seed under test grows there as a sprout (its own stage textures) while it is
+  assayed. Tiers: **andesite** (open pit), **brass** (a flush glazed hatch, like a cold frame), **chromatic** (the
+  hatch in chromatic metal, faintly glowing; recipe uses Create's legacy `create:chromatic_compound`, which packs
+  re-enable; pack makers can swap it).
+- **Power:** a vertical small cogwheel (rendered in the side window) meshes with neighbouring Assayers and
+  cogwheels like crafters do; a shaft from below also works. Stress impact `assayer.stressImpact` (default 3).
+- **Unit:** touching Assayers (any tier) form one unit (`PlotTracker`): one item handler for pipes and funnels,
+  seeds spread to idle members, one Ledger serves all. Speed = RPM × tier multiplier (config 1/2/4).
+- **Ledger / family tree:** records each assayed species. With chance `assayer.familyTreeChance` (0.2) it also
+  records one random not-yet-known cross from anywhere in the species' ancestry (parents and child, so it shows in
+  JEI; repeated assays fill the whole tree), and leaves **half-known hints** for every cross the species leads to,
+  two generations down: JEI shows the child and the known parent, the partner as "?". Hints live in the Ledger and
+  player knowledge alongside species.
+- **Hands (every Cultivar machine):** right-click with an item loads the unit/plot; shift + empty hand takes items
+  out (outputs first). Planter Bed soil comes out with a wrench.
+
 ### 3.13 Seed Vault (storage, rebuilt) — dropped
 
 > **Dropped:** seeds stack per genome, Create item vaults and the stock system store them, and the Phase 3 filter attributes (species, stat ≥ N, assayed) do the sorting.
@@ -742,11 +762,11 @@ Dependencies: Create `6.0.11`, Ponder `1.0.85` (`net.createmod.ponder`), Flywhee
 | **3 — Create farming** ✅ | Harvester override, deployer actions, item attributes (stat filters), comparator/Display Link, **cull loop: Millstone seeds → Seed Meal → fertilizer** | Fully automated plant–harvest–sort loop |
 | **4 — Water** ✅ | One block: the **Sprinkler** (1000 mB water tank, runs only while it has water, 1 mB per N ticks; adds random ticks + occasional BonemealEvent pulses to growables in a 9×9 area, moistens farmland; fed by any NeoForge fluid-capability pipe: Create, Pipez, Modern Dynamics). Cisterns/drip lines dropped; troughs return as the Irrigation Channel in Phase C | Sprinkler field fed by Create pipes |
 | **5 — Climate** ❌ dropped | Temperature added no gameplay; soils, the Sprinkler and the Bell Cloche already cover climate control. Left to addons via the API (see ARCHITECTURE.md "Extending from an addon") | — |
-| **Planter Bed** ✅ | End-stage breeding machine. Self-contained, pipe-fed (soil, ranked seed stock, fertilizer, trellis + cloche supply, 4000 mB water, 9 outputs); touching beds form one plot (shared capabilities, balanced water, plot-wide goggles + comparator). Places fed trellises/cloches itself; redstone strips them back. Breeder beds (grafting frame above) bank newborn children as seeds and re-arm; producer beds plant the best seed, hold mature crops for neighbouring breeders, harvest, and upgrade to better seeds of the same species. Ranking = weighted stats (config) | A self-improving plot fed only by pipes |
+| **Planter Bed** ✅ | End-stage breeding machine. Self-contained, pipe-fed (soil, ranked seed stock, fertilizer, trellis + cloche supply, 4000 mB water, 9 outputs); touching beds form one plot (shared capabilities, balanced water, plot-wide goggles + comparator). Places fed trellises/cloches itself; a wrench toggles dismantle mode (strips them back, pipes empty every slot); redstone pauses. Breeder beds (grafting frame above) bank newborn children as seeds and re-arm; producer beds plant the best seed, hold mature crops for neighbouring breeders, harvest, and upgrade to better seeds of the same species. Ranking = weighted stats (config) | A self-improving plot fed only by pipes |
 | **Trial Bed** ✅ | Research plot (brass casing): touching Trial Beds grow and cross their stocked seeds for real with every limiter removed (ideal soil host: no requirements, weeds or mutation habitats). Free trellises in a checkerboard: producers plant random stocked species (spending a seed), hold mature to parent, then rotate; frames breed, and a child of a new species records that mutation in the Ledger. Bonus: every N minutes (config, default 5) a roll at a configurable chance (default 5% for a full 9×9, scaled by plot size) discovers a random untested mutation whose parents are both stocked, records parents + child in the plot's Ledger (recipe appears), and spends one seed of each parent. Inputs: seeds + Ledger; output: the Ledger | A 9×9 fills a Ledger over time |
 | **6 — Content** (slimmed) | **Ore-blooms** ✅ (22 blooms incl. 12 low-value stepping stones, data-only, drop `create:crushed_raw_*` and gems), **habitat blight variants** ✅ (9, data-driven `habitat`). Derelict Conservatories ✅ (greenhouse + lean-to ruins, decay processor, loot). Optional: Wall Trellis. Dropped: Brass Apiary, Seed Vault, Livestock Trough/fodder genes, Ore Petals, Brassleaf gating | Pack-ready |
 | **Later — Optional compat** | Serene Seasons (`cultivar:season` growth condition; cloche/conservatory season immunity), loaded only when the mod is present | No effect or cost without the mod |
-| **7 — Polish** | Excalibur-based asset pass (blooms ✅, blights ✅), sounds ✅ (vanilla/Create events), advancements ✅, Ponder scenes ✅ (spreading, stats, crossbreeding, assaying), JEI ✅ / EMI categories, Jade | Release |
+| **7 — Polish** | Excalibur-based asset pass (blooms ✅, blights ✅), sounds ✅ (vanilla/Create events), advancements ✅, Ponder scenes ✅ (spreading, stats, crossbreeding, assaying, field crops, cloches, Olla, Sprinkler, Planter Beds, Trial Beds), JEI ✅ / EMI categories, Jade | Release |
 
 **To do soon**
 - [ ] **Keep test code out of the release jar.** Move `gametest/`, `content/devtest/`, `client/devtest/` and the test

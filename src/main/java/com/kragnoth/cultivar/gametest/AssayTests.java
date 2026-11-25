@@ -52,4 +52,70 @@ public final class AssayTests {
         h.assertTrue(LedgerItem.data(be.inventory.getStackInSlot(LEDGER)).knows(wheatKey), "the ledger recorded wheat");
         h.succeed();
     }
+
+    /** Touching Assayers form one unit: one handler fills them, hand loading spreads, one Ledger serves all. */
+    @GameTest(template = "empty")
+    public static void unitSharesInputOutputAndLedger(GameTestHelper h) {
+        ResourceKey<Plant> wheatKey = ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.withDefaultNamespace("wheat"));
+        Holder<Plant> wheat = h.getLevel().registryAccess().registryOrThrow(CultivarRegistries.PLANT).getHolderOrThrow(wheatKey);
+        BlockPos a = new BlockPos(0, 1, 1), b = new BlockPos(1, 1, 1), c = new BlockPos(2, 1, 1);
+        h.setBlock(a, AssayModule.ENGINE.get());
+        h.setBlock(b, AssayModule.BRASS_ENGINE.get());
+        h.setBlock(c, AssayModule.CHROMATIC_ENGINE.get());
+        AssayingEngineBlockEntity ea = (AssayingEngineBlockEntity) h.getBlockEntity(a),
+                eb = (AssayingEngineBlockEntity) h.getBlockEntity(b), ec = (AssayingEngineBlockEntity) h.getBlockEntity(c);
+        h.assertTrue(ea.unit().size() == 3, "three touching Assayers form one unit, any tier");
+        h.assertTrue(ea.unitHandler().getSlots() == 9, "one handler covers the unit");
+
+        ItemStack rest = eb.insertIntoUnit(CultivarSeedItem.of(Genome.base(wheat)).copyWithCount(9));
+        h.assertTrue(rest.isEmpty(), "all seeds fit");
+        h.assertTrue(ea.inventory.getStackInSlot(SEED_IN).getCount() == 3 && ec.inventory.getStackInSlot(SEED_IN).getCount() == 3,
+                "hand loading spreads seeds across the unit");
+        h.assertTrue(ea.insertIntoUnit(new ItemStack(LedgerModule.LEDGER.get())).isEmpty(), "the unit takes a Ledger");
+        h.assertTrue(!ec.insertIntoUnit(new ItemStack(LedgerModule.LEDGER.get())).isEmpty(), "but only one");
+
+        // Same RPM, tiers 1x / 2x / 4x: after 4 ticks at 32 RPM andesite is 4% in, chromatic 16%.
+        for (int i = 0; i < 4; i++) {
+            ea.advance(32);
+            eb.advance(32);
+            ec.advance(32);
+        }
+        h.assertTrue(ec.progress() > eb.progress() && eb.progress() > ea.progress(), "higher tiers assay faster");
+        for (int i = 0; i < 200; i++) {
+            ec.advance(256);
+        }
+        h.assertTrue(ec.inventory.getStackInSlot(SEED_OUT).getCount() == 3, "chromatic finished its share");
+        h.assertTrue(LedgerItem.data(ea.inventory.getStackInSlot(LEDGER)).knows(wheatKey), "the Ledger on another member recorded it");
+        var taken = eb.takeFromUnit();
+        h.assertTrue(taken.size() == 1 && taken.getFirst().getCount() == 3, "shift + empty hand takes finished seeds first");
+        h.succeed();
+    }
+
+    /** Family tree: one ancestor cross fully recorded, and half-known hints for crosses the plant leads to. */
+    @GameTest(template = "empty")
+    public static void familyTreeRecordsAncestryAndHints(GameTestHelper h) {
+        var mutations = h.getLevel().registryAccess().registryOrThrow(CultivarRegistries.MUTATION);
+        var m = mutations.stream().findFirst().orElse(null);
+        if (m == null) {
+            h.succeed();
+            return;
+        }
+        BlockPos pos = new BlockPos(1, 1, 1);
+        h.setBlock(pos, AssayModule.ENGINE.get());
+        AssayingEngineBlockEntity be = (AssayingEngineBlockEntity) h.getBlockEntity(pos);
+
+        ItemStack ledger = new ItemStack(LedgerModule.LEDGER.get());
+        h.assertTrue(be.recordFamily(ledger, m.child().unwrapKey().orElseThrow()), "a child with unknown ancestry teaches something");
+        var data = LedgerItem.data(ledger);
+        h.assertTrue(mutations.stream().anyMatch(x -> java.util.stream.Stream.of(x.parentA(), x.parentB(), x.child())
+                .allMatch(p -> data.knows(p.unwrapKey().orElseThrow()))), "one cross in its ancestry is now fully known");
+
+        ItemStack second = new ItemStack(LedgerModule.LEDGER.get());
+        var parent = m.parentA().unwrapKey().orElseThrow();
+        be.recordFamily(second, parent);
+        var key = mutations.getResourceKey(m).orElseThrow();
+        h.assertTrue(LedgerItem.data(second).hints().stream().anyMatch(hint -> hint.cross().equals(key)),
+                "a parent's assay leaves a half-known hint for the cross it leads to");
+        h.succeed();
+    }
 }

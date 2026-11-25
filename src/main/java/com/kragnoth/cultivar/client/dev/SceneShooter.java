@@ -226,7 +226,7 @@ public final class SceneShooter {
         crop(level, 10, DZ, timber.setValue(TrellisBlock.CLOCHE, true), wheat, 5);
         crop(level, 11, DZ, timber, wheat, 5);
 
-        // Assaying Engine on a creative motor, loaded with seeds so it runs.
+        // Assayer on a creative motor, loaded with seeds so it runs.
         BlockState motor = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(
                 ResourceLocation.fromNamespaceAndPath("create", "creative_motor")).defaultBlockState();
         motor = motor.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING, net.minecraft.core.Direction.UP);

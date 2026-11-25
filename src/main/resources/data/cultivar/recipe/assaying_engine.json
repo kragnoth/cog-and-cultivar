@@ -2,22 +2,25 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "GLG",
-    "GSG",
-    " C "
+    "GFG",
+    "LCL",
+    " S "
   ],
   "key": {
     "G": {
       "item": "minecraft:glass_pane"
     },
+    "F": {
+      "item": "minecraft:dirt"
+    },
     "L": {
-      "item": "create:electron_tube"
+      "item": "create:cogwheel"
+    },
+    "C": {
+      "item": "create:andesite_casing"
     },
     "S": {
       "item": "create:shaft"
-    },
-    "C": {
-      "item": "create:brass_casing"
     }
   },
   "result": {

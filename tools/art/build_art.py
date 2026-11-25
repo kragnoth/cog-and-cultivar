@@ -78,7 +78,6 @@ def leaded(path, tint, mullions=(7, 8)):
 
 
 POLISH = {
-    'block/assay_glass': lambda p: leaded(p, (210, 228, 235, 60)),
     'block/lamp_cloche': lambda p: leaded(p, (240, 170, 70, 120)),
 }
 

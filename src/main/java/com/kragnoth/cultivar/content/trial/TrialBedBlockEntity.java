@@ -280,6 +280,11 @@ public class TrialBedBlockEntity extends BlockEntity implements IHaveGoggleInfor
             plantRandom(crop, random);
             return;
         }
+        BlockPos segment = crop.nextSegmentPos();
+        if (segment != null) { // a tall plant: stack another (free) trellis so it can reach full height and parent
+            server.setBlock(segment, com.kragnoth.cultivar.content.crop.CropModule.TIMBER_TRELLIS.get().defaultBlockState(), Block.UPDATE_ALL);
+            return;
+        }
         if (crop.isMature()) {
             if (heldCycles++ >= CultivarServerConfig.TRIAL_HOLD_CYCLES.get()) {
                 heldCycles = 0;

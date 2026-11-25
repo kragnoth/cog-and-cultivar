@@ -24,10 +24,17 @@ public final class CultivarServerConfig {
     public static final ModConfigSpec.IntValue BED_GROWTH_ODDS;
     public static final ModConfigSpec.IntValue BED_FERTILIZER_ODDS;
     public static final ModConfigSpec.IntValue BED_BREED_HOLD;
+    public static final ModConfigSpec.DoubleValue BED_WEED_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_GAIN;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_GROWTH;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_STRENGTH;
     public static final ModConfigSpec.DoubleValue BED_QUALITY_VIGOUR;
+    public static final ModConfigSpec.DoubleValue ASSAY_STRESS;
+    public static final ModConfigSpec.DoubleValue ASSAY_SPEED_ANDESITE;
+    public static final ModConfigSpec.DoubleValue ASSAY_SPEED_BRASS;
+    public static final ModConfigSpec.DoubleValue ASSAY_SPEED_CHROMATIC;
+    public static final ModConfigSpec.DoubleValue ASSAY_FAMILY_CHANCE;
+    public static final ModConfigSpec.IntValue ASSAY_MAX_UNIT;
     public static final ModConfigSpec.IntValue TRIAL_INTERVAL_MINUTES;
     public static final ModConfigSpec.DoubleValue TRIAL_CHANCE;
     public static final ModConfigSpec.IntValue TRIAL_FULL_SIZE;
@@ -67,11 +74,11 @@ public final class CultivarServerConfig {
                 .defineEnum("statExpression", Genetics.Expression.MAX);
         CLONE_MUTATIONS = b.comment("Whether a single-parent clone can still drift stats.")
                 .define("cloneMutations", false);
-        REQUIRE_ASSAY = b.comment("Seed item tooltips hide stats until the seed is assayed (Assaying Engine).",
+        REQUIRE_ASSAY = b.comment("Seed item tooltips hide stats until the seed is assayed (Assayer).",
                         "Goggles always read crops in the field.")
                 .define("requireAssay", true);
         SATCHEL_SEED_BASE = b.comment("Harvesting a mature plant with the Seed Satchel (hand or Deployer): base chance of a seed.",
-                        "Chance = base + perVigour * Vigour. Harvesters, hands and shears never give seeds.")
+                        "Chance = base + perVigour * Vigor. Harvesters, hands and shears never give seeds.")
                 .defineInRange("satchelSeedBase", 0.25, 0.0, 1.0);
         SATCHEL_SEED_PER_VIGOUR = b.defineInRange("satchelSeedPerVigour", 0.05, 0.0, 1.0);
         REVEAL_ALL_MUTATIONS = b.comment("Show every cross in JEI and the Ledger, known or not (creative or guide-style packs).",
@@ -86,6 +93,20 @@ public final class CultivarServerConfig {
                 .defineInRange("maxMutationMultiplier", 1.5, 1.0, 4.0);
         MIN_WEED_MULTIPLIER = b.comment("Floor on the combined weed multiplier (lower = stronger suppression).")
                 .defineInRange("minWeedMultiplier", 0.5, 0.0, 1.0);
+        b.pop();
+
+        b.push("assayer");
+        ASSAY_STRESS = b.comment("Stress impact of each Assayer, per RPM (Create units; a Millstone is 4).")
+                .defineInRange("stressImpact", 3.0, 0.0, 64.0);
+        ASSAY_SPEED_ANDESITE = b.comment("Speed multipliers per tier. At 1.0, 32 RPM assays a seed in 5 s; speed scales with RPM.")
+                .defineInRange("speedAndesite", 1.0, 0.01, 64.0);
+        ASSAY_SPEED_BRASS = b.defineInRange("speedBrass", 2.0, 0.01, 64.0);
+        ASSAY_SPEED_CHROMATIC = b.defineInRange("speedChromatic", 4.0, 0.01, 64.0);
+        ASSAY_FAMILY_CHANCE = b.comment("With a Botanical Ledger in the unit: chance per assayed seed to also record one of the",
+                        "crosses that produce its species (both parents), so the cross shows up in JEI.")
+                .defineInRange("familyTreeChance", 0.2, 0.0, 1.0);
+        ASSAY_MAX_UNIT = b.comment("Most Assayers that join into one unit (shared input/output).")
+                .defineInRange("maxUnitSize", 81, 1, 256);
         b.pop();
 
         b.push("trial_bed");
@@ -145,8 +166,11 @@ public final class CultivarServerConfig {
                 .defineInRange("fertilizerOdds", 12, 1, 10_000);
         BED_BREED_HOLD = b.comment("Cycles a mature crop next to a breeding bed waits before harvest, so the grafting frame can use it as a parent.")
                 .defineInRange("breedHoldCycles", 40, 0, 10_000);
+        BED_WEED_MULTIPLIER = b.comment("Weeds on crops in a Planter Bed, relative to plain soil: 0 = none (a tended bed; any blight",
+                        "already there is cleared), 1 = as on soil. Trial Beds never grow weeds.")
+                .defineInRange("weedMultiplier", 0.0, 0.0, 1.0);
         BED_QUALITY_GAIN = b.comment("Seed ranking weights: beds plant, keep and upgrade to the highest weighted stat total.",
-                        "Defaults favour output: Gain 3, Growth 2, Strength 1, Vigour 1.")
+                        "Defaults favor output: Gain 3, Growth 2, Strength 1, Vigor 1.")
                 .defineInRange("qualityGain", 3.0, 0.0, 100.0);
         BED_QUALITY_GROWTH = b.defineInRange("qualityGrowth", 2.0, 0.0, 100.0);
         BED_QUALITY_STRENGTH = b.defineInRange("qualityStrength", 1.0, 0.0, 100.0);

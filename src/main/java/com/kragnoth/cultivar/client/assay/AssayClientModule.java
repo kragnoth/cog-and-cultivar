@@ -14,8 +14,6 @@ public final class AssayClientModule implements ClientModule {
 
     @Override
     public void onConstructClient(IEventBus modBus, ModContainer container) {
-        // Touch the partial now so it is registered before the first model bake.
-        AssayingEngineRenderer.DRUM.toString();
         modBus.addListener((EntityRenderersEvent.RegisterRenderers e) ->
                 e.registerBlockEntityRenderer(AssayModule.ENGINE_BE.get(), AssayingEngineRenderer::new));
     }

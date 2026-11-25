@@ -1,4 +1,4 @@
-package com.kragnoth.cultivar.content.bed;
+package com.kragnoth.cultivar.core.plot;
 
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** One item handler over many: the members' slots end to end. Used for bed plots so one pipe serves the plot. */
+/** One item handler over many: the members' slots end to end, so one pipe serves a whole plot or machine unit. */
 public final class PlotItemHandler implements IItemHandler {
     private final Supplier<List<IItemHandler>> members;
 
