@@ -60,6 +60,7 @@ import org.jetbrains.annotations.Nullable;
 public final class CultivarJeiPlugin implements IModPlugin {
     private static final List<MutationCategory.Cross> CROSSES = new ArrayList<>();
     private static final List<GrowingCategory.Growing> GROWING = new ArrayList<>();
+    private static final List<HarvestCategory.Harvest> HARVESTS = new ArrayList<>();
     private static @Nullable IJeiRuntime runtime;
     private static boolean listening;
 
@@ -104,6 +105,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.addRecipeCategories(
                 new MutationCategory(gui),
                 new GrowingCategory(gui),
+                new HarvestCategory(gui),
                 new AssayCategory(gui),
                 new LinesCategory<>(gui, SOILS, "jei.cultivar.soil", new ItemStack(Items.FARMLAND), 6, CultivarJeiPlugin::soilItems, CultivarJeiPlugin::soilLines),
                 new LinesCategory<>(gui, FERTILIZERS, "jei.cultivar.fertilizer", new ItemStack(Items.BONE_MEAL), 3,
@@ -198,6 +200,11 @@ public final class CultivarJeiPlugin implements IModPlugin {
             c.items().forEach(item -> registration.addIngredientInfo(item.value(), text));
         }
         registration.addRecipes(GrowingCategory.TYPE, List.copyOf(GROWING));
+        // Harvest pages: what each plant's products list (and clip_products) gives, read from the plant JSONs.
+        HARVESTS.clear();
+        access.registryOrThrow(CultivarRegistries.PLANT).holders().map(HarvestCategory.Harvest::of)
+                .filter(h -> !h.isEmpty()).forEach(HARVESTS::add);
+        registration.addRecipes(HarvestCategory.TYPE, List.copyOf(HARVESTS));
         registration.addRecipes(SOILS, access.registryOrThrow(CultivarRegistries.SOIL).stream().map(SoilPage::new).toList());
         registration.addRecipes(BLIGHTS, access.registryOrThrow(CultivarRegistries.WEED).entrySet().stream()
                 .map(e -> new BlightPage(e.getKey().location(), e.getValue())).toList());
@@ -238,9 +245,10 @@ public final class CultivarJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(TrialModule.TRIAL_BED.get(), MutationCategory.TYPE);
         AssayModule.tiers().forEach(b -> registration.addRecipeCatalyst(b.get(), AssayCategory.TYPE));
         for (var trellis : List.of(CropModule.TIMBER_TRELLIS.get(), CropModule.IRON_TRELLIS.get())) {
-            registration.addRecipeCatalyst(trellis, GrowingCategory.TYPE, SOILS, FERTILIZERS, BLIGHTS);
+            registration.addRecipeCatalyst(trellis, GrowingCategory.TYPE, HarvestCategory.TYPE, SOILS, FERTILIZERS, BLIGHTS);
         }
-        registration.addRecipeCatalyst(PlanterBedModule.BED_ITEM.get(), FERTILIZERS);
+        registration.addRecipeCatalyst(PlanterBedModule.BED_ITEM.get(), FERTILIZERS, HarvestCategory.TYPE);
+        registration.addRecipeCatalyst(ToolsModule.PRUNING_SHEARS.get(), HarvestCategory.TYPE);
     }
 
     @Override
@@ -263,7 +271,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
         if (rt == null) {
             return out;
         }
-        for (RecipeType<?> type : List.of(MutationCategory.TYPE, GrowingCategory.TYPE, AssayCategory.TYPE, SOILS, BLIGHTS, FERTILIZERS)) {
+        for (RecipeType<?> type : List.of(MutationCategory.TYPE, GrowingCategory.TYPE, HarvestCategory.TYPE, AssayCategory.TYPE, SOILS, BLIGHTS, FERTILIZERS)) {
             out.put(type.getUid().getPath(), rt.getRecipeManager().createRecipeLookup(type).includeHidden().get().count());
         }
         return out;
@@ -277,7 +285,7 @@ public final class CultivarJeiPlugin implements IModPlugin {
     /** Shows the crosses the player knows and hides the rest. */
     private static void applyKnowledge() {
         IJeiRuntime rt = runtime;
-        if (rt == null || CROSSES.isEmpty() && GROWING.isEmpty()) {
+        if (rt == null || CROSSES.isEmpty() && GROWING.isEmpty() && HARVESTS.isEmpty()) {
             return;
         }
         LedgerItem.Data known = ClientKnowledge.get();
@@ -313,6 +321,15 @@ public final class CultivarJeiPlugin implements IModPlugin {
         }
         rt.getRecipeManager().unhideRecipes(GrowingCategory.TYPE, grow);
         rt.getRecipeManager().hideRecipes(GrowingCategory.TYPE, hide);
+
+        // Harvest pages follow the same rule: a bred-only plant's products stay hidden until you know the plant.
+        List<HarvestCategory.Harvest> harvestShown = new ArrayList<>(), harvestHidden = new ArrayList<>();
+        for (HarvestCategory.Harvest h : HARVESTS) {
+            boolean breedOnly = h.plant().value().seeds().isEmpty() && bred.stream().anyMatch(x -> x.is(h.plant()));
+            ((reveal || !breedOnly || knows(known, h.plant())) ? harvestShown : harvestHidden).add(h);
+        }
+        rt.getRecipeManager().unhideRecipes(HarvestCategory.TYPE, harvestShown);
+        rt.getRecipeManager().hideRecipes(HarvestCategory.TYPE, harvestHidden);
     }
 
     private static boolean knows(LedgerItem.Data known, Holder<Plant> plant) {
