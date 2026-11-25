@@ -78,7 +78,7 @@ public final class CultivarServerConfig {
                         "Goggles always read crops in the field.")
                 .define("requireAssay", true);
         SATCHEL_SEED_BASE = b.comment("Harvesting a mature plant with the Seed Satchel (hand or Deployer): base chance of a seed.",
-                        "Chance = base + perVigour * Vigour. Harvesters, hands and shears never give seeds.")
+                        "Chance = base + perVigour * Vigor. Harvesters, hands and shears never give seeds.")
                 .defineInRange("satchelSeedBase", 0.25, 0.0, 1.0);
         SATCHEL_SEED_PER_VIGOUR = b.defineInRange("satchelSeedPerVigour", 0.05, 0.0, 1.0);
         REVEAL_ALL_MUTATIONS = b.comment("Show every cross in JEI and the Ledger, known or not (creative or guide-style packs).",
@@ -170,7 +170,7 @@ public final class CultivarServerConfig {
                         "already there is cleared), 1 = as on soil. Trial Beds never grow weeds.")
                 .defineInRange("weedMultiplier", 0.0, 0.0, 1.0);
         BED_QUALITY_GAIN = b.comment("Seed ranking weights: beds plant, keep and upgrade to the highest weighted stat total.",
-                        "Defaults favour output: Gain 3, Growth 2, Strength 1, Vigour 1.")
+                        "Defaults favor output: Gain 3, Growth 2, Strength 1, Vigor 1.")
                 .defineInRange("qualityGain", 3.0, 0.0, 100.0);
         BED_QUALITY_GROWTH = b.defineInRange("qualityGrowth", 2.0, 0.0, 100.0);
         BED_QUALITY_STRENGTH = b.defineInRange("qualityStrength", 1.0, 0.0, 100.0);

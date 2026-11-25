@@ -104,19 +104,25 @@ public final class PlanterBedTests {
         ((CropBlockEntity) h.getBlockEntity(pos.above())).plant(wheat(h, 4), 3);
         h.assertTrue(items.extractItem(PlanterBedBlockEntity.SEEDS, 1, true).isEmpty()
                 && items.extractItem(PlanterBedBlockEntity.FERTILIZER, 1, true).isEmpty(),
-                "unpowered: pipes pull only crop outputs");
+                "growing: pipes pull only crop outputs");
         bed.inventory.setStackInSlot(PlanterBedBlockEntity.SEEDS, new ItemStack(Items.WHEAT_SEEDS, 3));
 
         h.setBlock(pos.east(), Blocks.REDSTONE_BLOCK);
         bed.work(level, false);
+        h.assertTrue(h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE),
+                "redstone only pauses the plot");
+        h.setBlock(pos.east(), Blocks.AIR);
+        bed.invalidatePowerForTests();
+        h.assertTrue(bed.toggleDismantling(), "a wrench puts the plot into dismantle mode");
+        bed.work(level, false);
         h.assertTrue(!h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE)
-                && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.CLOCHE).isEmpty(), "redstone takes the cloche back");
+                && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.CLOCHE).isEmpty(), "dismantling takes the cloche back");
         bed.work(level, false);
         h.assertTrue(h.getBlockState(pos.above()).isAir() && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.TRELLIS).isEmpty(),
                 "then the trellis");
         h.assertTrue(!bed.inventory.getStackInSlot(PlanterBedBlockEntity.SEEDS).isEmpty(), "the plant is banked as a seed");
         h.assertTrue(!items.extractItem(PlanterBedBlockEntity.TRELLIS, 1, false).isEmpty()
-                && !items.extractItem(PlanterBedBlockEntity.SEEDS, 1, false).isEmpty(), "powered: dump mode, every slot can be pulled");
+                && !items.extractItem(PlanterBedBlockEntity.SEEDS, 1, false).isEmpty(), "dismantling: every slot can be pulled");
         h.succeed();
     }
 

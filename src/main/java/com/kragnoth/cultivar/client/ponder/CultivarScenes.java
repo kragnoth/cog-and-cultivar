@@ -143,7 +143,7 @@ public final class CultivarScenes {
                 .pointAt(util.vector().topOf(f)).placeNearTarget().attachKeyFrame();
         scene.idle(90);
 
-        scene.overlay().showText(100).text("A Grafting Frame beside a single ripe crop slowly copies it. The higher the parent's Vigour, the sooner it happens.")
+        scene.overlay().showText(100).text("A Grafting Frame beside a single ripe crop slowly copies it. The higher the parent's Vigor, the sooner it happens.")
                 .pointAt(util.vector().centerOf(f)).placeNearTarget();
         scene.idle(70);
         frame(scene, f, false);
@@ -204,7 +204,7 @@ public final class CultivarScenes {
         crop(scene, util, p2, "minecraft:carrot", 2, 7);
         scene.overlay().showText(90).text("Every seed carries four stats, each from 1 to 10.").independent(10).attachKeyFrame();
         scene.idle(30);
-        scene.overlay().showText(140).text("Gain: more produce per harvest. Growth: ripens faster. Strength: copes with worse soil and light and fends off blight; at 10 it grows on any soil. Vigour: crosses more readily and passes on better stats.")
+        scene.overlay().showText(140).text("Gain: more produce per harvest. Growth: ripens faster. Strength: copes with worse soil and light and fends off blight; at 10 it grows on any soil. Vigor: crosses more readily and passes on better stats.")
                 .independent(40);
         scene.idle(150);
 
@@ -254,7 +254,7 @@ public final class CultivarScenes {
                 .pointAt(util.vector().topOf(3, 1, 1)).placeNearTarget().colored(PonderPalette.GREEN);
         scene.idle(100);
 
-        scene.overlay().showText(110).text("Vigour speeds everything up: at 1 a parent joins a cross about half the time, at 10 every time. Breed it up first.")
+        scene.overlay().showText(110).text("Vigor speeds everything up: at 1 a parent joins a cross about half the time, at 10 every time. Breed it up first.")
                 .independent(20);
         scene.idle(120);
         scene.overlay().showText(90).text("When you're ready to automate, a Planter Bed breeds, ranks and keeps its best seeds by itself.")
@@ -349,7 +349,7 @@ public final class CultivarScenes {
         scene.idle(10);
         scene.world().setKineticSpeed(drive, 32);
         scene.world().setKineticSpeed(util.select().position(andesite), -32);
-        scene.overlay().showText(90).text("The Assayer reads the genome of seeds and cuttings. Its cogwheel takes rotation from a neighbouring cog, like a Mechanical Crafter.")
+        scene.overlay().showText(90).text("The Assayer reads the genome of seeds and cuttings. Its cogwheel takes rotation from a neighboring cog, like a Mechanical Crafter.")
                 .pointAt(util.vector().blockSurface(cog, Direction.UP)).placeNearTarget().attachKeyFrame();
         scene.idle(100);
 
