@@ -1,254 +1,252 @@
-package com.kragnoth.cultivar.content.bed;
+package com.kragnoth.cultivar.gametest;
 
+import com.kragnoth.cultivar.Cultivar;
 import com.kragnoth.cultivar.api.CultivarRegistries;
-import com.kragnoth.cultivar.api.soil.SoilHost;
-import com.kragnoth.cultivar.content.cloche.BellClocheItem;
+import com.kragnoth.cultivar.content.bed.PlanterBedBlockEntity;
+import com.kragnoth.cultivar.content.bed.PlanterBedModule;
 import com.kragnoth.cultivar.content.crop.CropBlockEntity;
-import com.kragnoth.cultivar.content.crop.TrellisBlock;
-import com.mojang.serialization.MapCodec;
+import com.kragnoth.cultivar.content.crop.CropModule;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
+import net.minecraft.core.Direction;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.items.IItemHandler;
 
-/**
- * Planter Bed. Right-click with: a soil block to fill it; a trellis to set one on top; a Bell Cloche to cover that
- * trellis; seeds or fertilizer to load it; a water bucket to fill it. Sneak with an empty hand to take the plot's
- * outputs, then this bed's stock, then its soil. Pipes can also feed trellises and cloches, which the bed places
- * itself. Pipes pull only crop outputs, unless the plot is in dismantle mode (toggled with a wrench): then it strips
- * down (cloche, then trellis, back into stock; plants banked as seeds) and every slot can be pulled. Redstone pauses
- * the plot. Pipes and funnels see the whole connected plot (see {@link BedNetwork}).
- */
-public class PlanterBedBlock extends com.simibubi.create.content.kinetics.base.KineticBlock
-        implements com.simibubi.create.foundation.block.IBE<PlanterBedBlockEntity>, com.simibubi.create.content.kinetics.simpleRelays.ICogWheel, SoilHost {
+@GameTestHolder(Cultivar.MOD_ID)
+@PrefixGameTestTemplate(false)
+public final class PlanterBedTests {
+    private PlanterBedTests() {}
 
-    public PlanterBedBlock(Properties properties) {
-        super(properties);
-    }
+    @GameTest(template = "empty")
+    public static void bedPlotPlantsWatersHarvestsAndShares(GameTestHelper h) {
+        var level = h.getLevel();
+        BlockPos a = new BlockPos(1, 1, 1), b = new BlockPos(2, 1, 1);
+        h.setBlock(a, PlanterBedModule.BED.get());
+        h.setBlock(b, PlanterBedModule.BED.get());
+        PlanterBedBlockEntity bedA = (PlanterBedBlockEntity) h.getBlockEntity(a);
+        PlanterBedBlockEntity bedB = (PlanterBedBlockEntity) h.getBlockEntity(b);
+        bedA.setSoil(Blocks.FARMLAND.defaultBlockState());
+        h.setBlock(a.above(), CropModule.TIMBER_TRELLIS.get());
 
-    /** Powered like a Mechanical Crafter: its cogwheel meshes with neighbouring beds and cogwheels; a shaft from below also works. */
-    @Override
-    public net.minecraft.core.Direction.Axis getRotationAxis(BlockState state) {
-        return net.minecraft.core.Direction.Axis.Y;
-    }
-
-    @Override
-    public boolean hasShaftTowards(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state, net.minecraft.core.Direction face) {
-        return face == net.minecraft.core.Direction.DOWN;
-    }
-
-    @Override
-    public Class<PlanterBedBlockEntity> getBlockEntityClass() {
-        return PlanterBedBlockEntity.class;
-    }
-
-    @Override
-    public BlockEntityType<? extends PlanterBedBlockEntity> getBlockEntityType() {
-        return PlanterBedModule.BED_BE.get();
-    }
-
-    @Override
-    public @Nullable BlockState hostedSoil(BlockGetter level, BlockPos pos) {
-        return level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed ? bed.soil() : null;
-    }
-
-    @Override
-    public boolean suppliesWater(BlockGetter level, BlockPos pos) {
-        return level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed && bed.hasWater();
-    }
-
-    private static boolean isSoil(Level level, BlockState state) {
-        return level.registryAccess().registryOrThrow(CultivarRegistries.SOIL).stream()
-                .anyMatch(s -> s.blocks().contains(state.getBlockHolder()));
-    }
-
-    /** A tended bed: weeds scaled by {@code planter_bed.weedMultiplier} (default 0, none). */
-    @Override
-    public double weedMultiplier(net.minecraft.world.level.BlockGetter level, BlockPos pos) {
-        return com.kragnoth.cultivar.core.config.CultivarServerConfig.SPEC.isLoaded()
-                ? com.kragnoth.cultivar.core.config.CultivarServerConfig.BED_WEED_MULTIPLIER.get() : 0.0;
-    }
-
-    @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
-                                              InteractionHand hand, BlockHitResult hit) {
-        if (!(level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed)) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        // Feed through bed B: the whole plot shares it.
+        IItemHandler items = level.getCapability(Capabilities.ItemHandler.BLOCK, h.absolutePos(b), Direction.UP);
+        IFluidHandler fluids = level.getCapability(Capabilities.FluidHandler.BLOCK, h.absolutePos(b), Direction.UP);
+        h.assertTrue(items.getSlots() == 2 * PlanterBedBlockEntity.SLOTS, "two touching beds form one plot");
+        ItemStack seeds = new ItemStack(Items.WHEAT_SEEDS, 4);
+        for (int i = 0; i < items.getSlots() && !seeds.isEmpty(); i++) {
+            seeds = items.insertItem(i, seeds, false);
         }
-        BlockPos above = pos.above();
-        // Trellis: set it on top (stacking further trellises is done on the trellis itself).
-        if (stack.getItem() instanceof BlockItem bi && bi.getBlock() instanceof TrellisBlock trellis) {
-            if (!level.getBlockState(above).canBeReplaced()) {
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-            }
-            if (!level.isClientSide()) {
-                level.setBlock(above, trellis.defaultBlockState(), Block.UPDATE_ALL);
-                level.playSound(null, above, SoundEvents.SCAFFOLDING_PLACE, SoundSource.BLOCKS, 1f, 1f);
-                stack.consume(1, player);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
-        }
-        // Cloche: cover the trellis above, as if clicked on it.
-        if (stack.getItem() instanceof BellClocheItem cloche && level.getBlockState(above).getBlock() instanceof TrellisBlock) {
-            BlockState t = level.getBlockState(above);
-            if (t.getValue(TrellisBlock.CLOCHE) || t.getValue(TrellisBlock.CROSS) || TrellisBlock.hasSegmentAbove(level, above)) {
-                return ItemInteractionResult.FAIL;
-            }
-            if (!level.isClientSide()) {
-                level.setBlock(above, cloche.fit(t), Block.UPDATE_ALL);
-                level.playSound(null, above, SoundEvents.GLASS_PLACE, SoundSource.BLOCKS, 1f, 1f);
-                stack.consume(1, player);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
-        }
-        // Soil block: fill the bed.
-        if (bed.soil() == null && stack.getItem() instanceof BlockItem bi && isSoil(level, bi.getBlock().defaultBlockState())) {
-            if (!level.isClientSide()) {
-                bed.setSoil(bi.getBlock().defaultBlockState());
-                level.playSound(null, pos, SoundEvents.ROOTED_DIRT_PLACE, SoundSource.BLOCKS, 1f, 1f);
-                stack.consume(1, player);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
-        }
-        // Water bucket.
-        if (stack.is(Items.WATER_BUCKET)) {
-            if (!level.isClientSide() && bed.tank.fill(new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 1000),
-                    IFluidHandler.FluidAction.SIMULATE) == 1000) {
-                bed.tank.fill(new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
-                if (!player.getAbilities().instabuild) {
-                    player.setItemInHand(hand, new ItemStack(Items.BUCKET));
-                }
-                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1f, 1f);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
-        }
-        // Seeds / fertilizer: into this bed first, then anywhere in the plot (the plot shares its stock).
-        for (int slot : new int[]{0, 1, 2, 3, PlanterBedBlockEntity.FERTILIZER}) {
-            if (bed.inventory.isItemValid(slot, stack)) {
-                if (!level.isClientSide()) {
-                    ItemStack rest = bed.inventory.insertItem(slot, stack, false);
-                    for (PlanterBedBlockEntity other : bed.cachedNetwork()) {
-                        for (int s : new int[]{0, 1, 2, 3, PlanterBedBlockEntity.FERTILIZER}) {
-                            if (!rest.isEmpty() && other.inventory.isItemValid(s, rest)) {
-                                rest = other.inventory.insertItem(s, rest, false);
-                            }
-                        }
-                    }
-                    player.setItemInHand(hand, rest);
-                    level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.6f, 1.2f);
-                }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide());
+        h.assertTrue(seeds.isEmpty(), "vanilla seeds accepted");
+        h.assertTrue(fluids.fill(new FluidStack(Fluids.WATER, 5000), IFluidHandler.FluidAction.EXECUTE) == 5000, "water spreads across the plot");
+        h.assertTrue(bedA.tank.getFluidAmount() == 2500 && bedB.tank.getFluidAmount() == 2500, "one pipe waters the plot evenly");
+
+        CropBlockEntity crop = (CropBlockEntity) h.getBlockEntity(a.above());
+        h.assertTrue(crop.soil().isPresent(), "the bed acts as its soil");
+        bedA.work(level, true);
+        h.assertTrue(crop.hasPlant(), "bed A planted from seeds stored in bed B");
+
+        crop.plant(crop.genome(), crop.genome().species().value().matureStage());
+        crop.uproot();
+        crop.plant(com.kragnoth.cultivar.api.genetics.Genome.base(level.registryAccess().registryOrThrow(CultivarRegistries.PLANT)
+                .getHolderOrThrow(ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.withDefaultNamespace("wheat")))), 7);
+        bedA.work(level, true);
+        boolean gotWheat = false;
+        for (int i = 0; i < items.getSlots(); i++) {
+            if (items.extractItem(i, 64, true).is(Items.WHEAT)) {
+                gotWheat = true;
             }
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        h.assertTrue(gotWheat && !crop.isMature(), "mature crop harvested into the plot outputs");
+        h.assertTrue(com.kragnoth.cultivar.content.core.condition.Hydration.effective(level, h.absolutePos(a),
+                com.kragnoth.cultivar.api.soil.SoilLevels.Humidity.WET) == com.kragnoth.cultivar.api.soil.SoilLevels.Humidity.WATERY,
+                "a watered bed is one humidity step wetter");
+        h.succeed();
     }
 
-    @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!(level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed)) {
-            return InteractionResult.PASS;
-        }
-        // Machine rule: shift + empty hand takes items out: the plot's outputs, then this bed's stock, then its soil.
-        if (!player.isShiftKeyDown()) {
-            return InteractionResult.PASS;
-        }
-        if (level.isClientSide()) {
-            return InteractionResult.SUCCESS;
-        }
-        boolean took = false;
-        for (PlanterBedBlockEntity member : bed.cachedNetwork()) {
-            for (int i = PlanterBedBlockEntity.OUT_START; i < PlanterBedBlockEntity.SLOTS; i++) {
-                ItemStack out = member.inventory.extractItem(i, 64, false);
-                if (!out.isEmpty()) {
-                    player.getInventory().placeItemBackInInventory(out);
-                    took = true;
-                }
-            }
-        }
-        if (!took) {
-            for (int i = 0; i < PlanterBedBlockEntity.OUT_START; i++) {
-                ItemStack in = bed.inventory.extractItem(i, 64, false);
-                if (!in.isEmpty()) {
-                    player.getInventory().placeItemBackInInventory(in);
-                    took = true;
-                }
-            }
-        }
-        if (!took && bed.soil() != null) { // last of all, the soil itself
-            player.getInventory().placeItemBackInInventory(new ItemStack(bed.soil().getBlock()));
-            bed.setSoil(null);
-            took = true;
-        }
-        if (took) {
-            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4f, 1f);
-        }
-        return took ? InteractionResult.SUCCESS : InteractionResult.PASS;
+    private static com.kragnoth.cultivar.api.genetics.Genome wheat(GameTestHelper h, int gain) {
+        var wheat = h.getLevel().registryAccess().registryOrThrow(CultivarRegistries.PLANT)
+                .getHolderOrThrow(ResourceKey.create(CultivarRegistries.PLANT, ResourceLocation.withDefaultNamespace("wheat")));
+        var stats = new java.util.HashMap<>(com.kragnoth.cultivar.api.genetics.Genome.base(wheat).stats());
+        stats.put(com.kragnoth.cultivar.content.core.CoreModule.GAIN.getKey(), new com.kragnoth.cultivar.api.genetics.AllelePair(gain, gain));
+        return new com.kragnoth.cultivar.api.genetics.Genome(wheat, stats);
     }
 
-    @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, BlockPos from, boolean moving) {
-        super.neighborChanged(state, level, pos, neighbor, from, moving);
-        if (level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed) {
-            bed.invalidatePower();
-        }
+    @GameTest(template = "empty")
+    public static void bedPlacesAndStripsTrellisAndCloche(GameTestHelper h) {
+        var level = h.getLevel();
+        BlockPos pos = new BlockPos(1, 1, 1);
+        h.setBlock(pos, PlanterBedModule.BED.get());
+        h.setBlock(pos.above(), Blocks.AIR); // the test frame's barrier roof sits here
+        PlanterBedBlockEntity bed = (PlanterBedBlockEntity) h.getBlockEntity(pos);
+        bed.setSoil(Blocks.FARMLAND.defaultBlockState());
+        IItemHandler items = level.getCapability(Capabilities.ItemHandler.BLOCK, h.absolutePos(pos), Direction.UP);
+        h.assertTrue(items.insertItem(PlanterBedBlockEntity.TRELLIS, new ItemStack(CropModule.TIMBER_TRELLIS.get()), false).isEmpty(),
+                "pipes can feed trellises");
+        h.assertTrue(items.insertItem(PlanterBedBlockEntity.CLOCHE, new ItemStack(com.kragnoth.cultivar.content.cloche.ClocheModule.BELL_CLOCHE.get()), false).isEmpty(),
+                "pipes can feed cloches");
+
+        bed.work(level, false);
+        h.assertTrue(h.getBlockState(pos.above()).is(CropModule.TIMBER_TRELLIS.get()), "a fed trellis is placed on top, found "
+                + h.getBlockState(pos.above()) + ", supply " + bed.inventory.getStackInSlot(PlanterBedBlockEntity.TRELLIS));
+        ((CropBlockEntity) h.getBlockEntity(pos.above())).plant(wheat(h, 4), 3);
+        bed.work(level, false);
+        h.assertTrue(h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE),
+                "a fed cloche covers the planted crop (wheat in daylight: a Bell)");
+        h.assertTrue(items.extractItem(PlanterBedBlockEntity.SEEDS, 1, true).isEmpty()
+                && items.extractItem(PlanterBedBlockEntity.FERTILIZER, 1, true).isEmpty(),
+                "growing: pipes pull only crop outputs");
+        bed.inventory.setStackInSlot(PlanterBedBlockEntity.SEEDS, new ItemStack(Items.WHEAT_SEEDS, 3));
+
+        h.setBlock(pos.east(), Blocks.REDSTONE_BLOCK);
+        bed.work(level, false);
+        h.assertTrue(h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE),
+                "redstone only pauses the plot");
+        h.setBlock(pos.east(), Blocks.AIR);
+        bed.invalidatePowerForTests();
+        h.assertTrue(bed.toggleDismantling(), "a wrench puts the plot into dismantle mode");
+        bed.work(level, false);
+        h.assertTrue(!h.getBlockState(pos.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CLOCHE)
+                && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.CLOCHE).isEmpty(), "dismantling takes the cloche back");
+        bed.work(level, false);
+        h.assertTrue(h.getBlockState(pos.above()).isAir() && !bed.inventory.getStackInSlot(PlanterBedBlockEntity.TRELLIS).isEmpty(),
+                "then the trellis");
+        h.assertTrue(!bed.inventory.getStackInSlot(PlanterBedBlockEntity.SEEDS).isEmpty(), "the plant is banked as a seed");
+        h.assertTrue(!items.extractItem(PlanterBedBlockEntity.TRELLIS, 1, false).isEmpty()
+                && !items.extractItem(PlanterBedBlockEntity.SEEDS, 1, false).isEmpty(), "dismantling: every slot can be pulled");
+        h.succeed();
     }
 
-    @Override
-    protected boolean hasAnalogOutputSignal(BlockState state) {
-        return true;
+    @GameTest(template = "empty")
+    public static void bedUpgradesToBetterSeedsAndBanksBredChildren(GameTestHelper h) {
+        var level = h.getLevel();
+        BlockPos producer = new BlockPos(1, 1, 1), breeder = new BlockPos(2, 1, 1);
+        for (BlockPos p : new BlockPos[]{producer, breeder}) {
+            h.setBlock(p, PlanterBedModule.BED.get());
+            ((PlanterBedBlockEntity) h.getBlockEntity(p)).setSoil(Blocks.FARMLAND.defaultBlockState());
+            h.setBlock(p.above(), CropModule.TIMBER_TRELLIS.get());
+        }
+        PlanterBedBlockEntity prod = (PlanterBedBlockEntity) h.getBlockEntity(producer);
+        PlanterBedBlockEntity breed = (PlanterBedBlockEntity) h.getBlockEntity(breeder);
+        CropBlockEntity prodCrop = (CropBlockEntity) h.getBlockEntity(producer.above());
+        CropBlockEntity breedCrop = (CropBlockEntity) h.getBlockEntity(breeder.above());
+
+        // Breeder: a grafting frame the bed adopts and re-arms after a child is born.
+        h.setBlock(breeder.above(), h.getBlockState(breeder.above()).setValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CROSS, true));
+        breed.work(level, false);
+        h.assertTrue(breed.isBreeding(), "a bed under a grafting frame becomes a breeder");
+        h.setBlock(breeder.above(), h.getBlockState(breeder.above()).setValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CROSS, false));
+        breedCrop = (CropBlockEntity) h.getBlockEntity(breeder.above());
+        breedCrop.plant(wheat(h, 9), 0); // as if just born
+        breed.work(level, false);
+        h.assertTrue(h.getBlockState(breeder.above()).getValue(com.kragnoth.cultivar.content.crop.TrellisBlock.CROSS), "frame re-armed");
+
+        // Producer: mature low-Gain wheat; the stock now holds the bred Gain 9 seed. Harvest swaps it in.
+        prodCrop.plant(wheat(h, 2), 7);
+        for (int i = 0; i < 60 && prodCrop.genome() != null
+                && com.kragnoth.cultivar.content.core.genetics.Genetics.expressed(prodCrop.genome(),
+                com.kragnoth.cultivar.content.core.CoreModule.GAIN.getKey(),
+                com.kragnoth.cultivar.content.core.genetics.Genetics.current()) == 2; i++) {
+            prod.work(level, false); // waits out the breeder hold, then harvests and upgrades
+        }
+        int gain = com.kragnoth.cultivar.content.core.genetics.Genetics.expressed(prodCrop.genome(),
+                com.kragnoth.cultivar.content.core.CoreModule.GAIN.getKey(), com.kragnoth.cultivar.content.core.genetics.Genetics.current());
+        h.assertTrue(gain == 9, "the producer upgraded to the bred Gain 9 seed, got " + gain);
+        h.succeed();
     }
 
-    @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-        return level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed ? bed.plotComparator() : 0;
+    /** A tended bed (default weedMultiplier 0) keeps its crop clean: no new blight, and blight that got in is cleared. */
+    @GameTest(template = "empty")
+    public static void bedsKeepCropsFreeOfWeeds(GameTestHelper h) {
+        var level = h.getLevel();
+        BlockPos bed = new BlockPos(1, 1, 1);
+        h.setBlock(bed, PlanterBedModule.BED.get());
+        ((PlanterBedBlockEntity) h.getBlockEntity(bed)).setSoil(Blocks.FARMLAND.defaultBlockState());
+        h.setBlock(bed.above(), CropModule.TIMBER_TRELLIS.get());
+        var crop = (com.kragnoth.cultivar.content.crop.CropBlockEntity) h.getBlockEntity(bed.above());
+        var weed = level.registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.WEED).holders().findFirst().orElseThrow();
+        crop.setWeed(weed, 0);
+        for (int i = 0; i < 200; i++) {
+            crop.tickWeeds(level, level.random, com.kragnoth.cultivar.api.influence.InfluenceEffects.NONE);
+        }
+        h.assertTrue(crop.weed() == null, "the bed cleared the blight and none came back");
+        h.succeed();
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof PlanterBedBlockEntity bed) {
-            bed.dropContents();
+    /** Like a Create machine, a bed does nothing without rotation. */
+    @GameTest(template = "empty")
+    public static void unpoweredBedDoesNothing(GameTestHelper h) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        h.setBlock(pos, PlanterBedModule.BED.get());
+        h.setBlock(pos.above(), Blocks.AIR);
+        var bed = (PlanterBedBlockEntity) h.getBlockEntity(pos);
+        bed.setSoil(Blocks.FARMLAND.defaultBlockState());
+        bed.inventory.insertItem(PlanterBedBlockEntity.TRELLIS, new ItemStack(CropModule.TIMBER_TRELLIS.get(), 4), false);
+        for (int i = 0; i < 400; i++) {
+            bed.tick();
         }
-        super.onRemove(state, level, pos, newState, moving);
+        h.assertTrue(h.getBlockState(pos.above()).isAir(), "an unpowered bed places nothing");
+        h.succeed();
     }
 
-    /**
-     * Beds don't rotate: the wrench flips the whole plot between growing and dismantling (strip trellises and cloches
-     * back into stock, bank plants as seeds, and let pipes empty every slot). Sneak-wrench picks the bed up.
-     */
-    @Override
-    public InteractionResult onWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
-        Level level = context.getLevel();
-        if (!(level.getBlockEntity(context.getClickedPos()) instanceof PlanterBedBlockEntity bed)) {
-            return InteractionResult.PASS;
+    /** Beds pick the cloche a plant needs: Shade for dark-lovers in light, Lamp for light-lovers in the dark, else Bell. */
+    @GameTest(template = "empty")
+    public static void bedsChooseClochesByLightNeed(GameTestHelper h) {
+        var level = h.getLevel();
+        var plants = level.registryAccess().registryOrThrow(com.kragnoth.cultivar.api.CultivarRegistries.PLANT);
+        java.util.function.Function<String, com.kragnoth.cultivar.api.plant.Plant> plant = id -> plants.get(ResourceLocation.parse(id));
+        BlockPos dark = new BlockPos(1, 1, 1), lit = new BlockPos(1, 1, 3);
+        // A sealed stone box: no sky or block light at all.
+        for (BlockPos p : BlockPos.betweenClosed(dark.offset(-1, -1, -1), dark.offset(1, 1, 1))) {
+            h.setBlock(p, Blocks.STONE);
         }
-        if (!level.isClientSide()) {
-            boolean dismantling = bed.toggleDismantling();
-            if (context.getPlayer() != null) {
-                context.getPlayer().displayClientMessage(Component.translatable(dismantling ? "cultivar.bed.mode.dismantle"
-                        : "cultivar.bed.mode.grow"), true);
-            }
-            level.playSound(null, context.getClickedPos(), SoundEvents.ITEM_FRAME_ROTATE_ITEM, SoundSource.BLOCKS, 1f, dismantling ? 0.8f : 1.2f);
-        }
-        return InteractionResult.sidedSuccess(level.isClientSide());
+        h.setBlock(dark, Blocks.AIR);
+        h.setBlock(lit, Blocks.AIR);
+        h.setBlock(lit.east(), Blocks.GLOWSTONE); // block light 14 at the crop, whatever the sky does
+        h.runAfterDelay(5, () -> { // let light settle
+            var cave = h.absolutePos(dark);
+            var bright = h.absolutePos(lit);
+            h.assertTrue(PlanterBedBlockEntity.wantedCloche(level, cave, plant.apply("minecraft:wheat"))
+                    == com.kragnoth.cultivar.content.cloche.ClocheType.LAMP, "wheat in the dark gets a Lamp Cloche");
+            h.assertTrue(PlanterBedBlockEntity.wantedCloche(level, cave, plant.apply("cultivar:glowcap"))
+                    == com.kragnoth.cultivar.content.cloche.ClocheType.BELL, "glowcap in the dark needs no light change: Bell");
+            h.assertTrue(PlanterBedBlockEntity.wantedCloche(level, bright, plant.apply("cultivar:glowcap"))
+                    == com.kragnoth.cultivar.content.cloche.ClocheType.SHADE, "glowcap in bright light gets a Shade Cloche");
+            h.succeed();
+        });
+    }
+
+    /** Right-clicking a filled bed with a different soil block swaps the soil and returns the old one; it never places a block. */
+    @GameTest(template = "empty")
+    public static void bedSoilCanBeSwappedByRightClick(GameTestHelper h) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        h.setBlock(pos, PlanterBedModule.BED.get());
+        PlanterBedBlockEntity bed = (PlanterBedBlockEntity) h.getBlockEntity(pos);
+        var player = h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        java.util.function.Function<ItemStack, net.minecraft.world.InteractionResult> use = stack -> {
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(pos)),
+                    Direction.UP, h.absolutePos(pos), false);
+            return stack.useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+        };
+        use.apply(new ItemStack(Items.COARSE_DIRT));
+        h.assertTrue(bed.soil() != null && bed.soil().is(Blocks.COARSE_DIRT), "an empty bed takes the soil block");
+        use.apply(new ItemStack(Items.SAND));
+        h.assertTrue(bed.soil() != null && bed.soil().is(Blocks.SAND), "a filled bed swaps to the new soil");
+        h.assertTrue(player.getInventory().contains(new ItemStack(Items.COARSE_DIRT)), "the old soil is handed back");
+        h.assertTrue(h.getBlockState(pos.above()).isAir(), "no block was placed on top of the bed");
+        use.apply(new ItemStack(Items.SAND));
+        h.assertTrue(h.getBlockState(pos.above()).isAir() && bed.soil().is(Blocks.SAND), "the same soil is a no-op, not a placement");
+        h.succeed();
     }
 }
